@@ -4,14 +4,14 @@ from django.urls import path
 from django.contrib import admin
 admin.autodiscover()
 
-import hello.views
+import blogsite.views
 
 # Examples:
-# url(r'^$', 'gplitesite.views.home', name='home'),
+# url(r'^$', 'siteconfig.views.home', name='home'),
 # url(r'^blog/', include('blog.urls')),
 
 urlpatterns = [
-    url(r'^$', hello.views.index, name='index'),
-    url(r'^db', hello.views.db, name='db'),
+    url(r'^$', blogsite.views.index, name='index'),
+    url(r'^db', blogsite.views.db, name='db'),
     path('admin/', admin.site.urls),
 ]
