@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-import sys
+import settings
 
 # Create your views here.
 def index(request):
-    return HttpResponse('\n'.join(sys.path))
+    return HttpResponse(settings.IS_LOCAL_ENV)
