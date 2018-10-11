@@ -6,14 +6,14 @@ admin.autodiscover()
 
 import blogsite.views
 
-import home.views
+import blogsite.apps.home.views as home
 
 # Examples:
 # url(r'^$', 'gplitesite.views.home', name='home'),
 # url(r'^blog/', include('blog.urls')),
 
 urlpatterns = [
-    url(r'^$', home.views.index, name='index'),
+    url(r'^$', home.index, name='index'),
     url(r'^db', blogsite.views.db, name='db'),
     path('admin/', admin.site.urls),
 ]
