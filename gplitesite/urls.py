@@ -6,7 +6,7 @@ admin.autodiscover()
 
 import blogsite.views
 
-import blogsite.apps.home.views as home
+import home.views as home
 
 # Examples:
 # url(r'^$', 'gplitesite.views.home', name='home'),
