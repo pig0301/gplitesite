@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 import django_heroku
+import dj_database_url
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -28,6 +29,8 @@ SECRET_KEY = 'CHANGE_ME!!!! (P.S. the SECRET_KEY environment variable will be us
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+IS_LOCAL_ENV = (os.sys.platform == 'win32')
 
 
 # Application definition
@@ -76,16 +79,21 @@ WSGI_APPLICATION = 'gplitesite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'local_gplitesite',
-        'USER': 'heroku_usr',
-        'PASSWORD': 'heroku_usr',
-        'HOST': 'localhost',
-        'PORT': '5432',
+if IS_LOCAL_ENV == True:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'local_gplitesite',
+            'USER': 'heroku_usr',
+            'PASSWORD': 'heroku_usr',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': dj_database_url.config()
+    }
 
 
 # Password validation
