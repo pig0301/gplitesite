@@ -52,7 +52,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'siteconfig.urls'
+ROOT_URLCONF = 'gplitesite.urls'
 
 TEMPLATES = [
     {
@@ -70,7 +70,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'siteconfig.wsgi.application'
+WSGI_APPLICATION = 'gplitesite.wsgi.application'
 
 
 # Database

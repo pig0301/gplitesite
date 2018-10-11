@@ -1,1 +1,1 @@
-web: gunicorn siteconfig.wsgi
+web: gunicorn gplitesite.wsgi
