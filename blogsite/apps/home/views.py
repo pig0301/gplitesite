@@ -5,6 +5,7 @@ from dj_database_url import config
 
 # Create your views here.
 def index(request):
-    return HttpResponse(config().values())
+
+    return HttpResponse("\n".join(['%s:%s' % item for item in config().items()]))
 
 
