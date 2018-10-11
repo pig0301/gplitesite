@@ -5,6 +5,6 @@ from dj_database_url import config
 
 # Create your views here.
 def index(request):
-    return HttpResponse(config())
+    return HttpResponse(config().values())
 
 
