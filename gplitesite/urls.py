@@ -1,10 +1,8 @@
-from django.conf.urls import include, url
+from django.conf.urls import url
 from django.urls import path
 
 from django.contrib import admin
 admin.autodiscover()
-
-import blogsite.views
 
 import home.views as home
 
@@ -14,6 +12,5 @@ import home.views as home
 
 urlpatterns = [
     url(r'^$', home.index, name='index'),
-    url(r'^db', blogsite.views.db, name='db'),
     path('admin/', admin.site.urls),
 ]
