@@ -19,7 +19,7 @@ import dj_database_url
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 sys.path.append(os.path.join(BASE_DIR, 'gplitesite'))
-sys.path.append(os.path.join(BASE_DIR, 'blogsite', 'apps'))
+sys.path.append(os.path.join(BASE_DIR, 'blogsite'))
 
 
 # Quick-start development settings - unsuitable for production
