@@ -29,11 +29,9 @@ sys.path.append(os.path.join(BASE_DIR, 'blogsite'))
 SECRET_KEY = 'CHANGE_ME!!!! (P.S. the SECRET_KEY environment variable will be used, if set, instead).'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.sys.platform == 'win32'
 
 ALLOWED_HOSTS = []
-
-IS_LOCAL_ENV = (os.sys.platform == 'win32')
 
 
 # Application definition
@@ -82,7 +80,7 @@ WSGI_APPLICATION = 'gplitesite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
-if IS_LOCAL_ENV == True:
+if DEBUG == True:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
