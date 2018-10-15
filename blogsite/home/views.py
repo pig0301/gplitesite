@@ -1,8 +1,5 @@
-from django.shortcuts import render
-import settings
+from libs.utils import render_template
 
 
 def index(request):
-    data = {'IS_DEBUG': settings.DEBUG}
-    
-    return render(request, 'index.html', data)
+    return render_template('index.html', {}, request)
