@@ -38,10 +38,13 @@
                     <a class="nav-link" href="/snooker/">Snooker</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/blog/">Blog</a>
+                    <a class="nav-link" href="/coding/">Coding</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/photo/">Photo</a>
+                    <a class="nav-link" href="/blog/">Blogs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/album/">Album</a>
                 </li>
             </ul>
             {% if request.user.is_authenticated %}
@@ -50,6 +53,7 @@
 	                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ request.user.username }}</a>
 		            <div class="dropdown-menu" aria-labelledby="dropdown01">
 		                <a class="dropdown-item" href="/admin/">Site Admin</a>
+		                <div class="dropdown-divider"></div>
 	                    <a class="dropdown-item" href="/logout/?r={{ request.path }}">Logout</a>
 		            </div>
                 </li>
