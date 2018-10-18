@@ -6,109 +6,41 @@
 {% endblock %}
 
 {% block body_content %}
-    <div class="jumbotron">
-        <div class="container">
-            <h1 class="display-4">Welcome to GPLite's website!</h1>
-            <p>
-                This site contains my <var>Snooker</var> frames, useful <var>Coding</var> techniques and daily <var>Blogs</var> recording my personal life.<br />
-                As a <kbd>Data Analyst</kbd> of the <kbd>Universe Bank</kbd> for more than 10 years, My target is trying to be the best snooker player among programmers.
-            </p>
-            <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more &raquo;</a></p>
-        </div>
-    </div>
-    
-    <div class="row">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Location</th>
-                <th>Score</th>
-                <th>Opponent</th>
-                <th>Max Break</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for campaign in campaigns %}
-                <tr>
-                    <td>{{ campaign.event_dt|date:'Y-m-d' }}</td>
-                    <td>{{ campaign.gym.name }}（{{ campaign.gym.road }}）</td>
-                    <td>{{ campaign.win_frames|default_if_none:0|floatformat:0 }} : {{ campaign.lose_frames|default_if_none:0|floatformat:0 }}</td>
-                    <td>{{ campaign.opponent.name }}</td>
-                    <td>{{ campaign.campaign_break }}</td>
-                    <td>
-                        <a class="btn btn-xs btn-success" href="/snooker/campaign/{{ campaign.id }}/"><i class="fa fa-search"></i></a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+	<div class="container">
+	    <h4><br />Recent Campaigns&nbsp;
+	        <a class="btn btn-xs btn-primary" href="/snooker/campaign/"><i class="fas fa-history"></i></a>
+	        <a class="btn btn-xs btn-warning" href="/snooker/analysis/"><i class="fas fa-chart-line" style="color:white"></i></a>
+	    </h4>
+	</div>
 
     <div class="container">
         <div class="row">
-            <div class="col-md-4">
-                <h1><i class="fas fa-fingerprint text-info"></i></h1>
-                <h4>Introduction</h4>
-                <p>
-	                <div class="list-group">
-	                    <div class="list-group-item">
-	                        <h6 class="mb-1">Graduation</h6>
-	                        <small>An average <var>Software Engineering</var> bachelor.<br />Graduated from <var>SJTU</var> since <var>2008</var>.</small>
-	                    </div>
-	                    <div class="list-group-item">
-	                        <h6 class="mb-1">Hobbies</h6>
-	                        <small>A <var>Snooker</var> amateur, career max break <var>46</var> points.<br />Big fan of <var>Dota2</var>, <var>HearthStone</var> and <var>Manchester United</var>.</small>
-	                    </div>
-	                </div>
-                </p>
-            </div>
-            <div class="col-md-4">
-                <h1><i class="fab fa-windows text-info"></i></h1>
-                <h4>Language</h4>
-                <p>
-                    <div class="progress">
-				        <div class="progress-bar bg-warning progress-bar-striped" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100" style="width: 95%">
-				            <span>Java 95%</span>
-				        </div>
-				    </div><br />
-				    <div class="progress">
-                        <div class="progress-bar bg-danger progress-bar-striped" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="width: 85%">
-                            <span>SAS 85%</span>
-                        </div>
-                    </div><br />
-                    <div class="progress">
-                        <div class="progress-bar bg-success progress-bar-striped" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
-                            <span>Python 80%</span>
-                        </div>
-                    </div><br />
-                    <div class="progress">
-                        <div class="progress-bar bg-info progress-bar-striped" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="width: 85%">
-                            <span>Perl 85%</span>
-                        </div>
-                    </div><br />
-                    <div class="progress">
-                        <div class="progress-bar bg-primary progress-bar-striped" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: 90%">
-                            <span>VBA 90%</span>
-                        </div>
-                    </div>
-				</p>
-            </div>
-            <div class="col-md-4">
-                <h1><i class="fas fa-award text-info"></i></h1>
-                <h4>Achievement</h4>
-                <ul class="list-unstyled list-icons">
-                    <li><small><i class="fa fa-check text-success"></i> Teradata 12 Certified Professional</small></li>
-                    <li><small><i class="fa fa-check text-success"></i> Teradata 12 Certified Technical Specialist</small></li>
-                    <li><small><i class="fa fa-check text-success"></i> Teradata 12 Certified Database Administrator</small></li>
-                    <li><small><i class="fa fa-check text-success"></i> Teradata 12 Certified Solutions Developer</small></li>
-                    <li><small><i class="fa fa-check text-success"></i> Teradata 12 Certified Enterprise Architect</small></li>
-                </ul>
-                <ul class="list-unstyled list-icons">
-                    <li><small><i class="fa fa-info-circle text-info"></i>《企业级数据仓库系统的样本数据获取方法及装置》（专利号：ZL201010611704.4）</small></li>
-                </ul>
-            </div>
+            <table class="table table-striped">
+		        <thead>
+		            <tr>
+		                <th>Date</th>
+		                <th>Location</th>
+		                <th>Score</th>
+		                <th>Opponent</th>
+		                <th>Max Break</th>
+		                <th>Action</th>
+		            </tr>
+		        </thead>
+		        <tbody>
+		            {% for campaign in campaigns %}
+	                <tr>
+	                    <td>{{ campaign.event_dt|date:'Y-m-d' }}</td>
+	                    <td>{{ campaign.gym.name }}（{{ campaign.gym.road }}）</td>
+	                    <td>{{ campaign.win_frames }} : {{ campaign.lose_frames }}</td>
+	                    <td>{{ campaign.opponent.name }}</td>
+	                    <td>{{ campaign.campaign_break }}</td>
+	                    <td>
+	                        <a class="btn btn-xs btn-success" href="/snooker/campaign/{{ campaign.id }}/"><i class="fas fa-link"></i></a>
+	                    </td>
+	                </tr>
+		            {% endfor %}
+		        </tbody>
+		    </table>
         </div>
     </div>
 {% endblock %}
