@@ -1,7 +1,9 @@
 from django.db import models
 
 from django.db.models.aggregates import Avg, Sum, Max, Count
-from django.db.models import F
+
+from django.db.models import IntegerField
+from django.db.models.functions import Cast
 
 
 class group(models.Model):
@@ -53,8 +55,8 @@ class frame(models.Model):
 
 
 DEFAULT_CAMPAIGN_ANNOTATE = {
-    'win_frames': Sum('campaign_frame__is_win'),
-    'lose_frames': Sum(1 - F('campaign_frame__is_win')),
+     'win_frames': Sum(Cast('campaign_frame__is_win', IntegerField())),
+     'lose_frames': Sum(1 - Cast('campaign_frame__is_win', IntegerField())),
     'avg_get_points': Avg('campaign_frame__get_points'),
     'avg_oppo_points': Avg('campaign_frame__oppo_points'),
     'campaign_break': Max('campaign_frame__max_break')
@@ -62,8 +64,8 @@ DEFAULT_CAMPAIGN_ANNOTATE = {
 
 
 DEFAULT_FRAME_ANNOTATE = {
-    'win_frames': Sum('is_win'),
-    'lose_frames': Sum(1 - F('is_win')),
+    'win_frames': Sum(Cast('is_win', IntegerField())),
+    'lose_frames': Sum(1 - Cast('is_win', IntegerField())),
     'avg_get_points': Avg('get_points'),
     'avg_oppo_points': Avg('oppo_points'),
     'frame_count': Count('id'),
