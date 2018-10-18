@@ -1,4 +1,3 @@
-{% load staticfiles %}
 <!doctype html>
 <html lang="zh-CN">
 <head>
@@ -10,7 +9,9 @@
     <meta name="description" content="GPLite个人工作小站（包含博客、斯诺克记录等内容）">
     <meta name="author" content="GPLite">
 
-    <title>GPL[it]e.147 - {% block title_content %}{% endblock %}</title>
+    {% load staticfiles %}
+    {% load ext_filters %}
+    <title>GPL[it]e.147 - {{ request.path|default_title }}</title>
     
     <link rel="icon" href="/media/icon/{% if IS_DEBUG %}debugicon{% else %}favicon{% endif %}.ico">
 
@@ -30,23 +31,25 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            {% with request.path|default_title as tagname %}
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                <li class="nav-item{% if tagname == 'Home' %} active{% endif %}">
+                    <a class="nav-link" href="/">Home{% if tagname == 'Home' %} <span class="sr-only">(current)</span>{% endif %}</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/snooker/">Snooker</a>
+                <li class="nav-item{% if tagname == 'Snooker' %} active{% endif %}">
+                    <a class="nav-link" href="/snooker/">Snooker{% if tagname == 'Snooker' %} <span class="sr-only">(current)</span>{% endif %}</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/coding/">Coding</a>
+                <li class="nav-item{% if tagname == 'Coding' %} active{% endif %}">
+                    <a class="nav-link" href="/coding/">Coding{% if tagname == 'Coding' %} <span class="sr-only">(current)</span>{% endif %}</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/blog/">Blogs</a>
+                <li class="nav-item{% if tagname == 'Blogs' %} active{% endif %}">
+                    <a class="nav-link" href="/blogs/">Blogs{% if tagname == 'Blogs' %} <span class="sr-only">(current)</span>{% endif %}</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/album/">Album</a>
+                <li class="nav-item{% if tagname == 'Album' %} active{% endif %}">
+                    <a class="nav-link" href="/album/">Album{% if tagname == 'Album' %} <span class="sr-only">(current)</span>{% endif %}</a>
                 </li>
             </ul>
+            {% endwith %}
             {% if request.user.is_authenticated %}
             <ul class="navbar-nav my-2 my-md-0">
                 <li class="nav-item dropdown">
