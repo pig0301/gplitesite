@@ -10,21 +10,21 @@ class group(models.Model):
     name = models.CharField(max_length=45)
     is_show = models.CharField(max_length=1)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     
 class player(models.Model):
     name = models.CharField(max_length=45)
     group = models.ForeignKey(group, on_delete=models.DO_NOTHING, related_name='group_player')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 class gym(models.Model):
     name = models.CharField(max_length=45)
     road = models.CharField(max_length=45)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name + '(' + self.road + ')'
 
 class cue(models.Model):
@@ -32,7 +32,7 @@ class cue(models.Model):
     material = models.CharField(max_length=45)
     owner = models.OneToOneField(player, on_delete=models.DO_NOTHING)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name + '(' + self.owner.name + ')'
 
 class campaign(models.Model):
