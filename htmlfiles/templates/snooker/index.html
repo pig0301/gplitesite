@@ -7,38 +7,46 @@
 	        <a class="btn btn-xs btn-primary" href="/snooker/campaign/"><i class="fas fa-history"></i></a>
 	        <a class="btn btn-xs btn-warning" href="/snooker/analysis/"><i class="fas fa-chart-line" style="color:white"></i></a>
 	    </h4>
-	</div>
-
-    <div class="container">
+	    
+	    <div class="row">
+            <div class="col-md-12">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Score</th>
+                            <th>Opponent</th>
+                            <th>Max Break</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for campaign in campaigns %}
+                        <tr>
+                            <td>{{ campaign.event_dt|date:'Y-m-d' }}</td>
+                            <td>{{ campaign.gym.name }}（{{ campaign.gym.road }}）</td>
+                            <td>{{ campaign.win_frames }} : {{ campaign.lose_frames }}</td>
+                            <td>{{ campaign.opponent.name }}</td>
+                            <td>{{ campaign.campaign_break }}</td>
+                            <td>
+                                <a class="btn btn-xs btn-success" href="/snooker/campaign/{{ campaign.id }}/"><i class="fas fa-cube"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <h4><br />Tendency Chart</h4>
+        
         <div class="row">
             <div class="col-md-12">
-	            <table class="table table-striped">
-			        <thead>
-			            <tr>
-			                <th>Date</th>
-			                <th>Location</th>
-			                <th>Score</th>
-			                <th>Opponent</th>
-			                <th>Max Break</th>
-			                <th>Action</th>
-			            </tr>
-			        </thead>
-			        <tbody>
-			            {% for campaign in campaigns %}
-		                <tr>
-		                    <td>{{ campaign.event_dt|date:'Y-m-d' }}</td>
-		                    <td>{{ campaign.gym.name }}（{{ campaign.gym.road }}）</td>
-		                    <td>{{ campaign.win_frames }} : {{ campaign.lose_frames }}</td>
-		                    <td>{{ campaign.opponent.name }}</td>
-		                    <td>{{ campaign.campaign_break }}</td>
-		                    <td>
-		                        <a class="btn btn-xs btn-success" href="/snooker/campaign/{{ campaign.id }}/"><i class="fas fa-cube"></i></a>
-		                    </td>
-		                </tr>
-			            {% endfor %}
-			        </tbody>
-			    </table>
-		    </div>
+                <canvas id="canvas_w" height="400px"></canvas>
+            </div>
         </div>
-    </div>
+	</div>
 {% endblock %}
