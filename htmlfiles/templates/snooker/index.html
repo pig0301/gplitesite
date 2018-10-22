@@ -70,18 +70,18 @@
 	    new Chart($("#canvas_w")[0], {
 	        type: 'bar',
 	        data: {
-	            labels: [{% for campaign in campaigns %}"{{ campaign.event_dt|date:'m/d' }}",{% endfor %}],
+	            labels: [{% for campaign in campaigns reversed %}"{{ campaign.event_dt|date:'m/d' }}",{% endfor %}],
 	            datasets: [
 		            {
 		                label: 'Win Frames',
-		                data: [{% for campaign in campaigns %}"{{ campaign.win_frames }}",{% endfor %}],
+		                data: [{% for campaign in campaigns reversed %}"{{ campaign.win_frames }}",{% endfor %}],
 		                backgroundColor: 'rgba(54, 162, 235, 0.2)',
 		                borderColor: 'rgba(54, 162, 235, 1)',
 		                borderWidth: 1
 		            },
 		            {
 		                label: 'Lose Frames',
-		                data: [{% for campaign in campaigns %}"{{ campaign.lose_frames }}",{% endfor %}],
+		                data: [{% for campaign in campaigns reversed %}"{{ campaign.lose_frames }}",{% endfor %}],
 		                backgroundColor: 'rgba(255, 206, 86, 0.2)',
 		                borderColor: 'rgba(255, 206, 86, 1)',
 		                borderWidth: 1
