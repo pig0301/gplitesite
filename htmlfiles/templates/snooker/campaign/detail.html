@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block body_content %}
+	<div class="container">
+	    <h4><br />Campaign Detail&nbsp;
+	        <a class="btn btn-xs btn-success" href="/snooker/campaign/"><i class="far fa-hdd"></i></a>
+	        <a class="btn btn-xs btn-danger" href="/snooker/analysis/"><i class="far fa-trash-alt"></i></a>
+	    </h4>
+	    
+	    <div class="row">
+            <div class="col-md-12">
+			    <table class="table table-striped">
+			        <thead>
+			            <tr>
+			                <th>Date</th>
+			                <th>Location</th>
+			                <th>Total Score</th>
+			                <th>Opponent</th>
+			                {% if campaign.is_finished == '1' %}
+			                <th>Get Points</th>
+			                <th>Oppo Points</th>
+			                {% endif %}
+			            </tr>
+			        </thead>
+			        <tbody>
+			            <tr>
+			                <td>{{ campaign.event_dt|date:'Y-m-d' }}</td>
+			                <td>{{ campaign.gym.name }}（{{ campaign.gym.road }}）</td>
+			                <td>{{ campaign.win_frames }} : {{ campaign.lose_frames }}</td>
+			                <td>{{ campaign.opponent.name }}</td>
+			                {% if campaign.is_finished == '1' %}
+			                <td>{{ campaign.avg_get_points|floatformat:1 }}</td>
+			                <td>{{ campaign.avg_oppo_points|floatformat:1 }}</td>
+			                {% endif %}
+			            </tr>
+			        </tbody>
+			    </table>
+            </div>
+        </div>
+        
+        <hr />
+        
+        <h4><br />Frame Summary&nbsp;
+            <a class="btn btn-xs btn-info" href="/snooker/campaign/"><i class="fas fa-folder-plus"></i></a>
+            <a class="btn btn-xs btn-warning" href="/snooker/analysis/"><i class="fas fa-folder-minus" style="color:white"></i></a>
+        </h4>
+        
+        <div class="row">
+            <div class="col-md-12">
+			    <table class="table table-striped">
+			        <thead>
+			            <tr>
+			                <th>#</th>
+			                <th>Cue</th>
+			                <th>Frame Score</th>
+			                <th>Max Break</th>
+			                <th>Memo</th>
+			                <th>Result</th>
+			            </tr>
+			        </thead>
+			        <tbody>
+			            {% for frame in campaign.campaign_frame.all %}
+			            <tr>
+			                <td>{{ forloop.counter }}</td>
+			                <td>{{ frame.cue.name }}（{{ frame.cue.owner.name }}）</td>
+			                <td>{{ frame.get_points }} : {{ frame.oppo_points }}</td>
+			                <td>{{ frame.max_break|default_if_none:'' }}</td>
+			                <td>{{ frame.memo|default_if_none:'' }}</td>
+			                <td>
+			                    {% if frame.is_win == '1' %}
+			                    <span class="badge badge-success">Win</span>
+			                    {% else %}
+			                    <span class="badge badge-secondary">Lose</span>
+			                    {% endif %}
+			                    {% if frame.let_points > 0 %}
+			                    <span class="badge badge-warning">+{{ frame.let_points }}</span>
+			                    {% elif frame.let_points < 0 %}
+			                    <span class="badge badge-warning">{{ frame.let_points }}</span>
+			                    {% endif %}
+			                </td>
+			            </tr>
+			            {% endfor %}
+			        </tbody>
+			    </table>
+            </div>
+        </div>
+        
+        <hr />
+        
+        <h4><br />Tendency Chart</h4>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <canvas id="canvas" height="180" width="450" style="margin-top:10px;"></canvas>
+            </div>
+        </div>
+	</div>
+{% endblock %}
+
+{% block js_content %}
+    <script src="{% static 'plugins/Chart/Chart.bundle.min.js' %}"></script>
+    
+    <script type="text/javascript">
+	    new Chart($("#canvas")[0], {
+            type: 'line',
+            data: {
+                labels: [{% for frame in campaign.campaign_frame.all %}"#{{ forloop.counter }}",{% endfor %}],
+                datasets : [
+                    {
+                        label: "GPLite",
+                        borderColor : "rgba(75,192,192,1)",
+                        backgroundColor : "rgba(75,192,192,0.2)",
+                        pointBorderColor : "rgba(75,192,192,1)",
+                        pointBackgroundColor : "#fff",
+                        pointBorderWidth : 1,
+                        data : [
+                            {% for frame in campaign.campaign_frame.all %}{{ frame.get_points }},{% endfor %}
+                        ]
+                    },
+                    {
+                        label: "Opponent",
+                        borderColor : "rgba(255,206,86,1)",
+                        pointBorderColor : "rgba(255,206,86,1)",
+                        pointBackgroundColor : "#fff",
+                        pointBorderWidth : 1,
+                        fill: false,
+                        borderDash: [5, 5],
+                        data : [
+                            {% for frame in campaign.campaign_frame.all %}{{ frame.oppo_points }},{% endfor %}
+                        ]
+                    }
+                ]
+            },
+            options: {
+                legend: {
+                    display: false
+                }
+            }
+        });
+    </script>
+{% endblock %}

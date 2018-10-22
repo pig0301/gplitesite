@@ -5,8 +5,9 @@ from django.views.static import serve
 from django.contrib import admin
 admin.autodiscover()
 
-import home.views as home
-import snooker.views as snooker
+from home import views as home
+from snooker import views as snooker
+from snooker.campaign import views as snooker_campaign
 
 import settings
 
@@ -18,6 +19,7 @@ urlpatterns = [
     url(r'^logout/$', home.logout),
     
     url(r'^snooker/$', snooker.index),
+    url(r'^snooker/campaign/(\d+)/$', snooker_campaign.detail),
 
     path('admin/', admin.site.urls),
     url(r'^media/(?P<path>.*)$', serve, {"document_root": settings.MEDIA_ROOT}),
