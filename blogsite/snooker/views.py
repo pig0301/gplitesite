@@ -1,6 +1,6 @@
 from snooker import models
 
-from libs.utils import render_template
+from libs.functions import render_template
 from libs import constants
 
 

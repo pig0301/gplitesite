@@ -2,7 +2,7 @@ from django.http import HttpResponseRedirect
 from django.contrib import auth
 from django.contrib import messages
 
-from libs.utils import render_template
+from libs.functions import render_template
 
 
 def index(request):

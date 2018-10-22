@@ -12,7 +12,7 @@ import settings
 
 
 urlpatterns = [
-    url(r'^$', home.index, name='index'),
+    url(r'^$', home.index),
 
     url(r'^login/$', home.login),
     url(r'^logout/$', home.logout),
