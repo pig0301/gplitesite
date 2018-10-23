@@ -74,14 +74,14 @@
 	            datasets: [
 		            {
 		                label: 'Win Frames',
-		                data: [{% for campaign in campaigns reversed %}{{ campaign.win_frames }},{% endfor %}],
+		                data: [{% for campaign in campaigns reversed %}"{{ campaign.win_frames }}",{% endfor %}],
 		                backgroundColor: 'rgba(54, 162, 235, 0.2)',
 		                borderColor: 'rgba(54, 162, 235, 1)',
 		                borderWidth: 1
 		            },
 		            {
 		                label: 'Lose Frames',
-		                data: [{% for campaign in campaigns reversed %}{{ campaign.lose_frames }},{% endfor %}],
+		                data: [{% for campaign in campaigns reversed %}"{{ campaign.lose_frames }}",{% endfor %}],
 		                backgroundColor: 'rgba(255, 206, 86, 0.2)',
 		                borderColor: 'rgba(255, 206, 86, 1)',
 		                borderWidth: 1
@@ -104,25 +104,23 @@
 	    });
 	    
 	    new Chart($("#canvas_p")[0], {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: [{% for campaign in campaigns reversed %}"{{ campaign.event_dt|date:'m/d' }}",{% endfor %}],
                 datasets : [
                     {
-                        label: 'Get Points',
-                        type: 'line',
+                        label: "GPLite",
                         borderColor : "rgba(75,192,192,1)",
+                        backgroundColor : "rgba(75,192,192,0.2)",
                         pointBorderColor : "rgba(75,192,192,1)",
                         pointBackgroundColor : "#fff",
-                        fill: false,
                         pointBorderWidth : 1,
                         data : [
                             {% for campaign in campaigns reversed %}{{ campaign.avg_get_points|default_if_none:0|floatformat:1 }},{% endfor %}
                         ]
                     },
                     {
-                        label: 'Opponent Points',
-                        type: 'line',
+                        label: "Opponent",
                         borderColor : "rgba(255,206,86,1)",
                         pointBorderColor : "rgba(255,206,86,1)",
                         pointBackgroundColor : "#fff",
@@ -132,24 +130,10 @@
                         data : [
                             {% for campaign in campaigns reversed %}{{ campaign.avg_oppo_points|default_if_none:0|floatformat:1 }},{% endfor %}
                         ]
-                    },
-                    {
-                        label: 'Max Break',
-                        data: [{% for campaign in campaigns reversed %}{{ campaign.campaign_break }},{% endfor %}],
-                        backgroundColor: 'rgba(201, 203, 207, 0.2)',
-                        borderColor: 'rgba(201, 203, 207, 1)',
-                        borderWidth: 1
                     }
                 ]
             },
             options: {
-            	scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true
-                        }
-                    }]
-                },
                 legend: {
                     display: false
                 }
