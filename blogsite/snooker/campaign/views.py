@@ -20,7 +20,7 @@ def index(request):
         
     paginator = Paginator(finished_campaigns, constants.CAMPAIGN_LIST_COUNT_PER_PAGE)
     
-    page = request.GET.get('page', '1')
+    page = request.GET.get('p', '1')
     if not page.isdigit() or int(page) < 1 or int(page) > paginator.num_pages:
         page = 1
     else:
