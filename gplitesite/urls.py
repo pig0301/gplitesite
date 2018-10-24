@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^logout/$', home.logout),
     
     url(r'^snooker/$', snooker.index),
+    url(r'^snooker/campaign/$', snooker_campaign.index),
     url(r'^snooker/campaign/(\d+)/$', snooker_campaign.detail),
 
     path('admin/', admin.site.urls),
