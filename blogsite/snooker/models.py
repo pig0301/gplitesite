@@ -55,8 +55,8 @@ class frame(models.Model):
 
 
 DEFAULT_CAMPAIGN_ANNOTATE = {
-     'win_frames': Sum(Cast('campaign_frame__is_win', IntegerField())),
-     'lose_frames': Sum(1 - Cast('campaign_frame__is_win', IntegerField())),
+    'win_frames': Sum(Cast('campaign_frame__is_win', IntegerField())),
+    'lose_frames': Sum(1 - Cast('campaign_frame__is_win', IntegerField())),
     'avg_get_points': Avg('campaign_frame__get_points'),
     'avg_oppo_points': Avg('campaign_frame__oppo_points'),
     'campaign_break': Max('campaign_frame__max_break')
