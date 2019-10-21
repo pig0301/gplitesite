@@ -24,24 +24,24 @@
         },
         "django": {
             "hashes": [
-                "sha256:9493f9c4417ab6c15221a7ab964f73db0632bc6337ade33810078423b800dbd9",
-                "sha256:e2f3ada50cf2106af7b2631b7b0b6f0d983ae30aa218f06d5ec93d3049f94897"
+                "sha256:4025317ca01f75fc79250ff7262a06d8ba97cd4f82e93394b2a0a6a4a925caeb",
+                "sha256:a8ca1033acac9f33995eb2209a6bf18a4681c3e5269a878e9a7e0b7384ed1ca3"
             ],
-            "version": "==2.0.12"
+            "version": "==2.2.6"
         },
         "django-heroku": {
             "hashes": [
-                "sha256:193bacbe644a607642f6b60acd0a382d6abf4a1f7578f8d3eb10659457efe904",
-                "sha256:af6c723872553b7427121a865eb9fce70d566b9ad26d7defcdcd03a8acea56c8"
+                "sha256:2bc690aab89eedbe01311752320a9a12e7548e3b0ed102681acc5736a41a4762",
+                "sha256:6af4bc3ae4a9b55eaad6dbe5164918982d2762661aebc9f83d9fa49f6009514e"
             ],
-            "version": "==0.1.0"
+            "version": "==0.3.1"
         },
         "gunicorn": {
             "hashes": [
-                "sha256:75af03c99389535f218cc596c7de74df4763803f7b63eb09d77e92b3956b36c6",
-                "sha256:eee1169f0ca667be05db3351a0960765620dad53f53434262ff8901b68a1b622"
+                "sha256:aa8e0b40b4157b36a5df5e599f45c9c76d6af43845ba3b3b0efe2c70473c2471",
+                "sha256:fa2662097c66f920f53f70621c6c58ca4a3c4d3434205e608e121b5b3b71f4f3"
             ],
-            "version": "==19.7.1"
+            "version": "==19.9.0"
         },
         "psycopg2": {
             "hashes": [
@@ -65,6 +65,13 @@
                 "sha256:b02c06db6cf09c12dd25137e563b31700d3b80fcc4ad23abb7a315f2789819be"
             ],
             "version": "==2019.3"
+        },
+        "sqlparse": {
+            "hashes": [
+                "sha256:40afe6b8d4b1117e7dff5504d7a8ce07d9a1b15aeeade8a2d10f130a834f8177",
+                "sha256:7c3dca29c022744e95b547e867cee89f4fce4373f3549ccd8797d8eb52cdb873"
+            ],
+            "version": "==0.3.0"
         },
         "whitenoise": {
             "hashes": [
