@@ -17,3 +17,5 @@ drop table public.snooker_frame;
 drop table public.snooker_group;
 drop table public.snooker_gym;
 drop table public.snooker_player;
+
+-- 备份时选择：不保存“所有者”和“权限”，查询“使用插入命令”
