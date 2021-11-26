@@ -29,7 +29,7 @@ sys.path.append(os.path.join(BASE_DIR, 'blogsite'))
 SECRET_KEY = 'CHANGE_ME!!!! (P.S. the SECRET_KEY environment variable will be used, if set, instead).'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.sys.platform == 'win32'
 
 ALLOWED_HOSTS = []
 
@@ -94,10 +94,10 @@ if DEBUG == True:
             'PORT': '5432',
         }
     }
-
-DATABASES = {
-    'default': dj_database_url.config()
-}
+else:
+    DATABASES = {
+        'default': dj_database_url.config()
+    }
 
 
 # Password validation
@@ -130,7 +130,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
