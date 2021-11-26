@@ -5,7 +5,8 @@ from libs.functions import render_template
 from game import models
 
 def index(request):
-    return render_template('index.html', {}, request)
+#     produces = models.cg_mp700_produce.objects.order_by("-id").prefetch_related('produce_detail')
+    return render_template("game/index.html", {}, request)
 
 def produce_start(request):
     warehouse = request.GET['w']
