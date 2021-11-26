@@ -13,3 +13,14 @@ def default_title(url):
         return 'Home'
     else:
         return match.group(1).capitalize()
+    
+@register.filter
+def ml_step_desc(step):
+    if step == 1:
+        return "开箱"
+    elif step == 2:
+        return "整理"
+    elif step == 3:
+        return "制作"
+    else:
+        return ""

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load ext_filters %}
+
+{% block body_content %}
+	<div class="container">
+	    <h4><br />Recent Produces</h4>
+	    
+	    <div class="row">
+            <div class="col-md-12">
+            	{% for produce in produces %}
+            	<p>
+            		<span class="badge badge-success">{{ produce.warehouse }}</span>
+            		<span class="badge badge-primary">{{ produce.main_chef }}</span>
+            	</p>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>Step</th>
+                            <th>Time Consume</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detail in produce.produce_detail.all %}
+                        <tr>
+                            <td>{{ detail.round }}#</td>
+                            <td>{{ detail.step | ml_step_desc }}</td>
+                            <td><span class="badge badge-{% if detail.end_dttm %}secondary{% else %}warning{% endif %}">{{ detail.time_consume }}</span></td>
+                            <td>{{ detail.start_dttm | date:"Y-m-d H:i:s" }}</td>
+                            <td>{% if detail.end_dttm %}{{ detail.end_dttm | date:"Y-m-d H:i:s" }}{% else %}进行中{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endfor %}
+            </div>
+        </div>
+	</div>
+{% endblock %}

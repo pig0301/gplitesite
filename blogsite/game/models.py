@@ -9,7 +9,7 @@ class cg_mp700_produce(models.Model):
     main_chef = models.CharField(max_length=45)
 
 class cg_mp700_detail(models.Model):
-    produce = models.ForeignKey(cg_mp700_produce, on_delete=models.DO_NOTHING, related_name='product_detail')
+    produce = models.ForeignKey(cg_mp700_produce, on_delete=models.DO_NOTHING, related_name='produce_detail')
     round = models.IntegerField()
     step = models.IntegerField()
     start_dttm = models.DateTimeField()
@@ -18,6 +18,7 @@ class cg_mp700_detail(models.Model):
     def time_consume(self):
         if self.end_dttm is None:
             diff = timezone.now() - self.start_dttm
-            return timedelta(diff.days, diff.seconds, 0)
         else:
-            return self.end_dttm - self.start_dttm
+            diff = self.end_dttm - self.start_dttm
+        
+        return timedelta(diff.days, diff.seconds, 0)
