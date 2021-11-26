@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'blogsite',
     'htmlfiles',
     'snooker',
+    'game'
 ]
 
 MIDDLEWARE = [
