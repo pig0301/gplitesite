@@ -19,7 +19,7 @@ def produce_start(request):
    
     return HttpResponse(produce.id)
 
-def produce_finish(request, produce_id):
+def produce_finish(produce_id):
     lastStep = finish_last_step(produce_id)
    
     return HttpResponse(lastStep.id)
