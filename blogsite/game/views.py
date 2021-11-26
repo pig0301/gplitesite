@@ -4,9 +4,8 @@ from libs.functions import render_template
 
 from game import models
 
-def index():
-#     produces = models.cg_mp700_produce.objects.prefetch_related('produce_detail').order_by("-id")
-    return HttpResponse(1)
+def index(request):
+    return render_template('index.html', {}, request)
 
 def produce_start(request):
     warehouse = request.GET['w']
@@ -19,7 +18,7 @@ def produce_start(request):
    
     return HttpResponse(produce.id)
 
-def produce_finish(produce_id):
+def produce_finish(request, produce_id):
     lastStep = finish_last_step(produce_id)
    
     return HttpResponse(lastStep.id)
