@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('step', models.IntegerField()),
                 ('start_dttm', models.DateTimeField()),
                 ('end_dttm', models.DateTimeField(null=True)),
-                ('produce', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='product_detail', to='game.cg_mp700_produce')),
+                ('produce', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='produce_detail', to='game.cg_mp700_produce')),
             ],
         ),
     ]
