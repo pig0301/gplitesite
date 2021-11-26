@@ -4,7 +4,7 @@ from libs.functions import render_template
 
 from game import models
 
-def index(request):
+def index():
 #     produces = models.cg_mp700_produce.objects.prefetch_related('produce_detail').order_by("-id")
     return HttpResponse(1)
 
