@@ -5,7 +5,8 @@ from libs.functions import render_template
 from game import models
 
 def index(request):
-    produces = models.cg_mp700_produce.objects.prefetch_related('produce_detail').order_by("-id")
+    produces = models.cg_mp700_produce.objects.prefetch_related('produce_detail').annotate(
+        **models.DEFAULT_PRODUCE_ANNOTATE).order_by("-id")
     return render_template("game/index.html", {'produces': produces}, request)
 
 def produce_start(request):

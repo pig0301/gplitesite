@@ -1,6 +1,8 @@
 from django import template
 import re
 
+from datetime import timedelta
+
 
 register = template.Library()
 
@@ -24,3 +26,7 @@ def ml_step_desc(step):
         return "制作"
     else:
         return ""
+    
+@register.filter
+def time_delta(delta):
+    return timedelta(delta.days, delta.seconds, 0)

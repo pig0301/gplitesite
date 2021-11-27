@@ -28,7 +28,7 @@
                         <tr>
                             <td>{{ detail.round }}#</td>
                             <td>{{ detail.step | ml_step_desc }}</td>
-                            <td><span class="badge badge-{% if detail.end_dttm %}secondary{% else %}warning{% endif %}">{{ detail.time_consume }}</span></td>
+                            <td><span class="badge badge-{% if detail.end_dttm %}secondary{% else %}warning{% endif %}">{{ detail.time_consume | time_delta }}</span></td>
                             <td>{{ detail.start_dttm | date:"Y-m-d H:i:s" }}</td>
                             <td>{% if detail.end_dttm %}{{ detail.end_dttm | date:"Y-m-d H:i:s" }}{% else %}进行中{% endif %}</td>
                         </tr>
