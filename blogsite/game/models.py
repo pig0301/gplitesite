@@ -14,6 +14,9 @@ class cg_mp700_detail(models.Model):
     start_dttm = models.DateTimeField()
     end_dttm = models.DateTimeField(null=True)
     
+    class Meta: 
+        ordering = ['-start_dttm', '-id']
+    
     def time_consume(self):
         if self.end_dttm is None:
             return timezone.now() - self.start_dttm
