@@ -37,3 +37,10 @@ def time_diff(time1, time2):
         return time_delta(time1 - time2)
     else:
         return ""
+
+@register.filter
+def date_diff(time1, time2):
+    if time1 is not None and time2 is not None:
+        return (time1.date() - time2.date()).days
+    else:
+        return 0
