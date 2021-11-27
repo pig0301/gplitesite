@@ -48,7 +48,7 @@ def produce_detail_add(request, produce_id):
 
 def finish_last_step(produce_id):
     produce = models.cg_mp700_produce.objects.prefetch_related('produce_detail').get(id=produce_id)
-    lastStep = produce.produce_detail.last()
+    lastStep = produce.produce_detail.first()
    
     if lastStep is not None and lastStep.end_dttm is None:
         lastStep.end_dttm = timezone.now()

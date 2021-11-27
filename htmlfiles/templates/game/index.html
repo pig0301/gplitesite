@@ -12,6 +12,12 @@
             	<p>
             		<span class="badge badge-success">{{ produce.warehouse }}</span>
             		<span class="badge badge-primary">{{ produce.main_chef }}</span>
+            		<span class="badge badge-light">{{ produce.min_start_dttm | date:"Y-m-d H:i:s" }}</span>
+            		{% if produce.produce_detail.all.first.end_dttm %}
+            		<span class="badge badge-dark">共耗时：{{ produce.max_end_dttm | time_diff:produce.min_start_dttm }}</span>
+            		{% elif produce.produce_detail.all.first %}
+            		<span class="badge badge-danger">{{ produce.min_start_dttm | timesince }}前</span>
+            		{% endif %}
             	</p>
                 <table class="table table-striped">
                     <thead>

@@ -30,3 +30,10 @@ def ml_step_desc(step):
 @register.filter
 def time_delta(delta):
     return timedelta(delta.days, delta.seconds, 0)
+
+@register.filter
+def time_diff(time1, time2):
+    if time1 is not None and time2 is not None:
+        return time_delta(time1 - time2)
+    else:
+        return ""
