@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^snooker/campaign/(\d+)/$', snooker_campaign.detail),
     
     url(r'^game/$', game.index),
+    url(r'^game/reconnect/$', game.net_reconnect),
     url(r'^game/produce/start/$', game.produce_start),
     url(r'^game/produce/finish/(\d+)/$', game.produce_finish),
     url(r'^game/produce/detail/add/(\d+)/$', game.produce_detail_add),

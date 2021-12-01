@@ -9,6 +9,14 @@ def index(request):
         **models.DEFAULT_PRODUCE_ANNOTATE).order_by("-id")
     return render_template("game/index.html", {'produces': produces}, request)
 
+def net_reconnect(request):
+    if request.META.has_key('HTTP_X_FORWARDED_FOR'):
+        ip = request.META['HTTP_X_FORWARDED_FOR']
+    else:
+        ip = request.META['REMOTE_ADDR']
+        
+    return render_template("game/reconnect.html", {'ip': ip}, request)
+
 def produce_start(request):
     warehouse = request.GET['w']
     main_chef = request.GET['c']
