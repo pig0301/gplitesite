@@ -10,11 +10,7 @@ def index(request):
     return render_template("game/index.html", {'produces': produces}, request)
 
 def net_reconnect(request):
-    if request.META.has_key('HTTP_X_FORWARDED_FOR'):
-        ip = request.META['HTTP_X_FORWARDED_FOR']
-    else:
-        ip = request.META['REMOTE_ADDR']
-        
+    ip = request.GET['ip']
     return render_template("game/reconnect.html", {'ip': ip}, request)
 
 def produce_start(request):
