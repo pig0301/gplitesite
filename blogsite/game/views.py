@@ -1,13 +1,25 @@
+from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.utils import timezone
-from libs.functions import render_template
 
+from libs.functions import render_template
+from libs import constants
 from game import models
+
 
 def index(request):
     produces = models.cg_mp700_produce.objects.prefetch_related('produce_detail').annotate(
         **models.DEFAULT_PRODUCE_ANNOTATE).order_by("-id")
-    return render_template("game/index.html", {'produces': produces}, request)
+
+    paginator = Paginator(produces, constants.PRODUCE_LIST_COUNT_PER_PAGE)
+
+    page = request.GET.get('p', '1')
+    if not page.isdigit() or int(page) < 1 or int(page) > paginator.num_pages:
+        page = 1
+    else:
+        page = int(page)
+
+    return render_template("game/index.html", {'produces': paginator.get_page(page)}, request)
 
 def produce_start(request):
     warehouse = request.GET['w']

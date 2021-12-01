@@ -10,7 +10,7 @@
             <div class="col-md-12">
             	{% for produce in produces %}
             	<p>
-                    {% if forloop.first %}
+                    {% if not produce.produce_detail.all.first.end_dttm %}
                     <span class="badge badge-light">{{ produce.min_start_dttm | date:"Y-m-d H:i:s" }}</span>
                     {% else %}
                     <button class="btn btn-outline-secondary btn-xs" type="button" data-toggle="collapse" data-target="#collapse{{ produce.id }}" aria-expanded="false" aria-controls="collapse{{ produce.id }}">
@@ -25,7 +25,7 @@
             		<span class="badge badge-pill badge-danger">{{ produce.min_start_dttm | timesince }}前</span>
             		{% endif %}
             	</p>
-                <table class="table table-striped{% if not forloop.first %} collapse{% endif %}" id="collapse{{ produce.id }}">
+                <table class="table table-striped{% if produce.produce_detail.all.first.end_dttm %} collapse{% endif %}" id="collapse{{ produce.id }}">
                     <thead>
                         <tr>
                             <th>Round</th>
@@ -58,5 +58,19 @@
                 {% endfor %}
             </div>
         </div>
+
+        <ul class="pagination">
+            <li class="page-item{% if not produces.has_previous %} disabled{% endif %}">
+                <a class="page-link" {% if produces.has_previous %}href="/game/?p={{ produces.previous_page_number }}"{% endif %}>&laquo;</a>
+            </li>
+            {% for page in produces.paginator.page_range %}
+            <li class="page-item{% if produces.number == page %} disabled{% endif %}">
+                <a class="page-link" href="/game/?p={{ page }}">{{ page }}</a>
+            </li>
+            {% endfor %}
+            <li class="page-item{% if not produces.has_next %} disabled{% endif %}">
+                <a class="page-link" {% if produces.has_next %}href="/game/?p={{ produces.next_page_number }}"{% endif %}>&raquo;</a>
+            </li>
+        </ul>
 	</div>
 {% endblock %}
