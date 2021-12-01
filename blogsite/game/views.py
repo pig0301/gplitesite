@@ -9,10 +9,6 @@ def index(request):
         **models.DEFAULT_PRODUCE_ANNOTATE).order_by("-id")
     return render_template("game/index.html", {'produces': produces}, request)
 
-def net_reconnect(request):
-    ip = request.GET['ip']
-    return render_template("game/reconnect.html", {'ip': ip}, request)
-
 def produce_start(request):
     warehouse = request.GET['w']
     main_chef = request.GET['c']
