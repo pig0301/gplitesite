@@ -1,8 +1,8 @@
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 
-from libs.functions import render_template
+from libs.functions import render_template, check_login
 from libs import constants
 from game import models
 
@@ -46,6 +46,17 @@ def produce_finish(request, produce_id):
     lastStep = finish_last_step(produce_id)
    
     return HttpResponse(lastStep.id)
+
+def produce_clear(request):
+    if check_login(request):
+        max_id = models.cg_mp700_produce.objects.order_by('-id').first().id - 10
+        
+        models.cg_mp700_detail.objects.filter(produce__id__lte=max_id).delete()
+        models.cg_mp700_produce.objects.filter(id__lte=max_id).delete()
+        
+        return HttpResponseRedirect("/game/")
+    else:
+        return HttpResponse("非管理员用户禁止访问！")
 
 def produce_detail_add(request, produce_id):
     round1 = request.GET['r']
