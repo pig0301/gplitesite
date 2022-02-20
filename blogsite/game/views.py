@@ -49,7 +49,7 @@ def produce_finish(request, produce_id):
 
 def produce_clear(request):
     if check_login(request):
-        max_id = models.cg_mp700_produce.objects.order_by('-id').first().id - 10
+        max_id = models.cg_mp700_produce.objects.order_by('-id').first().id - constants.PRODUCE_LIST_COUNT_PER_PAGE
         
         models.cg_mp700_detail.objects.filter(produce__id__lte=max_id).delete()
         models.cg_mp700_produce.objects.filter(id__lte=max_id).delete()
