@@ -29,9 +29,17 @@ sys.path.append(os.path.join(BASE_DIR, 'blogsite'))
 SECRET_KEY = 'CHANGE_ME!!!! (P.S. the SECRET_KEY environment variable will be used, if set, instead).'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.sys.platform == 'win32'
+SERVER_TYPE = 'TENCENT'
 
-ALLOWED_HOSTS = []
+if os.sys.platform == 'win32':
+    SERVER_TYPE = 'DEVELOP'
+elif 'heroku' in os.environ['PATH']:
+    SERVER_TYPE = 'HEROKU'
+
+
+DEBUG = (SERVER_TYPE == 'DEVELOP' or SERVER_TYPE == 'TENCENT')
+
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -83,7 +91,7 @@ WSGI_APPLICATION = 'gplitesite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
-if DEBUG == True:
+if SERVER_TYPE == 'DEVELOP':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -141,4 +149,5 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'htmlfiles', 'media')
 
-django_heroku.settings(locals())
+if SERVER_TYPE == 'HEROKU':
+    django_heroku.settings(locals())
