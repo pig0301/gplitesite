@@ -4,9 +4,35 @@
 
 {% block body_content %}
 	<div class="container">
-	    <h4><br />Recent Produces</h4>
-	    
-	    <div class="row">
+	<h4>
+		<br />Recent Produces
+		{% if request.user.is_authenticated %}
+		&nbsp;
+		<button class="btn btn-xs btn-info" data-toggle="modal" data-target="#exampleModal">
+			<i class="fas fa-eraser"></i>
+		</button>
+
+		<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">询问</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">是否清理历史记录？</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+						<a class="btn btn-primary" href="/game/produce/clear/">清理</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		{% endif %}
+	</h4>
+
+	<div class="row">
             <div class="col-md-12">
             	{% for produce in produces %}
             	<p>

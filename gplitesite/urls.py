@@ -25,6 +25,7 @@ urlpatterns = [
     
     url(r'^game/$', game.index),
     url(r'^game/produce/start/$', game.produce_start),
+    url(r'^game/produce/clear/$', game.produce_clear),
     url(r'^game/produce/finish/(\d+)/$', game.produce_finish),
     url(r'^game/produce/detail/add/(\d+)/$', game.produce_detail_add),
 
