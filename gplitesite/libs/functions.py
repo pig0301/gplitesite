@@ -5,6 +5,7 @@ import settings
 
 def render_template(template, data, request):
     data["IS_DEBUG"] = settings.DEBUG
+    data["SERVER_TYPE"] = settings.SERVER_TYPE
     return render(request, template, data)
 
 def check_login(request):
