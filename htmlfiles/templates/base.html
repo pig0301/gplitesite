@@ -93,7 +93,7 @@
             <div class="col-md-6 text-right">
                 <small>
 	                Powered By &middot; <a href="https://www.djangoproject.com/">Django</a> &middot;
-	                <a href="https://www.getbootstrap.com/">Bootstrap</a>{% if SERVER_TYPE ne 'DEVELOP' %} &middot;{% endif %}
+	                <a href="https://www.getbootstrap.com/">Bootstrap</a>{% if not SERVER_TYPE == 'DEVELOP' %} &middot;{% endif %}
 	                {% if SERVER_TYPE == 'HEROKU' %}
 		                <a href="https://www.heroku.com/">Heroku</a> &middot;
 		                <a href="https://www.cloudflare.com/">Cloudflare</a>
