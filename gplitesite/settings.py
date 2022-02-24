@@ -37,7 +37,7 @@ elif 'heroku' in os.environ['PATH']:
     SERVER_TYPE = 'HEROKU'
 
 
-DEBUG = (SERVER_TYPE == 'DEVELOP' or SERVER_TYPE == 'TENCENT')
+DEBUG = (SERVER_TYPE == 'DEVELOP')
 
 ALLOWED_HOSTS = ['*']
 
@@ -147,6 +147,7 @@ USE_TZ = False
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'htmlfiles', 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'htmlfiles', 'media')
 
 if SERVER_TYPE == 'HEROKU':
