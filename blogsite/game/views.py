@@ -2,7 +2,7 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 
-from libs.functions import render_template, check_login
+from libs.functions import render_template, check_login, check_java_client
 from libs import constants
 from game import models
 
@@ -22,30 +22,35 @@ def index(request):
     return render_template("game/index.html", {'produces': paginator.get_page(page)}, request)
 
 def produce_start(request):
-    warehouse = request.GET['w']
-    main_chef = request.GET['c']
-    round1 = request.GET['r']
-
-    produce = None
-    detail = None
-    details = models.cg_mp700_detail.objects.prefetch_related('produce').order_by("-id")
-
-    if details.count() > 0:
-        detail = details.first()
-        produce = detail.produce
+    if check_java_client(request):
+        warehouse = request.GET['w']
+        main_chef = request.GET['c']
+        round1 = request.GET['r']
     
-    if produce is None or detail.end_dttm is not None or produce.warehouse != warehouse or produce.main_chef != main_chef or int(round1) < detail.round or int(round1) - detail.round > 1:
-        produce = models.cg_mp700_produce(warehouse=warehouse, main_chef=main_chef)
-        produce.save()
+        produce = None
+        detail = None
+        details = models.cg_mp700_detail.objects.prefetch_related('produce').order_by("-id")
     
-    models.cg_mp700_detail.objects.filter(end_dttm=None).update(end_dttm=timezone.now())
-
-    return HttpResponse(produce.id)
+        if details.count() > 0:
+            detail = details.first()
+            produce = detail.produce
+        
+        if produce is None or detail.end_dttm is not None or produce.warehouse != warehouse or produce.main_chef != main_chef or int(round1) < detail.round or int(round1) - detail.round > 1:
+            produce = models.cg_mp700_produce(warehouse=warehouse, main_chef=main_chef)
+            produce.save()
+        
+        models.cg_mp700_detail.objects.filter(end_dttm=None).update(end_dttm=timezone.now())
+    
+        return HttpResponse(produce.id)
+    else:
+        return HttpResponse("非授权终端访问！")
 
 def produce_finish(request, produce_id):
-    lastStep = finish_last_step(produce_id)
-   
-    return HttpResponse(lastStep.id)
+    if check_java_client(request):
+        lastStep = finish_last_step(produce_id)
+        return HttpResponse(lastStep.id)
+    else:
+        return HttpResponse("非授权终端访问！")
 
 def produce_clear(request):
     if check_login(request):
@@ -59,15 +64,18 @@ def produce_clear(request):
         return HttpResponse("非管理员用户禁止访问！")
 
 def produce_detail_add(request, produce_id):
-    round1 = request.GET['r']
-    step = request.GET['s']
-   
-    finish_last_step(produce_id)
-   
-    detail = models.cg_mp700_detail(produce_id=produce_id, round=round1, step=step, start_dttm=timezone.now())
-    detail.save()
-   
-    return HttpResponse(detail.id)
+    if check_java_client(request):
+        round1 = request.GET['r']
+        step = request.GET['s']
+       
+        finish_last_step(produce_id)
+       
+        detail = models.cg_mp700_detail(produce_id=produce_id, round=round1, step=step, start_dttm=timezone.now())
+        detail.save()
+       
+        return HttpResponse(detail.id)
+    else:
+        return HttpResponse("非授权终端访问！")
 
 def finish_last_step(produce_id):
     produce = models.cg_mp700_produce.objects.prefetch_related('produce_detail').get(id=produce_id)
