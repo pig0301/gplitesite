@@ -25,6 +25,7 @@ class cg_mp700_detail(models.Model):
 
 class cg_mp700_prepare(models.Model):
     warehouse = models.CharField(max_length=45)
+    account = models.CharField(max_length=45)
     is_ready = models.CharField(max_length=1)
     last_ready_dttm = models.DateTimeField()
     last_used_dttm = models.DateTimeField()
