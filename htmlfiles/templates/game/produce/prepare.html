@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load ext_filters %}
+
+{% block body_content %}
+    <div class="container">
+    <h4><br />Produce Prepare&nbsp;
+        <button class="btn btn-xs btn-danger" data-toggle="modal" data-target="#exampleModal">
+            <i class="fas fa-sync"></i>
+        </button>
+        
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">询问</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">是否更新材料准备状态？</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        <a class="btn btn-danger" onclick="document:updateForm.submit()">更新</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </h4>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped">
+	            <thead>
+	                <tr>
+	                    <th>Warehouse</th>
+	                    <th>Status</th>
+	                    <th>Last Ready</th>
+	                    <th>Last Used</th>
+	                    <th>Check Update</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                <form id="updateForm" action="/game/produce/prepare/update/" method="post">
+	                    {% csrf_token %}
+	                    {% for prepare in prepares %}
+	                    <tr>
+	                        <td>{{ prepare.warehouse }}</td>
+	                        <td>{% if prepare.is_ready == '0' %}<i class="fas fa-ban text-danger"></i>{% else %}<i class="fas fa-hamburger text-info"></i>{% endif %}</td>
+	                        <td>{{ prepare.last_ready_dttm | date:"Y-m-d H:i" }}</td>
+	                        <td>{{ prepare.last_used_dttm | date:"Y-m-d H:i" }}</td>
+	                        <td>{% if prepare.is_ready == '0' %}<input class="form-check-input" type="checkbox" value="{{ prepare.id }}" name="prepareIDs">{% endif %}</td>
+	                    </tr>
+	                    {% endfor %}
+                    </form>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -40,6 +40,7 @@ def produce_start(request):
             produce.save()
         
         models.cg_mp700_detail.objects.filter(end_dttm=None).update(end_dttm=timezone.now())
+        models.cg_mp700_prepare.objects.filter(warehouse=warehouse, is_ready='1').update(is_ready='0', last_used_dttm=timezone.now())
     
         return HttpResponse(produce.id)
     else:
@@ -76,6 +77,30 @@ def produce_detail_add(request, produce_id):
         return HttpResponse(detail.id)
     else:
         return HttpResponse("非授权终端访问！")
+
+def produce_prepare(request):
+    if check_login(request):
+        prepares = list(models.cg_mp700_prepare.objects.order_by('id'))
+        currect = models.cg_mp700_detail.objects.prefetch_related('produce').order_by("-id").first().produce.warehouse
+
+        i = 0
+        while i < 9 and prepares[-1].warehouse != currect:
+            prepares.append(prepares[0])
+            del prepares[0]
+            i = i + 1
+
+        return render_template("game/produce/prepare.html", {'prepares': prepares}, request)
+    else:
+        return HttpResponse("非管理员用户禁止访问！")
+
+def produce_prepare_update(request):
+    if check_login(request):
+        ids = request.POST.getlist('prepareIDs')
+        models.cg_mp700_prepare.objects.filter(id__in=ids, is_ready='0').update(is_ready='1', last_ready_dttm=timezone.now())
+        
+        return HttpResponseRedirect("/game/produce/prepare/")
+    else:
+        return HttpResponse("非管理员用户禁止访问！")
 
 def finish_last_step(produce_id):
     produce = models.cg_mp700_produce.objects.prefetch_related('produce_detail').get(id=produce_id)

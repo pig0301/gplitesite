@@ -8,6 +8,7 @@
 		<br />Recent Produces
 		{% if request.user.is_authenticated %}
 		&nbsp;
+        <a class="btn btn-xs btn-warning" href="/game/produce/prepare/"><i class="fas fa-luggage-cart"></i></a>
 		<button class="btn btn-xs btn-info" data-toggle="modal" data-target="#exampleModal">
 			<i class="fas fa-eraser"></i>
 		</button>
@@ -24,7 +25,7 @@
 					<div class="modal-body">是否清理历史记录？</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
-						<a class="btn btn-primary" href="/game/produce/clear/">清理</a>
+						<a class="btn btn-info" href="/game/produce/clear/">清理</a>
 					</div>
 				</div>
 			</div>
