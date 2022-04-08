@@ -30,6 +30,11 @@ class cg_mp700_prepare(models.Model):
     last_ready_dttm = models.DateTimeField()
     last_used_dttm = models.DateTimeField()
 
+class cg_mp700_status(models.Model):
+    finish_rounds = models.IntegerField()
+    last_reconnect_dttm = models.DateTimeField()
+    last_reset_dttm = models.DateTimeField()
+
 
 DEFAULT_PRODUCE_ANNOTATE = {
     'max_end_dttm': Max('produce_detail__end_dttm'),

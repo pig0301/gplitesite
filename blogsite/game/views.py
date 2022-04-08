@@ -81,17 +81,39 @@ def produce_detail_add(request, produce_id):
 def produce_prepare(request):
     if check_login(request):
         prepares = list(models.cg_mp700_prepare.objects.order_by('id'))
-        currect = models.cg_mp700_detail.objects.prefetch_related('produce').order_by("-id").first().produce.warehouse
+        status = models.cg_mp700_status.objects.get(id=1)
+        current = models.cg_mp700_detail.objects.prefetch_related('produce').order_by("-id").first().produce.warehouse
 
         i = 0
-        while i < 9 and prepares[-1].warehouse != currect:
+        while i < 9 and prepares[-1].warehouse != current:
             prepares.append(prepares[0])
             del prepares[0]
             i = i + 1
 
-        return render_template("game/produce/prepare.html", {'prepares': prepares}, request)
+        return render_template("game/produce/prepare.html", {'prepares': prepares, 'status': status}, request)
     else:
         return HttpResponse("非管理员用户禁止访问！")
+
+def produce_status_reconnect(request):
+    if check_java_client(request):
+        status = models.cg_mp700_status.objects.get(id=1)
+        status.last_reconnect_dttm=timezone.now()
+        status.save()
+    
+        return HttpResponse("success")
+    else:
+        return HttpResponse("非授权终端访问！")
+
+def produce_status_reset(request):
+    if check_java_client(request):
+        status = models.cg_mp700_status.objects.get(id=1)
+        status.finish_rounds = 0
+        status.last_reset_dttm=timezone.now()
+        status.save()
+        
+        return HttpResponse("success")
+    else:
+        return HttpResponse("非授权终端访问！")
 
 def produce_prepare_update(request):
     if check_login(request):

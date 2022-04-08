@@ -27,6 +27,27 @@
             </div>
         </div>
     </h4>
+    
+    <div class="row p-3">
+        <div class="col-md-12">
+            <table class="table table-bordered table-sm">
+                <thead class="thead-light">
+                    <tr align="center">
+                        <th>Finish Rounds</th>
+                        <th>Last Reset</th>
+                        <th>Last Reconnect</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr align="center">
+		                <td><span class="badge badge-secondary">{{ status.finish_rounds }}</span></td>
+		                <td><span class="badge badge-pill badge-{% if status.finish_rounds >= 10 %}danger{% else %}primary{% endif %}">{{ status.last_reset_dttm | timesince }}</span></td>
+		                <td><span class="badge badge-pill badge-warning">{{ status.last_reconnect_dttm | timesince }}</span></td>
+		            </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-md-12">
