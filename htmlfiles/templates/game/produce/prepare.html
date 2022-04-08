@@ -63,8 +63,8 @@
                 <tbody>
                     <tr align="center">
 		                <td><span class="badge badge-secondary">{{ status.finish_rounds }}</span></td>
-		                <td><span class="badge badge-{% if status.finish_rounds >= 10 %}danger{% else %}primary{% endif %}">{{ status.last_reset_dttm | timesince }}</span></td>
-		                <td><span class="badge badge-warning">{{ status.last_reconnect_dttm | timesince }}</span></td>
+		                <td><span class="badge badge-{% if status.finish_rounds >= 10 %}danger{% else %}primary{% endif %}">{{ status.last_reset_dttm | timesince }}前</span></td>
+		                <td><span class="badge badge-warning">{{ status.last_reconnect_dttm | timesince }}前</span></td>
 		            </tr>
                 </tbody>
             </table>
