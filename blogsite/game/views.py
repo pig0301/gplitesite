@@ -49,6 +49,11 @@ def produce_start(request):
 def produce_finish(request, produce_id):
     if check_java_client(request):
         lastStep = finish_last_step(produce_id)
+        
+        status = models.cg_mp700_status.objects.get(id=1)
+        status.finish_rounds = status.finish_rounds + 1
+        status.save()
+        
         return HttpResponse(lastStep.id)
     else:
         return HttpResponse("非授权终端访问！")
