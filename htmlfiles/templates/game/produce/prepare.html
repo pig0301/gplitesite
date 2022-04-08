@@ -9,6 +9,10 @@
             <i class="fas fa-user-check"></i>
         </button>
         
+        <button class="btn btn-xs btn-info" data-toggle="modal" data-target="#exampleModal1">
+            <i class="fas fa-server"></i>
+        </button>
+        
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -22,6 +26,24 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
                         <a class="btn btn-success" onclick="document:updateForm.submit()">更新</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel1">询问</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">是否重置服务器计数？</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        <a class="btn btn-info" href="/game/produce/status/reset/">重置</a>
                     </div>
                 </div>
             </div>
@@ -41,8 +63,8 @@
                 <tbody>
                     <tr align="center">
 		                <td><span class="badge badge-secondary">{{ status.finish_rounds }}</span></td>
-		                <td><span class="badge badge-pill badge-{% if status.finish_rounds >= 10 %}danger{% else %}primary{% endif %}">{{ status.last_reset_dttm | timesince }}</span></td>
-		                <td><span class="badge badge-pill badge-warning">{{ status.last_reconnect_dttm | timesince }}</span></td>
+		                <td><span class="badge badge-{% if status.finish_rounds >= 10 %}danger{% else %}primary{% endif %}">{{ status.last_reset_dttm | timesince }}</span></td>
+		                <td><span class="badge badge-warning">{{ status.last_reconnect_dttm | timesince }}</span></td>
 		            </tr>
                 </tbody>
             </table>
@@ -83,5 +105,6 @@
                 </tbody>
             </table>
         </div>
+    </div>
     </div>
 {% endblock %}

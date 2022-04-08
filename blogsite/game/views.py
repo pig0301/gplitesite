@@ -105,15 +105,15 @@ def produce_status_reconnect(request):
         return HttpResponse("非授权终端访问！")
 
 def produce_status_reset(request):
-    if check_java_client(request):
+    if check_login(request):
         status = models.cg_mp700_status.objects.get(id=1)
         status.finish_rounds = 0
         status.last_reset_dttm=timezone.now()
         status.save()
         
-        return HttpResponse("success")
+        return HttpResponseRedirect("/game/produce/prepare/")
     else:
-        return HttpResponse("非授权终端访问！")
+        return HttpResponse("非管理员用户禁止访问！")
 
 def produce_prepare_update(request):
     if check_login(request):
