@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^game/produce/prepare/update/$', game.produce_prepare_update),
     url(r'^game/produce/status/reconnect/$', game.produce_status_reconnect),
     url(r'^game/produce/status/reset/$', game.produce_status_reset),
+    url(r'^game/produce/status/error/add/$', game.produce_status_add_error),
 
     path('admin/', admin.site.urls),
     url(r'^media/(?P<path>.*)$', serve, {"document_root": settings.MEDIA_ROOT}),

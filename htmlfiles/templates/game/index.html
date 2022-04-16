@@ -38,6 +38,7 @@
             	{% for produce in produces %}
             	<p>
                     {% if not produce.produce_detail.all.first.end_dttm %}
+                    <span class="badge badge-pill badge-{% if status.current_errors < 10 %}secondary{% else %}danger{% endif %}"><i class="fas fa-bug"></i> x {{ status.current_errors }}</span>
                     <span class="badge badge-light">{{ produce.min_start_dttm | date:"Y-m-d H:i:s" }}</span>
                     {% else %}
                     <button class="btn btn-outline-secondary btn-xs" type="button" data-toggle="collapse" data-target="#collapse{{ produce.id }}" aria-expanded="false" aria-controls="collapse{{ produce.id }}">
