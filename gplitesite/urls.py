@@ -27,12 +27,12 @@ urlpatterns = [
     url(r'^game/produce/start/$', game.produce_start),
     url(r'^game/produce/clear/$', game.produce_clear),
     url(r'^game/produce/finish/(\d+)/$', game.produce_finish),
+    url(r'^game/produce/error/add/$', game.produce_error_add),
     url(r'^game/produce/detail/add/(\d+)/$', game.produce_detail_add),
     url(r'^game/produce/prepare/$', game.produce_prepare),
     url(r'^game/produce/prepare/update/$', game.produce_prepare_update),
     url(r'^game/produce/status/reconnect/$', game.produce_status_reconnect),
     url(r'^game/produce/status/reset/$', game.produce_status_reset),
-    url(r'^game/produce/status/error/add/$', game.produce_status_add_error),
 
     path('admin/', admin.site.urls),
     url(r'^media/(?P<path>.*)$', serve, {"document_root": settings.MEDIA_ROOT}),

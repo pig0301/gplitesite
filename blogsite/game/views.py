@@ -18,10 +18,8 @@ def index(request):
         page = 1
     else:
         page = int(page)
-    
-    status = models.cg_mp700_status.objects.get(id=1)
 
-    return render_template("game/index.html", {'produces': paginator.get_page(page), 'status': status}, request)
+    return render_template("game/index.html", {'produces': paginator.get_page(page)}, request)
 
 def produce_start(request):
     if check_java_client(request):
@@ -43,10 +41,6 @@ def produce_start(request):
         
         models.cg_mp700_detail.objects.filter(end_dttm=None).update(end_dttm=timezone.now())
         models.cg_mp700_prepare.objects.filter(warehouse=warehouse, is_ready='1').update(is_ready='0', last_used_dttm=timezone.now())
-        
-        status = models.cg_mp700_status.objects.get(id=1)
-        status.current_errors = 0
-        status.save()
     
         return HttpResponse(produce.id)
     else:
@@ -75,6 +69,19 @@ def produce_clear(request):
     else:
         return HttpResponse("非管理员用户禁止访问！")
 
+def produce_error_add(request):
+    if check_java_client(request):
+        details = models.cg_mp700_detail.objects.filter(end_dttm=None).order_by("-id")
+        
+        if details.count() > 0:
+            detail = details.first();
+            detail.client_errors = detail.client_errors + 1
+            detail.save()
+    
+        return HttpResponse("success")
+    else:
+        return HttpResponse("非授权终端访问！")
+
 def produce_detail_add(request, produce_id):
     if check_java_client(request):
         round1 = request.GET['r']
@@ -82,7 +89,7 @@ def produce_detail_add(request, produce_id):
        
         finish_last_step(produce_id)
        
-        detail = models.cg_mp700_detail(produce_id=produce_id, round=round1, step=step, start_dttm=timezone.now())
+        detail = models.cg_mp700_detail(produce_id=produce_id, round=round1, step=step, client_errors=0, start_dttm=timezone.now())
         detail.save()
        
         return HttpResponse(detail.id)
@@ -125,16 +132,6 @@ def produce_status_reset(request):
         return HttpResponseRedirect("/game/produce/prepare/")
     else:
         return HttpResponse("非管理员用户禁止访问！")
-
-def produce_status_add_error(request):
-    if check_java_client(request):
-        status = models.cg_mp700_status.objects.get(id=1)
-        status.current_errors = status.current_errors + 1
-        status.save()
-    
-        return HttpResponse("success")
-    else:
-        return HttpResponse("非授权终端访问！")
 
 def produce_prepare_update(request):
     if check_login(request):

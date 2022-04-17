@@ -11,6 +11,7 @@ class cg_mp700_detail(models.Model):
     produce = models.ForeignKey(cg_mp700_produce, on_delete=models.DO_NOTHING, related_name='produce_detail')
     round = models.IntegerField()
     step = models.IntegerField()
+    client_errors = models.IntegerField()
     start_dttm = models.DateTimeField()
     end_dttm = models.DateTimeField(null=True)
     
@@ -34,7 +35,6 @@ class cg_mp700_status(models.Model):
     finish_rounds = models.IntegerField()
     last_reconnect_dttm = models.DateTimeField()
     last_reset_dttm = models.DateTimeField()
-    current_errors = models.IntegerField()
 
 
 DEFAULT_PRODUCE_ANNOTATE = {
