@@ -69,8 +69,12 @@
                             <td>{{ detail.step | ml_step_desc }}</td>
                             <td>
                                 <span class="badge badge-{% if detail.end_dttm %}secondary{% else %}warning{% endif %}">{{ detail.time_consume | time_delta }}</span>
-                                {% if detail.client_errors > 0 %}
-                                <span class="badge badge-{% if detail.client_errors > 5 %}danger{% else %}info{% endif %}"><i class="fas fa-bug"></i> x {{ detail.client_errors }}</span>
+                                {% if detail.client_errors > 99 %}
+                                <span class="badge badge-dark"><i class="fas fa-heart-broken"></i> x {% widthratio detail.client_errors 100 1 %}</span>
+                                {% elif detail.client_errors > 5 %}
+                                <span class="badge badge-danger"><i class="fas fa-bug"></i> x {{ detail.client_errors }}</span>
+                                {% elif detail.client_errors > 0 %}
+                                <span class="badge badge-info"><i class="fas fa-bug"></i> x {{ detail.client_errors }}</span>
                                 {% endif %}
                             </td>
                             {% with detail.start_dttm|date_diff:produce.min_start_dttm as start_index %}
