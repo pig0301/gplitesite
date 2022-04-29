@@ -122,11 +122,16 @@ def produce_status_reconnect(request):
     else:
         return HttpResponse("非授权终端访问！")
 
-def produce_status_reset(request):
+def produce_status_change(request, operation):
     if check_login(request):
         status = models.cg_mp700_status.objects.get(id=1)
-        status.finish_rounds = 0
-        status.last_reset_dttm=timezone.now()
+        
+        if operation == 'reset':
+            status.finish_rounds = 0
+            status.last_reset_dttm=timezone.now()
+        elif operation == 'reboot':
+            status.last_reboot_dttm=timezone.now()
+        
         status.save()
         
         return HttpResponseRedirect("/game/produce/prepare/")
