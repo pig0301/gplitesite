@@ -12,6 +12,7 @@ class cg_mp700_detail(models.Model):
     round = models.IntegerField()
     step = models.IntegerField()
     client_errors = models.IntegerField()
+    informed_messages = models.IntegerField()
     start_dttm = models.DateTimeField()
     end_dttm = models.DateTimeField(null=True)
     

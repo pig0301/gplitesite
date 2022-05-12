@@ -2,6 +2,7 @@ from django import template
 import re
 
 from datetime import timedelta
+from libs import constants
 
 
 register = template.Library()
@@ -18,14 +19,7 @@ def default_title(url):
     
 @register.filter
 def ml_step_desc(step):
-    if step == 1:
-        return "开箱"
-    elif step == 2:
-        return "整理"
-    elif step == 3:
-        return "制作"
-    else:
-        return ""
+    return constants.ML_STEP_DESC_DICT[step]
     
 @register.filter
 def time_delta(delta):

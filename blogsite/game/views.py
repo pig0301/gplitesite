@@ -2,7 +2,7 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
 
-from libs.functions import render_template, check_login, check_java_client
+from libs.functions import render_template, check_login, check_java_client, send_wechat_message
 from libs import constants
 from game import models
 
@@ -76,6 +76,17 @@ def produce_error_add(request):
         if details.count() > 0:
             detail = details.first();
             detail.client_errors = detail.client_errors + 1
+
+            account = detail.produce.warehouse + "（" + detail.produce.main_chef + "）"
+            position = "第" + str(detail.round) + "轮（" + constants.ML_STEP_DESC_DICT[detail.step] + "）"
+
+            if detail.client_errors >= 100 and detail.informed_messages < 2:
+                send_wechat_message(1, "【警告！！！】程序客户端已发生100次错误，请尽快上线解决！\n\n账号：" + account + "\n定位：" + position)
+                detail.informed_messages = 2
+            elif detail.client_errors >= 5 and detail.informed_messages < 1:
+                send_wechat_message(1, "【提示】程序客户端已发生5次错误，建议上线查看！\n\n账号：" + account + "\n定位：" + position)
+                detail.informed_messages = 1
+            
             detail.save()
     
         return HttpResponse("success")
@@ -89,7 +100,7 @@ def produce_detail_add(request, produce_id):
        
         finish_last_step(produce_id)
        
-        detail = models.cg_mp700_detail(produce_id=produce_id, round=round1, step=step, client_errors=0, start_dttm=timezone.now())
+        detail = models.cg_mp700_detail(produce_id=produce_id, round=round1, step=step, client_errors=0, informed_messages=0, start_dttm=timezone.now())
         detail.save()
        
         return HttpResponse(detail.id)
