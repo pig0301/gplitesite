@@ -37,7 +37,7 @@ elif 'heroku' in os.environ['PATH']:
     SERVER_TYPE = 'HEROKU'
 
 
-DEBUG = True
+DEBUG = (SERVER_TYPE == 'DEVELOP')
 
 ALLOWED_HOSTS = ['*']
 
