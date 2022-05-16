@@ -134,7 +134,7 @@ def produce_status_reconnect(request):
         return HttpResponse("非授权终端访问！")
 
 def produce_status_change(request, operation):
-    if check_login(request):
+    if check_login(request) or check_java_client(request):
         status = models.cg_mp700_status.objects.get(id=1)
         
         if operation == 'reset':
@@ -142,6 +142,8 @@ def produce_status_change(request, operation):
             status.last_reset_dttm=timezone.now()
         elif operation == 'reboot':
             status.last_reboot_dttm=timezone.now()
+            if check_java_client(request):
+                send_wechat_message(1, "【通知】客户端运行已超3天，目前客户端主机正在重启，请关注并及时上线重启程序！")
         
         status.save()
         
