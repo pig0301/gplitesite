@@ -27,7 +27,7 @@ urlpatterns = [
     url(r'^game/produce/start/$', game.produce_start),
     url(r'^game/produce/clear/$', game.produce_clear),
     url(r'^game/produce/finish/(\d+)/$', game.produce_finish),
-    url(r'^game/produce/error/add/$', game.produce_error_add),
+    url(r'^game/produce/error/add/(\d+)/$', game.produce_error_add),
     url(r'^game/produce/detail/add/(\d+)/$', game.produce_detail_add),
     url(r'^game/produce/prepare/$', game.produce_prepare),
     url(r'^game/produce/prepare/update/$', game.produce_prepare_update),

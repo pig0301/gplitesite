@@ -69,13 +69,13 @@ def produce_clear(request):
     else:
         return HttpResponse("非管理员用户禁止访问！")
 
-def produce_error_add(request):
+def produce_error_add(request, errors):
     if check_java_client(request):
         details = models.cg_mp700_detail.objects.filter(end_dttm=None).order_by("-id")
         
         if details.count() > 0:
             detail = details.first();
-            detail.client_errors = detail.client_errors + 1
+            detail.client_errors = detail.client_errors + int(errors)
 
             account = detail.produce.warehouse + "（" + detail.produce.main_chef + "）"
             position = "第" + str(detail.round) + "轮（" + constants.ML_STEP_DESC_DICT[detail.step] + "）"
