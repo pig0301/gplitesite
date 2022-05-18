@@ -81,7 +81,7 @@ def produce_error_add(request, errors):
             position = "第" + str(detail.round) + "轮（" + constants.ML_STEP_DESC_DICT[detail.step] + "）"
 
             if detail.client_errors >= 100 and detail.informed_messages < 2:
-                send_wechat_message(1, "【警告！！！】客户端程序累计上报错误次数已达100次，请立即上线解决问题！\n\n账号：" + account + "\n定位：" + position)
+                send_wechat_message(1, "【警告！！！】客户端程序已发生严重错误，请立即上线解决问题！\n\n账号：" + account + "\n定位：" + position)
                 detail.informed_messages = 2
             elif detail.client_errors >= 5 and detail.informed_messages < 1:
                 send_wechat_message(1, "【提示】客户端程序累计上报错误次数已达5次，建议上线开展排查！\n\n账号：" + account + "\n定位：" + position)
