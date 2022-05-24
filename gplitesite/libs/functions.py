@@ -14,7 +14,7 @@ def check_login(request):
     return request.user is not None and request.user.is_authenticated
 
 def check_java_client(request):
-    return request.META['HTTP_USER_AGENT'].startswith("Java/1.8") or settings.DEBUG
+    return request.META['HTTP_USER_AGENT'] == 'Java/1.8/GPLite.com' or settings.DEBUG
 
 def send_wechat_message(message_id, content):
     wechat = models.wechat_message.objects.get(id=message_id)
