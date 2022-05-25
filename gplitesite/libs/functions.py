@@ -14,7 +14,17 @@ def check_login(request):
     return request.user is not None and request.user.is_authenticated
 
 def check_java_client(request):
-    return request.META['HTTP_USER_AGENT'] == 'Java/1.8/GPLite.com' or settings.DEBUG
+    if settings.DEBUG:
+        return True
+
+    if 'HTTP_X_FORWARDED_FOR' in request.META:
+        ip = request.META['HTTP_X_FORWARDED_FOR']
+    else:
+        ip = request.META['REMOTE_ADDR']
+
+    user_agent = request.META['HTTP_USER_AGENT']
+
+    return user_agent == 'Java/1.8/GPLite.com' and ip == '222.70.2.24'
 
 def send_wechat_message(message_id, content):
     wechat = models.wechat_message.objects.get(id=message_id)
