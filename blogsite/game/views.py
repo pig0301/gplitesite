@@ -18,14 +18,8 @@ def index(request):
         page = 1
     else:
         page = int(page)
-    
-    if 'HTTP_X_FORWARDED_FOR' in request.META:
-        ip = request.META['HTTP_X_FORWARDED_FOR']
-    else:
-        ip = request.META['REMOTE_ADDR']
-    print(ip)
 
-    return render_template("game/index.html", {'produces': paginator.get_page(page), 'ip': ip}, request)
+    return render_template("game/index.html", {'produces': paginator.get_page(page)}, request)
 
 def produce_start(request):
     if check_java_client(request):
