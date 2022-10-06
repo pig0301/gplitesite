@@ -114,7 +114,7 @@ def produce_prepare(request):
         current = models.cg_mp700_detail.objects.prefetch_related('produce').order_by("-id").first().produce.warehouse
 
         i = 0
-        while i < 9 and prepares[-1].warehouse != current:
+        while i < len(prepares) and prepares[-1].warehouse != current:
             prepares.append(prepares[0])
             del prepares[0]
             i = i + 1
