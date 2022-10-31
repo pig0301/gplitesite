@@ -24,7 +24,7 @@ def check_java_client(request):
 
     user_agent = request.META['HTTP_USER_AGENT']
 
-    return user_agent == 'Java/1.8/GPLite.com' and ip == '222.70.2.24'
+    return user_agent == 'Java/1.8/GPLite.com' and ip == '101.84.22.48'
 
 def send_wechat_message(message_id, content):
     wechat = models.wechat_message.objects.get(id=message_id)
