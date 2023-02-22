@@ -55,7 +55,8 @@ INSTALLED_APPS = [
     'htmlfiles',
     'home',
     'snooker',
-    'game'
+    'game',
+    'coding'
 ]
 
 MIDDLEWARE = [

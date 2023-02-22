@@ -9,6 +9,7 @@ from home import views as home
 from snooker import views as snooker
 from snooker.campaign import views as snooker_campaign
 from game import views as game
+from coding.wechat import views as coding_wechat
 
 import settings
 
@@ -18,6 +19,8 @@ urlpatterns = [
 
     url(r'^login/$', home.login),
     url(r'^logout/$', home.logout),
+    
+    url(r'^coding/wechat/mail/list/', coding_wechat.mail_list),
     
     url(r'^snooker/$', snooker.index),
     url(r'^snooker/campaign/$', snooker_campaign.index),
