@@ -21,7 +21,8 @@ urlpatterns = [
     url(r'^logout/$', home.logout),
     
     url(r'^coding/wechat/mail/list/', coding_wechat.mail_list),
-    
+    url(r'^coding/wechat/mail/parse/', coding_wechat.mail_parse),
+
     url(r'^snooker/$', snooker.index),
     url(r'^snooker/campaign/$', snooker_campaign.index),
     url(r'^snooker/campaign/(\d+)/$', snooker_campaign.detail),

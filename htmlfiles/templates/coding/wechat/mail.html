@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block body_content %}
+    <div class="container">
+        <h4><br />Wechat AI Mails</h4>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>From</th>
+                            <th>Subject</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mail in mail_list %}
+                        <tr>
+                            <td>{{ mail.Date }}</td>
+                            <td>{{ mail.From }}</td>
+                            <td>{{ mail.Subject }}</td>
+                            <td>
+                                <a class="btn btn-xs btn-success" href="/coding/wechat/mail/parse/?id={{ mail.mail_id }}"><i class="fas fa-cube"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
