@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.contrib import auth
 from django.contrib import messages
 
@@ -7,9 +7,6 @@ from libs.functions import render_template
 
 def index(request):
     return render_template('index.html', {}, request)
-
-def aaa(request):
-    return HttpResponse("D2HjkwHeZvsLeEyi")
 
 def login(request):
     username = request.POST['user'];

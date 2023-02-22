@@ -15,8 +15,6 @@ import settings
 
 urlpatterns = [
     url(r'^$', home.index),
-    
-    url(r'WW_verify_D2HjkwHeZvsLeEyi.txt$', home.aaa),
 
     url(r'^login/$', home.login),
     url(r'^logout/$', home.logout),
