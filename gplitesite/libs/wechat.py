@@ -1,5 +1,5 @@
 from home import models
-import requests, json, time, email
+import requests, json, time, email, re
 
 API_URL = 'https://qyapi.weixin.qq.com/cgi-bin'
 
@@ -73,6 +73,28 @@ def upload_file(media_file, media_type, filename):
         if data.get('media_id'):
             return data['media_id']
     return None
+
+def process_mail_text(mail_text):
+    textList = []
+    textBuffer = ''
+    
+    for text in mail_text.split('\n'):
+        text = text.strip()
+        
+        if len(text) > 0:
+            if len(textBuffer) > 0:
+                textBuffer += '\n'
+            
+            if not re.match(r'^\uEA62.+\.\w{1,4}$', text):
+                textBuffer += text
+        elif len(textBuffer) > 0:
+            textList.append(textBuffer)
+            textBuffer = ''
+    
+    if len(textBuffer) > 0 and not "。任何第三方均不得查阅或使用此邮件信息。" in textBuffer:
+        textList.append(textBuffer)
+    
+    return textList
 
 def send_media_message(media_id, media_type):
     wechat = get_access_token(2)

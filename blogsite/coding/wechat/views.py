@@ -24,7 +24,8 @@ def mail_parse(request):
             
             if content_type == 'text/plain':
                 text = part.get_payload(decode=True).decode()
-                wechat.send_text_message(2, text)
+                for s in wechat.process_mail_text(text):
+                    wechat.send_text_message(2, s)
             elif content_type.startswith('image/'):
                 filename = part.get_filename()
                 if filename:
