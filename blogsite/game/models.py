@@ -37,6 +37,7 @@ class cg_mp700_status(models.Model):
     last_reconnect_dttm = models.DateTimeField()
     last_reset_dttm = models.DateTimeField()
     last_reboot_dttm = models.DateTimeField()
+    is_continue = models.IntegerField()
 
 
 DEFAULT_PRODUCE_ANNOTATE = {

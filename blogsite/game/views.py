@@ -43,6 +43,10 @@ def produce_start(request):
         
         models.cg_mp700_detail.objects.filter(end_dttm=None).update(end_dttm=timezone.now())
         models.cg_mp700_prepare.objects.filter(warehouse=warehouse, is_ready='1').update(is_ready='0', last_used_dttm=timezone.now())
+
+        status = models.cg_mp700_status.objects.get(id=1)
+        status.is_continue = 1
+        status.save()
     
         return HttpResponse(produce.id)
     else:
@@ -50,13 +54,13 @@ def produce_start(request):
 
 def produce_finish(request, produce_id):
     if check_java_client(request):
-        lastStep = finish_last_step(produce_id)
+        finish_last_step(produce_id)
         
         status = models.cg_mp700_status.objects.get(id=1)
         status.finish_rounds = status.finish_rounds + 1
         status.save()
         
-        return HttpResponse(lastStep.id)
+        return HttpResponse(status.is_continue)
     else:
         return HttpResponse("非授权终端访问！")
 
@@ -146,6 +150,8 @@ def produce_status_change(request, operation):
             status.last_reboot_dttm=timezone.now()
             if check_java_client(request):
                 send_text_message(1, "【通知】客户端运行已超3天，目前客户端主机正在重启，请关注并及时上线重启程序！")
+        elif operation == 'changemode':
+            status.is_continue = 1 - status.is_continue
         
         status.save()
         
@@ -169,5 +175,3 @@ def finish_last_step(produce_id):
     if lastStep is not None and lastStep.end_dttm is None:
         lastStep.end_dttm = timezone.now()
         lastStep.save()
-   
-    return lastStep
