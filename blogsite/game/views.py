@@ -59,7 +59,10 @@ def produce_finish(request, produce_id):
         status = models.cg_mp700_status.objects.get(id=1)
         status.finish_rounds = status.finish_rounds + 1
         status.save()
-        
+
+        if status.is_continue == 0:
+            send_text_message(1, "【通知】单次任务已完成，目前客户端程序已终止，请关注并及时上线处理！")
+
         return HttpResponse(status.is_continue)
     else:
         return HttpResponse("非授权终端访问！")
