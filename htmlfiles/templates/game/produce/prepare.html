@@ -8,17 +8,17 @@
         <button class="btn btn-xs btn-success" data-toggle="modal" data-target="#exampleModal">
             <i class="fas fa-user-check"></i>
         </button>
-        
+
+        <button class="btn btn-xs btn-warning" data-toggle="modal" data-target="#exampleModal3">
+            <i class="fas fa-keyboard"></i>
+        </button>
+
         <button class="btn btn-xs btn-info" data-toggle="modal" data-target="#exampleModal1">
             <i class="fas fa-magic"></i>
         </button>
         
         <button class="btn btn-xs btn-danger" data-toggle="modal" data-target="#exampleModal2">
             <i class="fas fa-redo"></i>
-        </button>
-        
-        <button class="btn btn-xs btn-dark" data-toggle="modal" data-target="#exampleModal3">
-            <i class="fas fa-broadcast-tower"></i>
         </button>
 
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -103,16 +103,17 @@
                         <th>Last Reset</th>
                         <th>Last Reconnect</th>
                         <th>Last Reboot</th>
-                        <th>Run Mode</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr align="center">
-		                <td><span class="badge badge-secondary">{{ status.finish_rounds }}</span></td>
+		                <td>
+		                	<span class="badge badge-secondary">{{ status.finish_rounds }}</span>
+		                	<span class="badge badge-dark">{% if status.is_continue == 0 %}<i class="fas fa-swimming-pool"></i>{% else %}<i class="fas fa-swimmer"></i>{% endif %}</span>
+		                </td>
 		                <td><span class="badge badge-{% if status.finish_rounds >= 10 %}danger{% else %}primary{% endif %}">{{ status.last_reset_dttm | timesince }}前</span></td>
 		                <td><span class="badge badge-warning">{{ status.last_reconnect_dttm | timesince }}前</span></td>
 		                <td><span class="badge badge-info">{{ status.last_reboot_dttm | timesince }}前</span></td>
-		                <td><span class="badge badge-light">{% if status.is_continue == 0 %}<i class="fas fa-swimming-pool"></i>{% else %}<i class="fas fa-swimmer"></i>{% endif %}</td>
 		            </tr>
                 </tbody>
             </table>
