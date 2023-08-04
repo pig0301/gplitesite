@@ -21,4 +21,4 @@ def check_java_client(request):
 
     user_agent = request.META['HTTP_USER_AGENT']
 
-    return user_agent == 'Java/1.8/GPLite.com' and ip == '222.70.2.24'
+    return user_agent == 'Java/1.8/GPLite.com' and ip == '116.230.242.74'
