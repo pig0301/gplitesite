@@ -78,7 +78,7 @@ def process_mail_text(mail_text):
     textList = []
     textBuffer = ''
     
-    for text in mail_text.split('\n'):
+    for text in mail_text.split('\n\n'):
         text = text.strip()
         
         if len(text) > 0:
