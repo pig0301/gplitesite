@@ -111,7 +111,7 @@ else:
     }
     
     CRONJOBS = [
-        ('*/1 * * * *', 'coding.spider.cron.test', '>> /data/share/log/gplite/cron.log')
+        ('*/1 * * * *', 'coding.spider.cron.test', '>> /data/share/log/gplitesite/cron.log')
     ]
 
 
