@@ -5,11 +5,12 @@ API_URL = 'https://qyapi.weixin.qq.com/cgi-bin'
 
 
 def get_access_token(app_id):
-    wechat = models.wechat_message.objects.get(id=app_id)
-    get_token_url = f'{API_URL}/gettoken?corpid={wechat.corp_id}&corpsecret={wechat.corp_secret}'
-    wechat.access_token = requests.get(url=get_token_url).json().get('access_token')
-    
-    print("aaa: " + wechat)
+    try:
+        wechat = models.wechat_message.objects.get(id=app_id)
+        get_token_url = f'{API_URL}/gettoken?corpid={wechat.corp_id}&corpsecret={wechat.corp_secret}'
+        wechat.access_token = requests.get(url=get_token_url).json().get('access_token')
+    except Exception as e:
+        print(e)
     
     return wechat
 
