@@ -111,7 +111,7 @@ else:
     }
     
     CRONJOBS = [
-        ('*/1 * * * *', 'coding.spider.cron.test', '>> /data/share/log/gplitesite/cron.log')
+        ('*/1 * * * *', 'coding.spider.cron.query_goldbar_storage', '>> /data/share/log/gplitesite/cron/query_goldbar_storage.log')
     ]
 
 
