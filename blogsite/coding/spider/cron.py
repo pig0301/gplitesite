@@ -40,4 +40,4 @@ def query_goldbar_storage():
     print("-" * 30 + "\n")
     
     if len(storage_warn) > 0:
-        print(models.wechat_message.objects.count())
+        print(models)
