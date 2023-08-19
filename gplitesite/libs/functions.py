@@ -8,17 +8,18 @@ def render_template(template, data, request):
     return render(request, template, data)
 
 def check_login(request):
-    return request.user is not None and request.user.is_authenticated
+    return (request.user is not None and request.user.is_authenticated) or get_client_ip(request) == '127.0.0.1'
 
 def check_java_client(request):
     if settings.DEBUG:
         return True
 
-    if 'HTTP_X_FORWARDED_FOR' in request.META:
-        ip = request.META['HTTP_X_FORWARDED_FOR']
-    else:
-        ip = request.META['REMOTE_ADDR']
-
     user_agent = request.META['HTTP_USER_AGENT']
 
-    return user_agent == 'Java/1.8/GPLite.com' and ip == '116.230.242.74'
+    return user_agent == 'Java/1.8/GPLite.com' and get_client_ip(request) == '116.230.242.74'
+
+def get_client_ip(request):
+    if 'HTTP_X_FORWARDED_FOR' in request.META:
+        return request.META['HTTP_X_FORWARDED_FOR']
+    else:
+        return request.META['REMOTE_ADDR']

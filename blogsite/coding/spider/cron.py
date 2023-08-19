@@ -1,7 +1,5 @@
-import requests, re, json, datetime
+import requests
 from bs4 import BeautifulSoup
-
-from libs.wechat import send_text_message
 
 
 def query_goldbar_storage():
@@ -9,4 +7,7 @@ def query_goldbar_storage():
     response = requests.get(url)
     html = response.content
     
-    print(html)
+    soup = BeautifulSoup(html, 'html.parser')
+    table = soup.find('table')
+    
+    print(table.prettify())
