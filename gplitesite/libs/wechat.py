@@ -9,6 +9,8 @@ def get_access_token(app_id):
     get_token_url = f'{API_URL}/gettoken?corpid={wechat.corp_id}&corpsecret={wechat.corp_secret}'
     wechat.access_token = requests.get(url=get_token_url).json().get('access_token')
     
+    print("aaa: " + wechat)
+    
     return wechat
 
 def send_text_message(app_id, content):
