@@ -2,6 +2,7 @@ import requests, re, json, datetime
 from bs4 import BeautifulSoup
 
 from libs.wechat import send_text_message
+from home import models
 
 
 def query_goldbar_storage():
@@ -38,4 +39,4 @@ def query_goldbar_storage():
     print("-" * 30 + "\n")
     
     if len(storage_warn) > 0:
-        print("【重要】请关注如下规格如意金条线上库存！\n" + storage_warn)
+        print(models.wechat_message.objects.get(id=2))
