@@ -1,7 +1,8 @@
-import requests, re, json, datetime
+import requests, re, json, datetime, sys
 from bs4 import BeautifulSoup
 
 from libs.wechat import send_text_message
+sys.path.append("../..")
 from home import models
 
 
