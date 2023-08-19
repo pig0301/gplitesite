@@ -1,13 +1,15 @@
 import requests, re, json, datetime
 from bs4 import BeautifulSoup
 
-from libs.wechat import send_text_message
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'gplitesite.settings'  #此处要注意自己的项目目录
 import django
+django.setup()
+
+from libs.wechat import send_text_message
 
 
 def query_goldbar_storage():
-    
-    django.setup()
     link_id = "9003867817"
     sku_map = {
         '0000029061': '5g', '0000029062': '10g', '0000029063': '20g',
