@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',
     'blogsite',
     'htmlfiles',
     'home',
@@ -108,6 +109,10 @@ else:
     DATABASES = {
         'default': dj_database_url.config()
     }
+    
+    CRONJOBS = [
+        ('*/1 * * * *', 'coding.spider.cron.test', '>> /data/share/log/gplite/cron.log')
+    ]
 
 
 # Password validation
