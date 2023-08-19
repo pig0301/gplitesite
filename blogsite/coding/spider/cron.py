@@ -2,9 +2,12 @@ import requests, re, json, datetime
 from bs4 import BeautifulSoup
 
 from libs.wechat import send_text_message
+import django
 
 
 def query_goldbar_storage():
+    
+    django.setup()
     link_id = "9003867817"
     sku_map = {
         '0000029061': '5g', '0000029062': '10g', '0000029063': '20g',
