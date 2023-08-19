@@ -37,5 +37,5 @@ def query_goldbar_storage():
 
     print("-" * 30 + "\n")
     
-
-    send_text_message(2, "【重要】请关注如下规格如意金条线上库存！\n" + storage_warn)
+    if len(storage_warn) > 0:
+        print("【重要】请关注如下规格如意金条线上库存！\n" + storage_warn)
