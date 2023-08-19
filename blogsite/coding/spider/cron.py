@@ -1,6 +1,8 @@
 import requests, re, json, datetime
 from bs4 import BeautifulSoup
 
+from libs.wechat import send_text_message
+
 
 def query_goldbar_storage():
     link_id = "9003867817"
@@ -22,8 +24,18 @@ def query_goldbar_storage():
     print("Time：", datetime.datetime.now())
     print("-" * 30)
     
+    storage_warn = ""
+    
     for product in products:
         sku_name = sku_map[product['enumId']]
+        storage = product['allStorage']
+        
         print(sku_name + ": " + product['allStorage'])
         
+        if int(storage) < 600:
+            storage_warn += "\n“如意金条" + sku_name + "”库存仅剩" + storage + "件。"
+
     print("-" * 30 + "\n")
+    
+    if len(storage_warn) > 0:
+        send_text_message(2, "【重要】请关注如下规格如意金条线上库存！\n" + storage_warn)
