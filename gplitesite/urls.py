@@ -10,6 +10,7 @@ from snooker import views as snooker
 from snooker.campaign import views as snooker_campaign
 from game import views as game
 from coding.wechat import views as coding_wechat
+from coding.spider import views as coding_spider
 
 import settings
 
@@ -22,6 +23,7 @@ urlpatterns = [
     
     url(r'^coding/wechat/mail/list/', coding_wechat.mail_list),
     url(r'^coding/wechat/mail/parse/', coding_wechat.mail_parse),
+    url(r'^coding/spider/storage/query/', coding_spider.query_storage),
 
     url(r'^snooker/$', snooker.index),
     url(r'^snooker/campaign/$', snooker_campaign.index),

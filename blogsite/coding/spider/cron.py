@@ -1,46 +1,12 @@
 import requests, re, json, datetime
 from bs4 import BeautifulSoup
 
-import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'gplitesite.settings'  #此处要注意自己的项目目录
-import django
-django.setup()
-
 from libs.wechat import send_text_message
 
 
 def query_goldbar_storage():
-    link_id = "9003867817"
-    sku_map = {
-        '0000029061': '5g', '0000029062': '10g', '0000029063': '20g',
-        '0000034663': '50g', '0000034664': '100g', '0000034665': '200g'
-    }
-    
-    url = 'https://mall.icbc.com.cn/products/pd_' + link_id + '.jhtml'
+    url = 'http://127.0.0.1:8000/coding/spider/storage/query/'
     response = requests.get(url)
     html = response.content
     
-    soup = BeautifulSoup(html, 'html.parser')
-    pattern = re.compile(r'var initSkuPropEnumJson = (.*?);')
-    
-    script = soup.find(id='prodSkuDiv').find('script')
-    products = json.loads(pattern.search(script.prettify()).group(1))
-    
-    print("Time：", datetime.datetime.now())
-    print("-" * 30)
-    
-    storage_warn = ""
-    
-    for product in products:
-        sku_name = sku_map[product['enumId']]
-        storage = product['allStorage']
-        
-        print(sku_name + ": " + product['allStorage'])
-        
-        if int(storage) < 600:
-            storage_warn += "\n“如意金条" + sku_name + "”库存仅剩" + storage + "件。"
-
-    print("-" * 30 + "\n")
-    
-    if len(storage_warn) > 0:
-        send_text_message(2, "【重要】请关注如下规格如意金条线上库存！\n" + storage_warn)
+    print(html)
