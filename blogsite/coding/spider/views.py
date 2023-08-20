@@ -34,7 +34,7 @@ def query_storage(request):
             
             product['name'] = "“如意金条”" + str(product['spec']) + "g"
             product['prodUrl'] = url
-            storage = product['skuStorage']
+            storage = product['totalStorage']
             
             if int(storage) <= 20:
                 storage_warn += "\n" + product['name'] + "仅剩" + storage + "件。"
