@@ -33,6 +33,7 @@ def query_storage(request):
             product['spec'] = spec_map[product['merchantProdId']]
             
             product['name'] = "“如意金条”" + str(product['spec']) + "g"
+            product['prodUrl'] = url
             storage = product['skuStorage']
             
             if int(storage) <= 10:

@@ -19,10 +19,14 @@
                     <tbody>
                         {% for product in products %}
                         <tr>
-                            <td>{{ product.merchantProdId }}</td>
-                            <td>{{ product.name }}</td>
-                            <td>{{ product.skuPrice }}</td>
-                            <td><span class="badge badge-{% if product.is_warning == 1 %}danger{% else %}light{% endif %}">{{ product.skuStorage }}</span></td>
+                            <td style="vertical-align: middle;">{{ product.merchantProdId }}</td>
+                            <td style="vertical-align: middle;">{{ product.name }}</td>
+                            <td style="vertical-align: middle;">{{ product.skuPrice }}</td>
+                            <td style="vertical-align: middle;">
+                                <a href="{{ product.prodUrl }}"><h5>
+                                    <span class="badge badge-{% if product.is_warning == 1 %}danger{% else %}light{% endif %}">{{ product.skuStorage }}
+                                </span></h5></a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
