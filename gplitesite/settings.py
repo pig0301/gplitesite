@@ -111,7 +111,7 @@ else:
     }
     
     CRONJOBS = [
-        ('*/10 * * * *', 'coding.spider.cron.query_storage', '>> /data/share/log/gplitesite/cron/query_storage.log')
+        ('*/10 7-0 * * *', 'coding.spider.cron.query_storage', '>> /data/share/log/gplitesite/cron/query_storage.log')
     ]
 
 
