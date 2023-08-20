@@ -36,12 +36,12 @@ def query_storage(request):
             product['prodUrl'] = url
             storage = product['skuStorage']
             
-            if int(storage) <= 10:
+            if int(storage) <= 20:
                 storage_warn += "\n" + product['name'] + "仅剩" + storage + "件。"
                 product['is_warning'] = 1
         
         if len(storage_warn) > 0 and get_client_ip(request) == '127.0.0.1':
-            storage_warn = "【重要】请关注如下规格如意金条线上库存！\n" + storage_warn + "\n\n[时间]：" + str(datetime.datetime.now())[0:19]
+            storage_warn = "【重要】请关注以下规格如意金条线上库存！\n" + storage_warn + "\n\n[时间]：" + str(datetime.datetime.now())[0:19]
             
             wechat.send_text_message(2, storage_warn)
             dingding.send_text_message(1, storage_warn)
