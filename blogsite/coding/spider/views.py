@@ -1,10 +1,10 @@
 from django.http import HttpResponse
 from bs4 import BeautifulSoup
 
-import requests, re, json
+import requests, re, json, datetime
 
 from libs.functions import render_template, check_login, get_client_ip
-from libs import wechat
+from libs import wechat, dingding
 
 
 def query_storage(request):
@@ -41,7 +41,10 @@ def query_storage(request):
                 product['is_warning'] = 1
         
         if len(storage_warn) > 0 and get_client_ip(request) == '127.0.0.1':
-            wechat.send_text_message(2, "【重要】请关注如下规格如意金条线上库存！\n" + storage_warn)
+            storage_warn = "【重要】请关注如下规格如意金条线上库存！\n" + storage_warn + "\n\n[时间]：" + str(datetime.datetime.now())[0:19]
+            
+            wechat.send_text_message(2, storage_warn)
+            dingding.send_text_message(1, storage_warn)
         
         return render_template("coding/spider/storage.html", { 'products': products }, request)
     else:
