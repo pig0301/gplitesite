@@ -41,7 +41,13 @@ def get_product_details(prod_links):
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
     
-    browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options)
+    profile = webdriver.FirefoxProfile()
+    profile.set_preference("browser.cache.disk.enable", False);
+    profile.set_preference("browser.cache.memory.enable", False);
+    profile.set_preference("browser.cache.offline.enable", False);
+    profile.set_preference("network.http.use-cache", False);
+    
+    browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options, firefox_profile=profile)
     
     storage_re = re.compile(r'\s(\d+)\s')
     prod_details = []
