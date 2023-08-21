@@ -96,17 +96,15 @@ def get_product_details(prod_links):
                     try:
                         storage_str = browser.find_element_by_id("productStorage").text
                         storage = storage_re.search(storage_str).group(1)
-                    except Exception as e:
+                    except Exception:
                         errTimes += 1
-                        print(e)
                 
                 if storage == None:
                     product['visibleStorage'] = '-1'
                 else:
                     product['visibleStorage'] = storage
-            except Exception as ee:
+            except Exception:
                 product['visibleStorage'] = '0'
-                print(ee)
             
             if int(product['visibleStorage']) <= 20:
                 storage_warn += "\n" + product['name'] + "仅剩" + product['visibleStorage'] + "件。"
