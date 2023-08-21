@@ -108,4 +108,7 @@ def get_product_details(prod_links):
         
         prod_details = prod_details + prods_info
     
+    browser.close()
+    browser.quit()
+    
     return (prod_details, storage_warn)
