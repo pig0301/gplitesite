@@ -43,25 +43,25 @@
     		{% csrf_token %}
 			<div class="input-group mb-3">
 				<div class="input-group-prepend">
-					<label class="input-group-text" for="inputGroupSelect01">Wechat</label>
+					<label class="input-group-text" for="inputGroupSelect01">微信</label>
 				</div>
 				<select class="custom-select" id="inputGroupSelect01" name="wechat_msg">
-					<option value="0">[Not Used]</option>
+					<option value="0">[ 不通知 ]</option>
 					{% for wechat in wechat_level %}
 					<option value="{{ wechat.id }}" {% if wechat.id == msg_level.wechat_msg.id %}selected{% endif %}>{{ wechat.msg_type }}</option>
 					{% endfor %}
 				</select>
 				<div class="input-group-prepend">
-					<label class="input-group-text" for="inputGroupSelect02">Dingding</label>
+					<label class="input-group-text" for="inputGroupSelect02">钉钉</label>
 				</div>
 				<select class="custom-select" id="inputGroupSelect02" name="dingding_msg">
-					<option value="0">[Not Used]</option>
+					<option value="0">[ 不通知 ]</option>
 					{% for dingding in dingding_level %}
 					<option value="{{ dingding.id }}" {% if dingding.id == msg_level.dingding_msg.id %}selected{% endif %}>{{ dingding.msg_type }}</option>
 					{% endfor %}
 				</select>
 				<div class="input-group-append">
-					<button class="btn btn-outline-primary" type="submit">Update</button>
+					<button class="btn btn-outline-primary" type="submit">切换</button>
 				</div>
 			</div>
 			<input type="hidden" value="{{ request.get_full_path }}" name="callbackurl">

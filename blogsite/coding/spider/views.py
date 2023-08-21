@@ -37,16 +37,7 @@ def query_storage(request):
 
 
 def get_product_details(prod_links):
-    options = webdriver.FirefoxOptions()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    
-    profile = webdriver.FirefoxProfile()
-    profile.set_preference('browser.cache.disk.enable', False);
-    profile.set_preference('browser.cache.memory.enable', False);
-    profile.set_preference('browser.cache.offline.enable', False);
-    profile.set_preference('network.http.use-cache', False);
-    
+    (options, profile) = init_firefox_option()
     browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options, firefox_profile=profile)
     
     storage_re = re.compile(r'\s(\d+)\s')
@@ -116,3 +107,20 @@ def get_product_details(prod_links):
     browser.quit()
     
     return (prod_details, storage_warn)
+
+def init_firefox_option():
+    options = webdriver.FirefoxOptions()
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    
+    profile = webdriver.FirefoxProfile()
+    profile.set_preference('browser.cache.disk.enable', False);
+    profile.set_preference('browser.cache.memory.enable', False);
+    profile.set_preference('browser.cache.offline.enable', False);
+    profile.set_preference('network.http.use-cache', False);
+    profile.set_preference('permissions.default.image', 2)
+    profile.set_preference('permissions.default.stylesheet', 2)
+    profile.set_preference('browser.migration.version', 9001)
+    profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
+    
+    return (options, profile)
