@@ -42,11 +42,14 @@ def get_product_details(prod_links):
     options.add_argument('--disable-gpu')
     
     profile = webdriver.FirefoxProfile()
-    profile.set_preference("browser.cache.disk.enable", False);
-    profile.set_preference("browser.cache.memory.enable", False);
-    profile.set_preference("browser.cache.offline.enable", False);
-    profile.set_preference("network.http.use-cache", False);
+    profile.set_preference('browser.cache.disk.enable', False);
+    profile.set_preference('browser.cache.memory.enable', False);
+    profile.set_preference('browser.cache.offline.enable', False);
+    profile.set_preference('network.http.use-cache', False);
     profile.set_preference('permissions.default.image', 2)
+    profile.set_preference('permissions.default.stylesheet', 2)
+    profile.set_preference('browser.migration.version', 9001)
+    profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
     
     browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options, firefox_profile=profile)
     
