@@ -18,7 +18,7 @@ def query_storage(request):
         
         browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options)
         
-        prod_links = ['9003867817', '9002749021']
+        prod_links = ['9003867817']
         prod_details = []
         
         storage_re = re.compile(r'\s(\d+)\s')
