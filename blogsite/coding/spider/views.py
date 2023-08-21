@@ -19,6 +19,7 @@ def query_storage(request):
         browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options)
         
         prod_links = ['9003867817', '9002749021']
+        prod_details = []
         
         storage_re = re.compile(r'\s(\d+)\s')
         storage_warn = ""
@@ -81,6 +82,8 @@ def query_storage(request):
                 if int(product['visibleStorage']) <= 20:
                     storage_warn += "\n" + product['name'] + "仅剩" + product['visibleStorage'] + "件。"
                     product['is_warning'] = 1
+            
+            prod_details = prod_details + prods_info
 
         if len(storage_warn) > 0 and get_client_ip(request) == '127.0.0.1':
             storage_warn = "【重要】请关注以下贵金属产品线上库存！\n" + storage_warn + "\n\n[时间]：" + str(datetime.datetime.now())[0:19]
@@ -88,6 +91,6 @@ def query_storage(request):
             wechat.send_text_message(2, storage_warn)
             dingding.send_text_message(1, storage_warn)
         
-        return render_template("coding/spider/storage.html", { 'products': prods_info }, request)
+        return render_template("coding/spider/storage.html", { 'products': prod_details }, request)
     else:
         return HttpResponse("非管理员用户禁止访问！")
