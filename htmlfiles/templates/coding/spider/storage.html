@@ -13,8 +13,8 @@
                             <th>Product Id</th>
                             <th>Product Name</th>
                             <th>Total Price</th>
-                            <th>Storage(S)</th>
-                            <th>Storage(V)</th>
+                            <th>Storage(Script)</th>
+                            <th>Storage(Click)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -24,7 +24,7 @@
                             <td style="vertical-align: middle;">{{ product.name }}</td>
                             <td style="vertical-align: middle;">{{ product.skuPrice }}</td>
                             <td style="vertical-align: middle;">
-                                <h5><span class="badge badge-{% if product.is_warning == 1 %}danger{% else %}light{% endif %}">{{ product.totalStorage }}</span></h5>
+                                <h5><span class="badge badge-{% if product.is_warning == 1 %}danger{% else %}info{% endif %}">{{ product.totalStorage }}</span></h5>
                             </td>
                             <td style="vertical-align: middle;">
                                 <a href="{{ product.prodUrl }}"><h5>
