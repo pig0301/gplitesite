@@ -38,3 +38,10 @@ def date_diff(time1, time2):
         return (time1.date() - time2.date()).days
     else:
         return 0
+
+@register.filter
+def show_guest(word, is_login):
+    if len(word) >= 3 and not is_login:
+        return word[0] + '.' * 3 + word[-1]
+    else:
+        return word

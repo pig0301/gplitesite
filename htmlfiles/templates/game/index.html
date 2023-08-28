@@ -37,21 +37,22 @@
             <div class="col-md-12">
             	{% for produce in produces %}
             	<p>
-                    {% if not produce.produce_detail.all.first.end_dttm %}
+                    {% if not produce.produce_detail.all.first.end_dttm or not request.user.is_authenticated %}
                     <span class="badge badge-light">{{ produce.min_start_dttm | date:"Y-m-d H:i:s" }}</span>
                     {% else %}
                     <button class="btn btn-outline-secondary btn-xs" type="button" data-toggle="collapse" data-target="#collapse{{ produce.id }}" aria-expanded="false" aria-controls="collapse{{ produce.id }}">
                     {{ produce.min_start_dttm | date:"Y-m-d H:i:s" }}
                     </button>
                     {% endif %}
-            		<span class="badge badge-success">{{ produce.warehouse }}</span>
-            		<span class="badge badge-primary">{{ produce.main_chef }}</span>
+            		<span class="badge badge-success">{{ produce.warehouse|show_guest:request.user.is_authenticated }}</span>
+            		<span class="badge badge-primary">{{ produce.warehouse|show_guest:request.user.is_authenticated }}</span>
             		{% if produce.produce_detail.all.first.end_dttm %}
             		<span class="badge badge-pill badge-dark">共耗时：{{ produce.max_end_dttm | time_diff:produce.min_start_dttm }}</span>
             		{% elif produce.produce_detail.all.first %}
             		<span class="badge badge-pill badge-danger">{{ produce.min_start_dttm | timesince }}前</span>
             		{% endif %}
             	</p>
+            	{% if request.user.is_authenticated %}
                 <table class="table table-striped{% if produce.produce_detail.all.first.end_dttm %} collapse{% endif %}" id="collapse{{ produce.id }}">
                     <thead>
                         <tr>
@@ -91,6 +92,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                {% endif %}
                 {% endfor %}
             </div>
         </div>
