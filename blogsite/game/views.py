@@ -165,7 +165,14 @@ def produce_status_change(request, operation):
 def produce_prepare_update(request):
     if check_login(request):
         ids = request.POST.getlist('prepareIDs')
-        models.cg_mp700_prepare.objects.filter(id__in=ids, is_ready='0').update(is_ready='1', last_ready_dttm=timezone.now())
+        status_id = request.POST.get('status_id')
+        
+        rows = models.cg_mp700_prepare.objects.filter(id__in=ids).exclude(is_ready='1')
+        
+        if status_id == '1':
+            rows.update(is_ready=status_id, last_ready_dttm=timezone.now())
+        else:
+            rows.update(is_ready=status_id)
         
         return HttpResponseRedirect("/game/produce/prepare/")
     else:

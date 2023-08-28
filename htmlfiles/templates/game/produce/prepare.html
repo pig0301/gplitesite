@@ -3,7 +3,7 @@
 {% load ext_filters %}
 
 {% block body_content %}
-    <div class="container">
+    <div class="container" id="content_div">
     <h4><br />Produce Prepare&nbsp;
         <button class="btn btn-xs btn-success" data-toggle="modal" data-target="#exampleModal">
             <i class="fas fa-user-check"></i>
@@ -30,7 +30,13 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">是否更新材料准备状态？</div>
+                    <div class="modal-body">
+                        <p>是否更新材料准备状态？</p>
+		                <select class="custom-select" id="inputGroupSelect01" v-model="status_id">
+		                    <option value="1">[ 准备就绪 ]</option>
+		                    <option value="2">[ 清空仓库 ]</option>
+		                </select>
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
                         <a class="btn btn-success" onclick="document:updateForm.submit()">更新</a>
@@ -122,38 +128,55 @@
 
     <div class="row">
         <div class="col-md-12">
-            <table class="table table-striped">
-	            <thead>
-	                <tr>
-	                    <th>Warehouse</th>
-	                    <th>Status</th>
-	                    <th>Last Ready</th>
-	                    <th>Last Used</th>
-	                    <th>Check Update</th>
-	                </tr>
-	            </thead>
-	            <tbody>
-	                <form id="updateForm" action="/game/produce/prepare/update/" method="post">
-	                    {% csrf_token %}
-	                    {% for prepare in prepares %}
+            <form id="updateForm" action="/game/produce/prepare/update/" method="post">
+	            {% csrf_token %}
+	            <table class="table table-striped">
+		            <thead>
+		                <tr>
+		                    <th>Warehouse</th>
+		                    <th>Status</th>
+		                    <th>Last Ready</th>
+		                    <th>Last Used</th>
+		                    <th>Check Update</th>
+		                </tr>
+		            </thead>
+		            <tbody>
+		                {% for prepare in prepares %}
 	                    <tr>
 	                        <td>{{ prepare.warehouse }}</td>
-	                        <td>{% if prepare.is_ready == '0' %}<i class="fas fa-ban text-danger"></i>{% else %}<i class="fas fa-hamburger text-info"></i>{% endif %}</td>
+	                        <td>
+		                        {% if prepare.is_ready == '1' %}<i class="fas fa-hamburger text-info"></i></i>
+		                        {% elif prepare.is_ready == '2' %}<i class="fas fa-scroll text-warning"></i>
+		                        {% else %}<i class="fas fa-ban text-danger">{% endif %}
+                            </td>
 	                        <td>{{ prepare.last_ready_dttm | date:"Y-m-d H:i" }}</td>
 	                        <td>{{ prepare.last_used_dttm | date:"Y-m-d H:i" }}</td>
 	                        <td>
-	                        {% if prepare.is_ready == '0' %}
+	                        {% ifnotequal prepare.is_ready '1' %}
 	                            <input class="form-check-input" type="checkbox"{% if forloop.last %} disabled="true"{% endif %} value="{{ prepare.id }}" name="prepareIDs">
 	                            {{ prepare.account }}
 	                            </input>
-                            {% endif %}
+                            {% endifnotequal %}
                             </td>
 	                    </tr>
 	                    {% endfor %}
-                    </form>
-                </tbody>
-            </table>
+	                </tbody>
+	            </table>
+	            <input type="hidden" v-model="status_id" name="status_id">
+            </form>
         </div>
     </div>
     </div>
+{% endblock %}
+
+{% block js_content %}
+    <script src="{% static 'plugins/vue/vue.min.js' %}"></script>
+    
+    <script type="text/javascript">
+        new Vue({
+            el: "#content_div",
+            data: { status_id: '1' },
+            delimiters: ["${", "}"],
+        });
+    </script>
 {% endblock %}
