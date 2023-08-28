@@ -45,7 +45,7 @@
                     </button>
                     {% endif %}
             		<span class="badge badge-success">{{ produce.warehouse|show_guest:request.user.is_authenticated }}</span>
-            		<span class="badge badge-primary">{{ produce.warehouse|show_guest:request.user.is_authenticated }}</span>
+            		<span class="badge badge-primary">{{ produce.main_chef|show_guest:request.user.is_authenticated }}</span>
             		{% if produce.produce_detail.all.first.end_dttm %}
             		<span class="badge badge-pill badge-dark">共耗时：{{ produce.max_end_dttm | time_diff:produce.min_start_dttm }}</span>
             		{% elif produce.produce_detail.all.first %}
