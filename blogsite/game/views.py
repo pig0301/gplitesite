@@ -5,7 +5,7 @@ from django.utils import timezone
 from libs.functions import render_template, check_login, check_java_client
 from libs.wechat import send_text_message
 
-from libs import constants
+from libs import constants, functions
 from game import models
 
 
@@ -20,8 +20,10 @@ def index(request):
         page = 1
     else:
         page = int(page)
+    
+    ip = functions.get_client_ip(request)
 
-    return render_template("game/index.html", {'produces': paginator.get_page(page)}, request)
+    return render_template("game/index.html", {'produces': paginator.get_page(page), 'ip': ip}, request)
 
 def produce_start(request):
     if check_java_client(request):
@@ -42,7 +44,7 @@ def produce_start(request):
             produce.save()
         
         models.cg_mp700_detail.objects.filter(end_dttm=None).update(end_dttm=timezone.now())
-        models.cg_mp700_prepare.objects.filter(warehouse=warehouse, is_ready='1').update(is_ready='0', last_used_dttm=timezone.now())
+        models.cg_mp700_prepare.objects.filter(warehouse=warehouse).update(is_ready='0', last_used_dttm=timezone.now())
 
         status = models.cg_mp700_status.objects.get(id=1)
         status.is_continue = 1
