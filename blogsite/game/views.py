@@ -5,7 +5,7 @@ from django.utils import timezone
 from libs.functions import render_template, check_login, check_java_client
 from libs.wechat import send_text_message
 
-from libs import constants, functions
+from libs import constants
 from game import models
 
 
@@ -20,10 +20,8 @@ def index(request):
         page = 1
     else:
         page = int(page)
-    
-    ip = functions.get_client_ip(request)
 
-    return render_template("game/index.html", {'produces': paginator.get_page(page), 'ip': ip}, request)
+    return render_template("game/index.html", {'produces': paginator.get_page(page)}, request)
 
 def produce_start(request):
     if check_java_client(request):
