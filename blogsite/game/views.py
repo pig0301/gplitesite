@@ -155,7 +155,9 @@ def produce_status_change(request, operation):
                 send_text_message(1, "【通知】客户端运行已超3天，目前客户端主机正在重启，请关注并及时上线重启程序！")
         elif operation == 'changemode':
             status.is_continue = 1 - status.is_continue
-        
+        elif operation == 'notready':
+            if check_java_client(request):
+                send_text_message(1, "【通知】材料未准备就绪，目前客户端程序已终止，请关注并及时上线处理！")
         status.save()
         
         return HttpResponseRedirect("/game/produce/prepare/")
