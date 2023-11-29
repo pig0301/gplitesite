@@ -29,17 +29,20 @@ urlpatterns = [
     url(r'^snooker/$', snooker.index),
     url(r'^snooker/campaign/$', snooker_campaign.index),
     url(r'^snooker/campaign/(\d+)/$', snooker_campaign.detail),
-    
+
     url(r'^game/$', game.index),
     url(r'^game/produce/start/$', game.produce_start),
     url(r'^game/produce/clear/$', game.produce_clear),
     url(r'^game/produce/finish/(\d+)/$', game.produce_finish),
     url(r'^game/produce/error/add/(\d+)/$', game.produce_error_add),
     url(r'^game/produce/detail/add/(\d+)/$', game.produce_detail_add),
-    url(r'^game/produce/prepare/$', game.produce_prepare),
-    url(r'^game/produce/prepare/update/$', game.produce_prepare_update),
     url(r'^game/produce/status/reconnect/$', game.produce_status_reconnect),
     url(r'^game/produce/status/(\w+)/$', game.produce_status_change),
+
+    url(r'^game/produce/prepare/$', game.produce_prepare),
+    url(r'^game/produce/prepare/update/$', game.produce_prepare_update),
+    url(r'^game/produce/prepare/update/auto/$', game.produce_prepare_auto_update),
+    url(r'^game/produce/prepare/status/$', game.produce_get_prepare_status),
 
     path('admin/', admin.site.urls),
     url(r'^media/(?P<path>.*)$', serve, {"document_root": settings.MEDIA_ROOT}),

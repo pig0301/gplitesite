@@ -178,6 +178,31 @@ def produce_prepare_update(request):
     else:
         return HttpResponse("非管理员用户禁止访问！")
 
+def produce_prepare_auto_update(request):
+    if check_java_client(request):
+        warehouse = request.GET['w']
+        rows = models.cg_mp700_prepare.objects.filter(warehouse=warehouse).exclude(is_ready='1')
+
+        if rows.count() > 0:
+            rows.update(is_ready='1', last_ready_dttm=timezone.now())
+            return HttpResponse("success")
+        else:
+            return HttpResponse("none")
+    else:
+        return HttpResponse("非授权终端访问！")
+
+def produce_get_prepare_status(request):
+    if check_java_client(request):
+        warehouse = request.GET['w']
+        rows = models.cg_mp700_prepare.objects.filter(warehouse=warehouse)
+
+        if rows.count() > 0:
+            return HttpResponse(rows.first().is_ready)
+        else:
+            return HttpResponse("none")
+    else:
+        return HttpResponse("非授权终端访问！")
+
 def finish_last_step(produce_id):
     produce = models.cg_mp700_produce.objects.prefetch_related('produce_detail').get(id=produce_id)
     lastStep = produce.produce_detail.first()
