@@ -169,7 +169,7 @@ def produce_prepare_update(request):
         ids = request.POST.getlist('prepareIDs')
         status_id = request.POST.get('status_id')
         
-        rows = models.cg_mp700_prepare.objects.filter(id__in=ids).exclude(is_ready='1')
+        rows = models.cg_mp700_prepare.objects.filter(id__in=ids)
         
         if status_id == '1':
             rows.update(is_ready=status_id, last_ready_dttm=timezone.now())
