@@ -11,7 +11,7 @@ from home import models
 def index(request):
     return render_template('index.html', {}, request)
 
-def floor24():
+def floor24(request):
     return HttpResponseRedirect("https://gplite.notion.site/24-2024-03-14-2d6ef52dbe324a588e89751e3f3f4028?pvs=4")
 
 def login(request):
