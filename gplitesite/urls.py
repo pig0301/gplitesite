@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^login/$', home.login),
     url(r'^logout/$', home.logout),
     url(r'^message_level/update/$', home.message_level_update),
+    url(r'^24f/$', home.floor24),
     
     url(r'^coding/wechat/mail/list/', coding_wechat.mail_list),
     url(r'^coding/wechat/mail/parse/', coding_wechat.mail_parse),
