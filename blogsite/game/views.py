@@ -95,8 +95,12 @@ def produce_error_add(request, errors):
             elif detail.client_errors >= 5 and detail.informed_messages < 1:
                 send_text_message(1, "【提示】客户端程序累计上报错误次数已达5次，建议上线开展排查！\n\n账号：" + account + "\n定位：" + position)
                 detail.informed_messages = 1
-            
+
             detail.save()
+        elif int(errors) >= 100:
+            send_text_message(1, "【警告！！！】客户端程序已发生严重错误，请立即上线解决问题！")
+        else:
+            send_text_message(1, "【提示】客户端程序执行发生错误，建议上线开展排查！")
     
         return HttpResponse("success")
     else:
