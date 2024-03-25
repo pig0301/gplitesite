@@ -125,7 +125,7 @@ def produce_detail_latest(request):
         current = models.cg_mp700_detail.objects.prefetch_related('produce').order_by("-id").first()
         current_name = "0"
 
-        if current.start_dttm == None:
+        if current.end_dttm == None:
             current_name = current.produce.warehouse
 
         return HttpResponse(current_name)
