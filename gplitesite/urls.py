@@ -36,7 +36,9 @@ urlpatterns = [
     url(r'^game/produce/clear/$', game.produce_clear),
     url(r'^game/produce/finish/(\d+)/$', game.produce_finish),
     url(r'^game/produce/error/add/(\d+)/$', game.produce_error_add),
+
     url(r'^game/produce/detail/add/(\d+)/$', game.produce_detail_add),
+    url(r'^game/produce/detail/latest/$', game.produce_detail_latest),
     url(r'^game/produce/status/reconnect/$', game.produce_status_reconnect),
     url(r'^game/produce/status/(\w+)/$', game.produce_status_change),
 
