@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import re, json, datetime
 
 from libs.functions import render_template, check_login, get_client_ip
-from libs import wechat, dingding
+from libs import wechat, dingding, constants
 
 from home import models
 
@@ -97,7 +97,7 @@ def get_product_details(prod_links):
             except Exception:
                 product['visibleStorage'] = '0'
             
-            if int(product['visibleStorage']) <= 20:
+            if int(product['visibleStorage']) < constants.STORAGE_WARNING[product['merchantProdId']]:
                 storage_warn += "\n" + product['name'] + "仅剩" + product['visibleStorage'] + "件。"
                 product['is_warning'] = 1
         
