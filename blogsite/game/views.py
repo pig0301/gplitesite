@@ -120,6 +120,18 @@ def produce_detail_add(request, produce_id):
     else:
         return HttpResponse("非授权终端访问！")
 
+def produce_detail_latest(request):
+    if check_java_client(request):
+        current = models.cg_mp700_detail.objects.prefetch_related('produce').order_by("-id").first()
+        current_name = "0"
+
+        if current.end_dttm == None:
+            current_name = current.produce.warehouse
+
+        return HttpResponse(current_name)
+    else:
+        return HttpResponse("非授权终端访问！")
+
 def produce_prepare(request):
     if check_login(request):
         prepares = list(models.cg_mp700_prepare.objects.order_by('id'))

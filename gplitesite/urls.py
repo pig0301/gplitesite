@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^login/$', home.login),
     url(r'^logout/$', home.logout),
     url(r'^message_level/update/$', home.message_level_update),
+    url(r'^24f/$', home.floor24),
     
     url(r'^coding/wechat/mail/list/', coding_wechat.mail_list),
     url(r'^coding/wechat/mail/parse/', coding_wechat.mail_parse),
@@ -35,7 +36,9 @@ urlpatterns = [
     url(r'^game/produce/clear/$', game.produce_clear),
     url(r'^game/produce/finish/(\d+)/$', game.produce_finish),
     url(r'^game/produce/error/add/(\d+)/$', game.produce_error_add),
+
     url(r'^game/produce/detail/add/(\d+)/$', game.produce_detail_add),
+    url(r'^game/produce/detail/latest/$', game.produce_detail_latest),
     url(r'^game/produce/status/reconnect/$', game.produce_status_reconnect),
     url(r'^game/produce/status/(\w+)/$', game.produce_status_change),
 
