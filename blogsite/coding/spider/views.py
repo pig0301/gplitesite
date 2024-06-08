@@ -97,7 +97,7 @@ def get_product_details(prod_links):
             except Exception:
                 product['visibleStorage'] = '0'
             
-            if int(product['visibleStorage']) < constants.STORAGE_WARNING[product['merchantProdId']]:
+            if int(product['visibleStorage']) <= constants.STORAGE_WARNING[product['merchantProdId']] * 0.8:
                 storage_warn += "\n" + product['name'] + "仅剩" + product['visibleStorage'] + "件。"
                 product['is_warning'] = 1
         
