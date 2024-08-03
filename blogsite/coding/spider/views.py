@@ -37,24 +37,27 @@ def query_storage(request):
                 
                 if msg_level.wechat_msg:
                     wechat.send_text_message(msg_level.wechat_msg.id, storage_warn)
-                
+                 
                 if msg_level.dingding_msg:
                     dingding.send_text_message(msg_level.dingding_msg.id, storage_warn)
         
         prod_storages = models_code.spider_product_storage.objects.filter(event_dt=event_dt, product_id=OuterRef('product_id')).order_by('id').values_list('id')
         prod_storages = models_code.spider_product_storage.objects.annotate(tag=Subquery(prod_storages[:1]))
-        prod_storages = prod_storages.filter(id=F('tag'))
+        prod_storages = prod_storages.filter(id=F('tag')).order_by('product_id')
         
         init_storages = {}
+        storage_dtls = []
         for prod in prod_storages:
             init_storages[prod.product_id] = prod.storage_cnt
+            storage_dtls.append(models_code.spider_product_storage.objects.filter(event_dt=event_dt, product_id=prod.product_id).order_by('id'))
         
         for prod in prod_details:
             if prod['merchantProdId'] in init_storages.keys():
                 prod['daySalesCount'] = init_storages[prod['merchantProdId']] - int(prod['visibleStorage'])
         
         return render_template("coding/spider/storage.html", {
-                'products': prod_details, 'msg_level': msg_level, 'wechat_level': wechat_level, 'dingding_level': dingding_level
+                'products': prod_details, 'msg_level': msg_level, 'wechat_level': wechat_level, 'dingding_level': dingding_level,
+                'legends': prod_storages, 'chart_datas': storage_dtls
         }, request)
     else:
         return HttpResponse("非管理员用户禁止访问！")
