@@ -29,7 +29,7 @@ def query_storage(request):
         if get_client_ip(request) == '127.0.0.1':
             for prod in prod_details:
                 detail = models_code.spider_product_storage(event_dt=event_dt, product_id=prod['merchantProdId'], product_name=prod['name'],
-                    price=prod['skuPrice'], storage_cnt=prod['visibleStorage'], create_dttm=timezone.now())
+                    price=float(prod['skuPrice']), storage_cnt=int(prod['visibleStorage']), create_dttm=timezone.now())
                 detail.save()
 
             if msg_level and len(storage_warn) > 0:
@@ -51,7 +51,7 @@ def query_storage(request):
         
         for prod in prod_details:
             if prod['merchantProdId'] in init_storages.keys():
-                prod['daySalesCount'] = init_storages[prod['merchantProdId']] - prod['visibleStorage']
+                prod['daySalesCount'] = init_storages[prod['merchantProdId']] - int(prod['visibleStorage'])
         
         return render_template("coding/spider/storage.html", {
                 'products': prod_details, 'msg_level': msg_level, 'wechat_level': wechat_level, 'dingding_level': dingding_level
