@@ -26,13 +26,12 @@ def query_storage(request):
         timestamp = timezone.now()
         event_dt = timestamp.date()
 
-        for prod in prod_details:
-            detail = models_code.spider_product_storage(event_dt=event_dt, product_id=prod['merchantProdId'], product_name=prod['name'],
-                price=float(prod['skuPrice'].replace(',', '')), storage_cnt=int(prod['visibleStorage']), create_dttm=timezone.now())
-            detail.save()
-
         if get_client_ip(request) == '127.0.0.1':
-
+            for prod in prod_details:
+                detail = models_code.spider_product_storage(event_dt=event_dt, product_id=prod['merchantProdId'], product_name=prod['name'],
+                    price=float(prod['skuPrice'].replace(',', '')), storage_cnt=int(prod['visibleStorage']), create_dttm=timezone.now())
+                detail.save()
+            
             if msg_level and len(storage_warn) > 0:
                 storage_warn = "【重要】请关注以下贵金属产品线上库存！\n" + storage_warn + "\n\n[时间]：" + str(timestamp)[0:19]
                 
