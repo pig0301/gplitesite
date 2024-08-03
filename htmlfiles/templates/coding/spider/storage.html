@@ -33,7 +33,7 @@
                                 </span></h5></a>
                             </td>
                             <td style="vertical-align: middle;">
-                                <span class="badge badge-warning">{{ product.daySalesCount }}</span>
+                                <h5><span class="badge badge-{% if product.daySalesCount < 0 %}danger{% else %}warning{% endif %}">{{ product.daySalesCount }}</span></h5>
                             </td>
                         </tr>
                         {% endfor %}
