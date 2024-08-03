@@ -18,14 +18,14 @@ class player(models.Model):
     group = models.ForeignKey(group, on_delete=models.DO_NOTHING, related_name='group_player')
 
     def __str__(self):
-        return self.name
+        return self.name + '（' + self.group.name + '）'
 
 class gym(models.Model):
     name = models.CharField(max_length=45)
     road = models.CharField(max_length=45)
 
     def __str__(self):
-        return self.name + '(' + self.road + ')'
+        return self.name + '（' + self.road + '）'
 
 class cue(models.Model):
     name = models.CharField(max_length=45)
@@ -33,7 +33,7 @@ class cue(models.Model):
     owner = models.OneToOneField(player, on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return self.name + '(' + self.owner.name + ')'
+        return self.name + '（' + self.owner.name + '）'
 
 class campaign(models.Model):
     event_dt = models.DateField()

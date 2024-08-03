@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^snooker/$', snooker.index),
     url(r'^snooker/campaign/$', snooker_campaign.index),
     url(r'^snooker/campaign/(\d+)/$', snooker_campaign.detail),
+    url(r'^snooker/campaign/add_confirm/$', snooker_campaign.add_confirm),
 
     url(r'^game/$', game.index),
     url(r'^game/produce/start/$', game.produce_start),

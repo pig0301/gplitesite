@@ -1,7 +1,8 @@
 from django.core.paginator import Paginator
+from django.http import HttpResponse, HttpResponseRedirect
 from snooker import models
 
-from libs.functions import render_template
+from libs.functions import render_template, check_login
 from libs import constants
 
 
@@ -12,13 +13,10 @@ def detail(request, campaign_id):
     return render_template("snooker/campaign/detail.html", {'campaign': campaign}, request)
 
 def index(request):
-    finished_campaigns = models.campaign.objects.prefetch_related('campaign_frame').annotate(
-        **models.DEFAULT_CAMPAIGN_ANNOTATE).filter(is_finished='1').order_by('-id')
-    
-    unfinished_campaigns = models.campaign.objects.prefetch_related('campaign_frame').annotate(
-        **models.DEFAULT_CAMPAIGN_ANNOTATE).filter(is_finished='0').order_by('-id')
+    campaigns = models.campaign.objects.prefetch_related('campaign_frame').annotate(
+        **models.DEFAULT_CAMPAIGN_ANNOTATE).order_by('is_finished', '-id')
         
-    paginator = Paginator(finished_campaigns, constants.CAMPAIGN_LIST_COUNT_PER_PAGE)
+    paginator = Paginator(campaigns, constants.CAMPAIGN_LIST_COUNT_PER_PAGE)
     
     page = request.GET.get('p', '1')
     if not page.isdigit() or int(page) < 1 or int(page) > paginator.num_pages:
@@ -27,5 +25,20 @@ def index(request):
         page = int(page)
     
     return render_template("snooker/campaign/index.html", {
-        'finished_campaigns': paginator.get_page(page), 'unfinished_campaigns': unfinished_campaigns
+        'campaigns': paginator.get_page(page)
     }, request)
+
+def add_confirm(request):
+    if check_login(request):
+        event_dt = request.POST.get('event_dt')
+        gym = models.gym.objects.get(id=int(request.POST.get('gym_id')))
+        cue = models.cue.objects.get(id=int(request.POST.get('cue_id')))
+        opponent = models.player.objects.get(id=int(request.POST.get('opponent_id')))
+        let_points = int(request.POST.get('let_points'))
+        
+        campaign = models.campaign(event_dt=event_dt, gym=gym, cue=cue, opponent=opponent, let_points=let_points, is_finished='0')
+        campaign.save()
+
+        return HttpResponseRedirect("/snooker/campaign/{0}/".format(campaign.id))
+    else:
+        return HttpResponse("非管理员用户禁止访问！")

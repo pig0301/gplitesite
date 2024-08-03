@@ -5,9 +5,56 @@
 	<div class="container">
 	    <h4><br />Recent Campaigns&nbsp;
 	        <a class="btn btn-xs btn-primary" href="/snooker/campaign/"><i class="fas fa-history"></i></a>
-	        <a class="btn btn-xs btn-warning" href="/snooker/analysis/"><i class="fas fa-chart-line" style="color:white"></i></a>
+	        
+	        {% if request.user.is_authenticated %}
+	        <button class="btn btn-xs btn-warning" data-toggle="modal" data-target="#exampleModal">
+	            <i class="fas fa-play" style="color:white"></i>
+	        </button>
+	        
+		    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	            <div class="modal-dialog">
+	                <div class="modal-content">
+	                    <div class="modal-header">
+	                        <h5 class="modal-title" id="exampleModalLabel">新建</h5>
+	                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	                            <span aria-hidden="true">&times;</span>
+	                        </button>
+	                    </div>
+	                    <div class="modal-body">
+	                        <form id="addForm" action="/snooker/campaign/add_confirm/" method="post">
+	                        {% csrf_token %}
+	                            <p>日期：<input type="text" class="form-control" name="event_dt" value="{% now 'Y-m-d' %}"></p>
+	                            <p></p><p>场地：
+	                            <select class="custom-select" name="gym_id">
+	                                {% for gym in gyms %}
+	                                <option value="{{ gym.id }}">{{ gym }}</option>
+	                                {% endfor %}
+	                            </select></p>
+	                            <p></p><p>球杆：
+	                            <select class="custom-select" name="cue_id">
+	                                {% for cue in cues %}
+	                                <option value="{{ cue.id }}">{{ cue }}</option>
+	                                {% endfor %}
+	                            </select></p>
+	                            <p></p><p>对手：
+	                            <select class="custom-select" name="opponent_id">
+	                                {% for opponent in opponents %}
+	                                <option value="{{ opponent.id }}">{{ opponent }}</option>
+	                                {% endfor %}
+	                            </select></p>
+	                            <p></p><p>让分：<input type="text" class="form-control" name="let_points" value="0"></p>
+	                        </form>
+	                    </div>
+	                    <div class="modal-footer">
+	                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+	                        <a class="btn btn-success" onclick="document:addForm.submit()">确定</a>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	        {% endif %}
 	    </h4>
-	    
+
 	    <div class="row">
             <div class="col-md-12">
                 <table class="table table-striped">
@@ -30,7 +77,7 @@
                             <td>{{ campaign.opponent.name }}</td>
                             <td>{{ campaign.campaign_break }}</td>
                             <td>
-                                <a class="btn btn-xs btn-success" href="/snooker/campaign/{{ campaign.id }}/"><i class="fas fa-cube"></i></a>
+                                <a class="btn btn-xs btn-{% if campaign.is_finished == '1' %}success{% else %}primary{% endif %}" href="/snooker/campaign/{{ campaign.id }}/"><i class="fas fa-{% if campaign.is_finished == '1' %}search{% else %}edit{% endif %}"></i></a>
                             </td>
                         </tr>
                         {% endfor %}
