@@ -1,15 +1,18 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
-
-from django.http import HttpResponse
 from bs4 import BeautifulSoup
 
-import re, json, datetime
+from django.http import HttpResponse
+from django.db.models import OuterRef, Subquery, F
+from django.utils import timezone
+
+import re, json
 
 from libs.functions import render_template, check_login, get_client_ip
 from libs import wechat, dingding, constants
 
 from home import models
+from coding.spider import models as models_code
 
 
 def query_storage(request):
@@ -20,14 +23,35 @@ def query_storage(request):
         wechat_level = models.wechat_message.objects.all()
         dingding_level = models.dingding_message.objects.all()
 
-        if msg_level and len(storage_warn) > 0 and get_client_ip(request) == '127.0.0.1':
-            storage_warn = "【重要】请关注以下贵金属产品线上库存！\n" + storage_warn + "\n\n[时间]：" + str(datetime.datetime.now())[0:19]
-            
-            if msg_level.wechat_msg:
-                wechat.send_text_message(msg_level.wechat_msg.id, storage_warn)
-            
-            if msg_level.dingding_msg:
-                dingding.send_text_message(msg_level.dingding_msg.id, storage_warn)
+        timestamp = timezone.now()
+        event_dt = timestamp.date()
+
+        if get_client_ip(request) == '127.0.0.1':
+            for prod in prod_details:
+                detail = models_code.spider_product_storage(event_dt=event_dt, product_id=prod['merchantProdId'], product_name=prod['name'],
+                    price=prod['skuPrice'], storage_cnt=prod['visibleStorage'], create_dttm=timezone.now())
+                detail.save()
+
+            if msg_level and len(storage_warn) > 0:
+                storage_warn = "【重要】请关注以下贵金属产品线上库存！\n" + storage_warn + "\n\n[时间]：" + str(timestamp)[0:19]
+                
+                if msg_level.wechat_msg:
+                    wechat.send_text_message(msg_level.wechat_msg.id, storage_warn)
+                
+                if msg_level.dingding_msg:
+                    dingding.send_text_message(msg_level.dingding_msg.id, storage_warn)
+        
+        prod_storages = models_code.spider_product_storage.objects.filter(event_dt=event_dt, product_id=OuterRef('product_id')).order_by('id').values_list('id')
+        prod_storages = models_code.spider_product_storage.objects.annotate(tag=Subquery(prod_storages[:1]))
+        prod_storages = prod_storages.filter(id=F('tag'))
+        
+        init_storages = {}
+        for prod in prod_storages:
+            init_storages[prod.product_id] = prod.storage_cnt
+        
+        for prod in prod_details:
+            if prod['merchantProdId'] in init_storages.keys():
+                prod['daySalesCount'] = init_storages[prod['merchantProdId']] - prod['visibleStorage']
         
         return render_template("coding/spider/storage.html", {
                 'products': prod_details, 'msg_level': msg_level, 'wechat_level': wechat_level, 'dingding_level': dingding_level
@@ -58,15 +82,15 @@ def get_product_details(prod_links):
             re.compile(r'var prodSkuJson = (.*?);'),
             re.compile(r'var prodEnumMap = (.*?);')
         ]
-            
+        
         for script in soup.find_all('script'):
             for i in range(len(re_results)):
                 match_exp = re_exps[i].search(script.prettify())
                 if match_exp:
                     re_results[i] = json.loads(match_exp.group(1))
-         
+        
         (prod_name, prods_sku, prods_info, prods_spec) = re_results
-         
+        
         prods_info = sorted(prods_info, key=lambda x: x['prodSkuId'])
         
         for product in prods_info:

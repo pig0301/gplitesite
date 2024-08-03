@@ -15,6 +15,7 @@
                             <th>Total Price</th>
                             <th>Storage(JS)</th>
                             <th>Storage(Click)</th>
+                            <th>Today Sales</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -31,6 +32,7 @@
                                     <span class="badge badge-{% if product.is_warning == 1 %}danger{% else %}light{% endif %}">{{ product.visibleStorage }}
                                 </span></h5></a>
                             </td>
+                            <td style="vertical-align: middle;">{{ product.daySalesCount }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
