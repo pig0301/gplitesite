@@ -26,7 +26,7 @@
                     <div class="modal-body">
                         <form id="addForm" action="/snooker/campaign/add_confirm/" method="post">
                         {% csrf_token %}
-                            <p>日期：<input type="text" class="form-control" name="event_dt" value="{% now 'Y-m-d' %}"></p>
+                            <p>日期：<span class="badge-lg badge-danger" v-if="errors.event_dt">${errors.event_dt}</span><input type="text" class="form-control" name="event_dt" v-model="event_dt"></p>
                             <p></p><p>场地：
                             <select class="custom-select" name="gym_id">
                                 {% for gym in gyms %}
@@ -45,12 +45,12 @@
                                 <option value="{{ opponent.id }}">{{ opponent }}</option>
                                 {% endfor %}
                             </select></p>
-                            <p></p><p>让分：<input type="text" class="form-control" name="let_points" value="0"></p>
+                            <p></p><p>让分：<span class="badge-lg badge-danger" v-if="errors.let_points">${errors.let_points}</span><input type="text" class="form-control" name="let_points" v-model="let_points"></p>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
-                        <a class="btn btn-success" onclick="document:addForm.submit()">确定</a>
+                        <a class="btn btn-success" @click="validate">确定</a>
                     </div>
                 </div>
             </div>
@@ -185,6 +185,39 @@
             options: {
                 legend: {
                     display: false
+                }
+            }
+        });
+	    
+       new Vue({
+            el: '#exampleModal',
+            delimiters: ["${", "}"],
+            data() {
+                return {
+                    event_dt: '{% now 'Y-m-d' %}',
+                    let_points: '0',
+                    errors: {}
+                }
+            },
+            methods: {
+                validate() {
+                    this.errors = {};
+                    var re = /^\d{4}-\d{2}-\d{2}$/;
+                    var re1 = /^-?\d+$/;
+                    
+                    if(!re.test(this.event_dt)) {
+                        this.errors.event_dt = '请输入日期（YYYY-MM-DD）';
+                    }
+
+                    if(!re1.test(this.let_points)) {
+                        this.errors.let_points = '请输入整数（允许负数）';
+                    }
+                    
+                    if(Object.keys(this.errors).length){
+                        return;
+                    }
+                    
+                    $('#addForm').submit();
                 }
             }
         });

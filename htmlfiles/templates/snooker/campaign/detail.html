@@ -103,22 +103,22 @@
                     <div class="modal-body">
                         <form id="addForm" action="/snooker/campaign/add_frame_confirm/{{ campaign.id }}/" method="post">
                         {% csrf_token %}
-                            <p>我方得分：<input type="text" class="form-control" name="get_points"></p>
-                            <p></p><p>对手得分：<input type="text" class="form-control" name="oppo_points"></p>
+                            <p>我方得分：<span class="badge-lg badge-danger" v-if="errors.get_points">${errors.get_points}</span><input type="text" class="form-control" name="get_points" v-model="get_points"></p>
+                            <p></p><p>对手得分：<span class="badge-lg badge-danger" v-if="errors.oppo_points">${errors.oppo_points}</span><input type="text" class="form-control" name="oppo_points" v-model="oppo_points"></p>
                             <p></p><p>球杆：
                             <select class="custom-select" name="cue_id">
                                 {% for cue in cues %}
                                 <option value="{{ cue.id }}" {% if cue.id == campaign.cue.id %}selected{% endif %}>{{ cue }}</option>
                                 {% endfor %}
                             </select></p>
-                            <p></p><p>单杆最高：<input type="text" class="form-control" name="max_break"></p>
+                            <p></p><p>单杆最高：<span class="badge-lg badge-danger" v-if="errors.max_break">${errors.max_break}</span><input type="text" class="form-control" name="max_break" v-model="max_break"></p>
                             <p></p><p>备注：<textarea class="form-control" name="memo"></textarea></p>
-                            <p></p><p>让分：<input type="text" class="form-control" name="let_points" value="{{ campaign.let_points }}"></p>
+                            <p></p><p>让分：<span class="badge-lg badge-danger" v-if="errors.let_points">${errors.let_points}</span><input type="text" class="form-control" name="let_points" v-model="let_points"></p>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
-                        <a class="btn btn-success" onclick="document:addForm.submit()">确定</a>
+                        <a class="btn btn-success" @click="validate">确定</a>
                     </div>
                 </div>
             </div>
@@ -197,6 +197,7 @@
 
 {% block js_content %}
     <script src="{% static 'plugins/Chart/Chart.bundle.min.js' %}"></script>
+    <script src="{% static 'plugins/vue/vue.min.js' %}"></script>
     
     <script type="text/javascript">
 	    new Chart($("#canvas")[0], {
@@ -235,5 +236,58 @@
                 }
             }
         });
+	    
+	    new Vue({
+	    	el: '#exampleModal2',
+	    	delimiters: ["${", "}"],
+	    	data() {
+	    		return {
+	    			get_points: '',
+	    			oppo_points: '',
+	    			max_break: '',
+	    			let_points: '{{ campaign.let_points }}',
+	    			errors: {}
+	    		}
+	    	},
+	    	methods: {
+	    		validate() {
+	    			this.errors = {};
+	    			var re = /^\d+$/;
+	    			var re1 = /^-?\d+$/;
+	    			var good_points_cnt = 0;
+	    			
+	    			if(!re.test(this.get_points)) {
+	    				this.errors.get_points = '请输入整数';
+	    			}else{
+	    				good_points_cnt++;
+	    			}
+	    			
+                    if(!re.test(this.oppo_points)) {
+                        this.errors.oppo_points = '请输入整数';
+                    }else{
+                    	good_points_cnt++;
+                    }
+                    
+                    if(good_points_cnt==2 && this.get_points == this.oppo_points){
+                    	this.errors.get_points = '双方得分不能相等';
+                    	this.errors.oppo_points = '双方得分不能相等';
+                    }
+                    
+                    if(this.max_break && !re.test(this.max_break)) {
+                        this.errors.max_break = '请输入整数（或留空）';
+                    }
+                    
+                    if(!re1.test(this.let_points)) {
+                        this.errors.let_points = '请输入整数（允许负数）';
+                    }
+	    			
+	    			if(Object.keys(this.errors).length){
+	    				return;
+	    			}
+	    			
+	    			$('#addForm').submit();
+	    		}
+	    	}
+	    });
     </script>
 {% endblock %}
