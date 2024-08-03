@@ -34,6 +34,9 @@ urlpatterns = [
     url(r'^snooker/campaign/finish/(\d+)/$', snooker_campaign.finish),
     url(r'^snooker/campaign/delete/(\d+)/$', snooker_campaign.delete),
 
+    url(r'^snooker/campaign/add_frame_confirm/(\d+)/$', snooker_campaign.add_frame_confirm),
+    url(r'^snooker/campaign/delete_last_frame/(\d+)/$', snooker_campaign.delete_last_frame),
+
     url(r'^game/$', game.index),
     url(r'^game/produce/start/$', game.produce_start),
     url(r'^game/produce/clear/$', game.produce_clear),
