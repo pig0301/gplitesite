@@ -42,3 +42,22 @@ def add_confirm(request):
         return HttpResponseRedirect("/snooker/campaign/{0}/".format(campaign.id))
     else:
         return HttpResponse("非管理员用户禁止访问！")
+
+def finish(request, campaign_id):
+    if check_login(request):
+        campaign = models.campaign.objects.get(id=campaign_id)
+        campaign.is_finished = '1'
+        campaign.save()
+
+        return HttpResponseRedirect("/snooker/campaign/{0}/".format(campaign.id))
+    else:
+        return HttpResponse("非管理员用户禁止访问！")
+
+def delete(request, campaign_id):
+    if check_login(request):
+        campaign = models.campaign.objects.get(id=campaign_id)
+        campaign.delete()
+
+        return HttpResponseRedirect("/snooker/")
+    else:
+        return HttpResponse("非管理员用户禁止访问！")

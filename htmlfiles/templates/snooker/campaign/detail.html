@@ -6,9 +6,45 @@
 	    <h4><br />Campaign Detail&nbsp;
 	        {% if request.user.is_authenticated %}
 		        {% if campaign.is_finished == '0' %}
-		        <button class="btn btn-xs btn-success"><i class="far fa-hdd"></i></button>
+		        <button class="btn btn-xs btn-success" data-toggle="modal" data-target="#exampleModal"><i class="far fa-hdd"></i></button>
+		        
+		        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		            <div class="modal-dialog">
+		                <div class="modal-content">
+		                    <div class="modal-header">
+		                        <h5 class="modal-title" id="exampleModalLabel">询问</h5>
+		                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		                            <span aria-hidden="true">&times;</span>
+		                        </button>
+		                    </div>
+		                    <div class="modal-body">是否确认本场比赛已经结束？</div>
+		                    <div class="modal-footer">
+		                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+		                        <a class="btn btn-info" href="/snooker/campaign/finish/{{ campaign.id }}/">保存</a>
+		                    </div>
+		                </div>
+		            </div>
+		        </div>
 		        {% endif %}
-	        <button class="btn btn-xs btn-danger"><i class="far fa-trash-alt"></i></button>
+	        <button class="btn btn-xs btn-danger" data-toggle="modal" data-target="#exampleModal1"><i class="far fa-trash-alt"></i></button>
+	        
+	        <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel1">警告</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">是否确认删除本场比赛？</div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                            <a class="btn btn-info" href="/snooker/campaign/delete/{{ campaign.id }}/">删除</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
 	        {% endif %}
 	    </h4>
 	    
