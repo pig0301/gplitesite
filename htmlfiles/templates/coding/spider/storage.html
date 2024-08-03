@@ -32,7 +32,9 @@
                                     <span class="badge badge-{% if product.is_warning == 1 %}danger{% else %}light{% endif %}">{{ product.visibleStorage }}
                                 </span></h5></a>
                             </td>
-                            <td style="vertical-align: middle;">{{ product.daySalesCount }}</td>
+                            <td style="vertical-align: middle;">
+                                <span class="badge badge-warning">{{ product.daySalesCount }}</span>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
