@@ -4,8 +4,12 @@
 {% block body_content %}
 	<div class="container">
 	    <h4><br />Campaign Detail&nbsp;
-	        <button class="btn btn-xs btn-success"><i class="far fa-hdd"></i></button>
+	        {% if request.user.is_authenticated %}
+		        {% if campaign.is_finished == '0' %}
+		        <button class="btn btn-xs btn-success"><i class="far fa-hdd"></i></button>
+		        {% endif %}
 	        <button class="btn btn-xs btn-danger"><i class="far fa-trash-alt"></i></button>
+	        {% endif %}
 	    </h4>
 	    
 	    <div class="row">
@@ -27,7 +31,7 @@
 			            <tr>
 			                <td>{{ campaign.event_dt|date:'Y-m-d' }}</td>
 			                <td>{{ campaign.gym.name }}（{{ campaign.gym.road }}）</td>
-			                <td>{{ campaign.win_frames }} : {{ campaign.lose_frames }}</td>
+			                <td>{{ campaign.win_frames|default:0 }} : {{ campaign.lose_frames|default:0 }}</td>
 			                <td>{{ campaign.opponent.name }}</td>
 			                {% if campaign.is_finished == '1' %}
 			                <td>{{ campaign.avg_get_points|floatformat:1 }}</td>
@@ -42,8 +46,10 @@
         <hr />
         
         <h4><br />Frame Summary&nbsp;
+            {% if request.user.is_authenticated and campaign.is_finished == '0' %}
             <button class="btn btn-xs btn-info"><i class="fas fa-folder-plus"></i></button>
             <button class="btn btn-xs btn-warning"><i class="fas fa-folder-minus" style="color:white"></i></button>
+            {% endif %}
         </h4>
         
         <div class="row">
