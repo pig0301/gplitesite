@@ -27,6 +27,8 @@ def query_storage(request):
         event_dt = timestamp.date()
 
         if get_client_ip(request) == '127.0.0.1':
+            models_code.spider_product_storage.objects.filter(event_dt<event_dt).delete()
+            
             for prod in prod_details:
                 detail = models_code.spider_product_storage(event_dt=event_dt, product_id=prod['merchantProdId'], product_name=prod['name'],
                     price=float(prod['skuPrice'].replace(',', '')), storage_cnt=int(prod['visibleStorage']), create_dttm=timezone.now())
