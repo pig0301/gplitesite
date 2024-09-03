@@ -45,6 +45,7 @@ class campaign(models.Model):
 
 class frame(models.Model):
     campaign = models.ForeignKey(campaign, on_delete=models.DO_NOTHING, related_name='campaign_frame')
+    opponent = models.OneToOneField(player, on_delete=models.DO_NOTHING)
     cue = models.OneToOneField(cue, on_delete=models.DO_NOTHING)
     let_points = models.IntegerField()
     get_points = models.IntegerField()
@@ -55,6 +56,7 @@ class frame(models.Model):
 
 
 DEFAULT_CAMPAIGN_ANNOTATE = {
+    'opponent_count': Count('campaign_frame__opponent', distinct=True),
     'win_frames': Sum(Cast('campaign_frame__is_win', IntegerField())),
     'lose_frames': Sum(1 - Cast('campaign_frame__is_win', IntegerField())),
     'avg_get_points': Avg('campaign_frame__get_points'),

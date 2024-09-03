@@ -9,9 +9,14 @@ from libs import constants
 def detail(request, campaign_id):
     campaign = models.campaign.objects.prefetch_related('campaign_frame').annotate(
         **models.DEFAULT_CAMPAIGN_ANNOTATE).get(id=campaign_id)
-    cues = models.cue.objects.order_by('id')
 
-    return render_template("snooker/campaign/detail.html", {'campaign': campaign, 'cues': cues}, request)
+    frames = campaign.campaign_frame.all().order_by('id')
+    cues = models.cue.objects.order_by('id')
+    opponents = models.player.objects.filter(group__is_show='1').order_by('-id')
+
+    return render_template("snooker/campaign/detail.html", {
+        'campaign': campaign, 'frames': frames, 'cues': cues, 'opponents': opponents
+    }, request)
 
 def index(request):
     campaigns = models.campaign.objects.prefetch_related('campaign_frame').annotate(
@@ -49,13 +54,17 @@ def add_frame_confirm(request, campaign_id):
         get_points = int(request.POST.get('get_points'))
         oppo_points = int(request.POST.get('oppo_points'))
         cue = models.cue.objects.get(id=int(request.POST.get('cue_id')))
+        opponent = models.player.objects.get(id=int(request.POST.get('opponent_id')))
         campaign = models.campaign.objects.get(id=campaign_id)
         let_points = int(request.POST.get('let_points'))
         max_break = request.POST.get('max_break')
         memo = request.POST.get('memo')
         is_win = '1' if get_points > oppo_points else '0'
         
-        frame = models.frame(get_points=get_points, oppo_points=oppo_points, cue=cue, campaign=campaign, let_points=let_points, is_win=is_win, max_break=None, memo=None)
+        frame = models.frame(
+            get_points=get_points, oppo_points=oppo_points, cue=cue, opponent=opponent, campaign=campaign,
+            let_points=let_points, is_win=is_win, max_break=None, memo=None
+        )
         
         if len(max_break.strip()) > 0:
             frame.max_break = int(max_break.strip())

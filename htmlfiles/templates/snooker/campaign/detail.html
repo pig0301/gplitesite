@@ -56,8 +56,7 @@
 			                <th>Date</th>
 			                <th>Location</th>
 			                <th>Total Score</th>
-			                <th>Opponent</th>
-			                {% if campaign.is_finished == '1' %}
+			                {% if frames.count > 0 %}
 			                <th>Get Points</th>
 			                <th>Oppo Points</th>
 			                {% endif %}
@@ -68,8 +67,7 @@
 			                <td>{{ campaign.event_dt|date:'Y-m-d' }}</td>
 			                <td>{{ campaign.gym.name }}（{{ campaign.gym.road }}）</td>
 			                <td>{{ campaign.win_frames|default:0 }} : {{ campaign.lose_frames|default:0 }}</td>
-			                <td>{{ campaign.opponent.name }}</td>
-			                {% if campaign.is_finished == '1' %}
+			                {% if frames.count > 0 %}
 			                <td>{{ campaign.avg_get_points|floatformat:1 }}</td>
 			                <td>{{ campaign.avg_oppo_points|floatformat:1 }}</td>
 			                {% endif %}
@@ -84,7 +82,7 @@
         <h4><br />Frame Summary&nbsp;
             {% if request.user.is_authenticated and campaign.is_finished == '0' %}
             <button class="btn btn-xs btn-info" data-toggle="modal" data-target="#exampleModal2"><i class="fas fa-folder-plus"></i></button>
-                {% if campaign.campaign_frame.all.count > 0 %}
+                {% if frames.count > 0 %}
                 <button class="btn btn-xs btn-warning" data-toggle="modal" data-target="#exampleModal3"><i class="fas fa-folder-minus" style="color:white"></i></button>
                 {% endif %}
             {% endif %}
@@ -103,14 +101,20 @@
                     <div class="modal-body">
                         <form id="addForm" action="/snooker/campaign/add_frame_confirm/{{ campaign.id }}/" method="post">
                         {% csrf_token %}
-                            <p>我方得分：<span class="badge-lg badge-danger" v-if="errors.get_points">${errors.get_points}</span><input type="text" class="form-control" name="get_points" v-model="get_points"></p>
-                            <p></p><p>对手得分：<span class="badge-lg badge-danger" v-if="errors.oppo_points">${errors.oppo_points}</span><input type="text" class="form-control" name="oppo_points" v-model="oppo_points"></p>
-                            <p></p><p>球杆：
+                            <p>球杆：
                             <select class="custom-select" name="cue_id">
                                 {% for cue in cues %}
                                 <option value="{{ cue.id }}" {% if cue.id == campaign.cue.id %}selected{% endif %}>{{ cue }}</option>
                                 {% endfor %}
                             </select></p>
+                            <p></p><p>对手：
+                            <select class="custom-select" name="opponent_id">
+                                {% for opponent in opponents %}
+                                <option value="{{ opponent.id }}" {% if opponent.id == campaign.opponent.id %}selected{% endif %}>{{ opponent }}</option>
+                                {% endfor %}
+                            </select></p>
+                            <p></p><p>我方得分：<span class="badge-lg badge-danger" v-if="errors.get_points">${errors.get_points}</span><input type="text" class="form-control" name="get_points" v-model="get_points"></p>
+                            <p></p><p>对手得分：<span class="badge-lg badge-danger" v-if="errors.oppo_points">${errors.oppo_points}</span><input type="text" class="form-control" name="oppo_points" v-model="oppo_points"></p>
                             <p></p><p>单杆最高：<span class="badge-lg badge-danger" v-if="errors.max_break">${errors.max_break}</span><input type="text" class="form-control" name="max_break" v-model="max_break"></p>
                             <p></p><p>备注：<textarea class="form-control" name="memo"></textarea></p>
                             <p></p><p>让分：<span class="badge-lg badge-danger" v-if="errors.let_points">${errors.let_points}</span><input type="text" class="form-control" name="let_points" v-model="let_points"></p>
@@ -150,6 +154,7 @@
 			            <tr>
 			                <th>#</th>
 			                <th>Cue</th>
+			                <th>Opponent</th>
 			                <th>Frame Score</th>
 			                <th>Max Break</th>
 			                <th>Memo</th>
@@ -157,10 +162,11 @@
 			            </tr>
 			        </thead>
 			        <tbody>
-			            {% for frame in campaign.campaign_frame.all %}
+			            {% for frame in frames %}
 			            <tr>
 			                <td>{{ forloop.counter }}</td>
 			                <td>{{ frame.cue.name }}（{{ frame.cue.owner.name }}）</td>
+			                <td>{{ frame.opponent.name }}</td>
 			                <td>{{ frame.get_points }} : {{ frame.oppo_points }}</td>
 			                <td>{{ frame.max_break|default_if_none:'' }}</td>
 			                <td>{{ frame.memo|default_if_none:'' }}</td>
@@ -203,7 +209,7 @@
 	    new Chart($("#canvas")[0], {
             type: 'line',
             data: {
-                labels: [{% for frame in campaign.campaign_frame.all %}"#{{ forloop.counter }}",{% endfor %}],
+                labels: [{% for frame in frames %}"#{{ forloop.counter }}",{% endfor %}],
                 datasets : [
                     {
                         label: "GPLite",
@@ -213,7 +219,7 @@
                         pointBackgroundColor : "#fff",
                         pointBorderWidth : 1,
                         data : [
-                            {% for frame in campaign.campaign_frame.all %}{{ frame.get_points }},{% endfor %}
+                            {% for frame in frames %}{{ frame.get_points }},{% endfor %}
                         ]
                     },
                     {
@@ -225,7 +231,7 @@
                         fill: false,
                         borderDash: [5, 5],
                         data : [
-                            {% for frame in campaign.campaign_frame.all %}{{ frame.oppo_points }},{% endfor %}
+                            {% for frame in frames %}{{ frame.oppo_points }},{% endfor %}
                         ]
                     }
                 ]
