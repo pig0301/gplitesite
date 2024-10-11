@@ -2,9 +2,10 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import OuterRef, Subquery, F
 from django.utils import timezone
+from django.contrib import messages
 
 import re, json, datetime, time, requests
 import hmac, hashlib, base64, codecs
@@ -63,6 +64,19 @@ def query_storage(request):
                 'msg_level': msg_level, 'wechat_level': wechat_level, 'dingding_level': dingding_level, 'emall_api': emall_api,
                 'products': prod_details, 'legends': prod_storages, 'chart_datas': storage_dtls
         }, request)
+    else:
+        return HttpResponse("非管理员用户禁止访问！")
+
+
+def query_reset(request):
+    if check_login(request):
+        prod_sku = request.POST.get('prod_sku')
+        emall_api = models_code.spider_emall_api.objects.get(id=1)
+        
+        messages.error(request, "Login failed. User name or password is wrong!" + prod_sku)
+        messages.info(request, "Logout successfully!")
+        
+        return HttpResponseRedirect("/coding/spider/storage/query/")
     else:
         return HttpResponse("非管理员用户禁止访问！")
 
@@ -147,6 +161,7 @@ def get_product_details(prod_links, msg_level):
     
     return (prod_details, storage_warn)
 
+
 def adjust_storage(emall_api, product, final_storage):
     url = 'https://ops.mall.icbc.com.cn/icbcrouter?'
     app_secret = emall_api.app_secret
@@ -176,6 +191,7 @@ def adjust_storage(emall_api, product, final_storage):
     pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
     
     return int(pattern.group(1)) == 0
+
 
 def init_firefox_option():
     options = webdriver.FirefoxOptions()

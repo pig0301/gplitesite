@@ -2,8 +2,30 @@
 {% load staticfiles %}
 
 {% block body_content %}
-    <div class="container">
+    <div class="container" id="vue_app_storage">
         <h4><br />Product Online Storage</h4>
+
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">询问</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">是否确认本场比赛已经结束？${prod_name}</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        <form id="resetForm" action="/message_level/update/" method="post">
+	                        {% csrf_token %}
+	                        <input type="hidden" v-bind:value="prod_sku" name="msg_id">
+	                        <button class="btn btn-info" type="submit">切换</button>
+	                    </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         
         <div class="row">
             <div class="col-md-12">
@@ -36,7 +58,7 @@
                             <td style="vertical-align: middle;">
                                 <h5><span class="badge badge-{% if product.daySalesCount < 0 %}danger{% else %}warning{% endif %}">{{ product.daySalesCount }}</span></h5>
                             </td>
-                            <td style="vertical-align: middle;">{{ product.prodSkuId }}/{{ product.logstorId }}</td>
+                            <td style="vertical-align: middle;"><button class="btn btn-xs btn-success" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.prodSkuId }},{{ product.logstorId }}'" @click="prod_name='{{ product.name }}'"><i class="far fa-hdd"></i></button></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -67,7 +89,7 @@
 					{% endfor %}
 				</select>
 				<div class="input-group-prepend">
-                    <label class="input-group-text" for="inputGroupSelect02">钉钉</label>
+                    <label class="input-group-text" for="inputGroupSelect02">API</label>
                 </div>
                 <select class="custom-select" id="inputGroupSelect03" name="emall_api">
                     <option value="0">[ 不处理 ]</option>
@@ -107,8 +129,14 @@
     
     <script type="text/javascript">
         new Vue({
+            el: "#vue_app_storage",
+            data: { prod_sku: "", prod_name: "" },
+            delimiters: ["${", "}"]
+        });
+        
+        new Vue({
             el: "#vue_app_chart",
-            data: { chart_id: 0 },
+            data: { chart_id: 0},
             delimiters: ["${", "}"]
         });
     
