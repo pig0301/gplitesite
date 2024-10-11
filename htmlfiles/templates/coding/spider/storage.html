@@ -17,7 +17,7 @@
                     <div class="modal-body">是否确认本场比赛已经结束？${prod_name}</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
-                        <form id="resetForm" action="/message_level/update/" method="post">
+                        <form id="resetForm" action="/coding/spider/storage/reset/" method="post">
 	                        {% csrf_token %}
 	                        <input type="hidden" v-bind:value="prod_sku" name="msg_id">
 	                        <button class="btn btn-info" type="submit">切换</button>
