@@ -58,7 +58,7 @@
                             <td style="vertical-align: middle;">
                                 <h5><span class="badge badge-{% if product.daySalesCount < 0 %}danger{% else %}warning{% endif %}">{{ product.daySalesCount }}</span></h5>
                             </td>
-                            <td style="vertical-align: middle;"><button class="btn btn-xs btn-success" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.prodSkuId }},{{ product.logstorId }}'" @click="prod_name='{{ product.name }}'"><i class="far fa-hdd"></i></button></td>
+                            <td style="vertical-align: middle;"><button class="btn btn-xs btn-success" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.prodSkuId }},{{ product.logstorId }}';prod_name='{{ product.name }}'"><i class="far fa-hdd"></i></button></td>
                         </tr>
                         {% endfor %}
                     </tbody>
