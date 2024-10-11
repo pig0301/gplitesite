@@ -6,7 +6,8 @@ from django.http import HttpResponse
 from django.db.models import OuterRef, Subquery, F
 from django.utils import timezone
 
-import re, json
+import re, json, datetime, time, requests
+import hmac, hashlib, base64, codecs
 
 from libs.functions import render_template, check_login, get_client_ip
 from libs import wechat, dingding, constants
@@ -17,11 +18,12 @@ from coding.spider import models as models_code
 
 def query_storage(request):
     if check_login(request):
-        (prod_details, storage_warn) = get_product_details(['9003867817'])
         msg_level = models.message_level.objects.get(id=1)
+        (prod_details, storage_warn) = get_product_details(['9003867817'], msg_level)
         
         wechat_level = models.wechat_message.objects.all()
         dingding_level = models.dingding_message.objects.all()
+        emall_api = models_code.spider_emall_api.objects.all()
 
         timestamp = timezone.now()
         event_dt = timestamp.date()
@@ -58,14 +60,14 @@ def query_storage(request):
                 prod['daySalesCount'] = init_storages[prod['merchantProdId']] - int(prod['visibleStorage'])
         
         return render_template("coding/spider/storage.html", {
-                'products': prod_details, 'msg_level': msg_level, 'wechat_level': wechat_level, 'dingding_level': dingding_level,
-                'legends': prod_storages, 'chart_datas': storage_dtls
+                'msg_level': msg_level, 'wechat_level': wechat_level, 'dingding_level': dingding_level, 'emall_api': emall_api,
+                'products': prod_details, 'legends': prod_storages, 'chart_datas': storage_dtls
         }, request)
     else:
         return HttpResponse("非管理员用户禁止访问！")
 
 
-def get_product_details(prod_links):
+def get_product_details(prod_links, msg_level):
     (options, profile) = init_firefox_option()
     browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options, firefox_profile=profile)
     
@@ -125,9 +127,17 @@ def get_product_details(prod_links):
                     product['visibleStorage'] = storage
             except Exception:
                 product['visibleStorage'] = '0'
-            
-            if int(product['visibleStorage']) <= constants.STORAGE_WARNING[product['merchantProdId']] * 0.8:
-                storage_warn += "\n" + product['name'] + "仅剩" + product['visibleStorage'] + "件。"
+
+            standard_storage = constants.STORAGE_WARNING[product['merchantProdId']]
+            if int(product['visibleStorage']) <= standard_storage[0]:
+                if msg_level.emall_api == None:
+                    storage_warn += "\n{0}仅剩{1}件。".format(product['name'], product['visibleStorage'])
+                else:
+                    if adjust_storage(msg_level.emall_api, product, standard_storage[1]):
+                        storage_warn += "\n{0}仅剩{1}件，已自动增加库存至{2}件。".format(product['name'], product['visibleStorage'], standard_storage[1])
+                    else:
+                        storage_warn += "\n{0}仅剩{1}件，自动增加库存失败！".format(product['name'], product['visibleStorage'])
+
                 product['is_warning'] = 1
         
         prod_details = prod_details + prods_info
@@ -136,6 +146,36 @@ def get_product_details(prod_links):
     browser.quit()
     
     return (prod_details, storage_warn)
+
+def adjust_storage(emall_api, product, final_storage):
+    url = 'https://ops.mall.icbc.com.cn/icbcrouter?'
+    app_secret = emall_api.app_secret
+    
+    data = {'version': '1.0', 'format': 'xml' }
+    
+    data['app_key'] = emall_api.app_key
+    data['auth_code'] = emall_api.auth_code
+    
+    dttm = datetime.datetime.fromtimestamp(time.time())
+    data['req_sid'] = dttm.strftime('%Y%m%d%H%M%S%f')
+    data['timestamp'] = dttm.strftime('%Y-%m-%d %H:%M:%S.%f')
+    
+    data['method'] = 'icbcb2c.sellablestorage.modify'
+    data['req_data'] = '<?xml version="1.0" encoding="UTF-8"?><body><products><product><product_sku_id>{0}</product_sku_id><logstor_id>{1}</logstor_id><storage>{2}</storage></product></products></body>'.format(product['prodSkuId'], product['logstorId'], final_storage)
+    
+    for param in data.keys():
+        url = '{0}{1}={2}&'.format(url, param, data[param])
+    
+    sign = 'app_key={0}&auth_code={1}&req_data={2}'.format(data['app_key'], data['auth_code'], data['req_data'])
+    sign = hmac.new(bytes(app_secret, 'utf-8'), bytes(sign, 'utf-8'), digestmod=hashlib.sha256).digest()
+    
+    url = '{0}sign={1}'.format(url, base64.b64encode(sign).decode('utf-8')).replace('+', '%2B')
+    response = requests.get(url, verify=False)
+    
+    response_xml = codecs.encode(response.text, 'latin-1').decode('utf-8')
+    pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
+    
+    return int(pattern.group(1)) == 0
 
 def init_firefox_option():
     options = webdriver.FirefoxOptions()

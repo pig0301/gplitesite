@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from libs.functions import render_template, check_login
 
 from home import models
+from coding.spider import models as models_code
 
 
 def index(request):
@@ -42,6 +43,7 @@ def message_level_update(request):
     if check_login(request):
         wechat_msg = int(request.POST['wechat_msg'])
         dingding_msg = int(request.POST['dingding_msg'])
+        emall_api = int(request.POST['emall_api'])
         
         msg_id = int(request.POST['msg_id'])
         callbackurl = request.POST['callbackurl']
@@ -58,6 +60,11 @@ def message_level_update(request):
                 msg_level.dingding_msg = None
             else:
                 msg_level.dingding_msg = models.dingding_message.objects.get(id=dingding_msg)
+
+            if emall_api == 0:
+                msg_level.emall_api = None
+            else:
+                msg_level.emall_api = models_code.spider_emall_api.objects.get(id=emall_api)
             
             msg_level.save()
         

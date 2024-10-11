@@ -16,6 +16,7 @@
                             <th>Storage(JS)</th>
                             <th>Storage(Click)</th>
                             <th>Today Sales</th>
+                            <th>Reset Storage</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -35,6 +36,7 @@
                             <td style="vertical-align: middle;">
                                 <h5><span class="badge badge-{% if product.daySalesCount < 0 %}danger{% else %}warning{% endif %}">{{ product.daySalesCount }}</span></h5>
                             </td>
+                            <td style="vertical-align: middle;">{{ product.prodSkuId }}/{{ product.logstorId }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -64,6 +66,15 @@
 					<option value="{{ dingding.id }}" {% if dingding.id == msg_level.dingding_msg.id %}selected{% endif %}>{{ dingding.msg_type }}</option>
 					{% endfor %}
 				</select>
+				<div class="input-group-prepend">
+                    <label class="input-group-text" for="inputGroupSelect02">钉钉</label>
+                </div>
+                <select class="custom-select" id="inputGroupSelect03" name="emall_api">
+                    <option value="0">[ 不处理 ]</option>
+                    {% for emall in emall_api %}
+                    <option value="{{ emall.id }}" {% if emall.id == msg_level.emall_api.id %}selected{% endif %}>{{ emall.msg_type }}</option>
+                    {% endfor %}
+                </select>
 				<div class="input-group-append">
 					<button class="btn btn-outline-primary" type="submit">切换</button>
 				</div>

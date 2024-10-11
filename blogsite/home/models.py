@@ -1,4 +1,5 @@
 from django.db import models
+from coding.spider import models as models_code
 
 
 class wechat_message(models.Model):
@@ -19,3 +20,4 @@ class message_level(models.Model):
     msg_info = models.CharField(max_length=100)
     wechat_msg = models.OneToOneField(wechat_message, on_delete=models.DO_NOTHING, null=True)
     dingding_msg = models.OneToOneField(dingding_message, on_delete=models.DO_NOTHING, null=True)
+    emall_api = models.OneToOneField(models_code.spider_emall_api, on_delete=models.DO_NOTHING, null=True)
