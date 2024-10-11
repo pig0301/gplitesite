@@ -14,13 +14,13 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">是否确认本场比赛已经结束？${prod_name}</div>
+                    <div class="modal-body">是否将“${prod_name}”的线上可售库存调整为默认值？</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
                         <form id="resetForm" action="/coding/spider/storage/reset/" method="post">
 	                        {% csrf_token %}
 	                        <input type="hidden" v-bind:value="prod_sku" name="prod_sku">
-	                        <button class="btn btn-info" type="submit">切换</button>
+	                        <button class="btn btn-info" type="submit">确定</button>
 	                    </form>
                     </div>
                 </div>
@@ -58,7 +58,11 @@
                             <td style="vertical-align: middle;">
                                 <h5><span class="badge badge-{% if product.daySalesCount < 0 %}danger{% else %}warning{% endif %}">{{ product.daySalesCount }}</span></h5>
                             </td>
-                            <td style="vertical-align: middle;"><button class="btn btn-xs btn-success" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.prodSkuId }},{{ product.logstorId }}';prod_name='{{ product.name }}'"><i class="far fa-hdd"></i></button></td>
+                            <td style="vertical-align: middle;">
+                                <button class="btn btn-xs btn-success" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.merchantProdId }},{{ product.prodSkuId }},{{ product.logstorId }}';prod_name='{{ product.name }}'">
+                                    <i class="far fa-hdd"></i>
+                                </button>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -70,12 +70,17 @@ def query_storage(request):
 
 def query_reset(request):
     if check_login(request):
-        prod_sku = request.POST.get('prod_sku')
+        prod_sku = request.POST.get('prod_sku').split(',')
         emall_api = models_code.spider_emall_api.objects.get(id=1)
         
-        messages.error(request, "Login failed. User name or password is wrong!" + prod_sku)
-        messages.info(request, "Logout successfully!")
+        standard_storage = constants.STORAGE_WARNING[prod_sku[0]]
+        product = { 'prodSkuId': prod_sku[1], 'logstorId': prod_sku[2] }
         
+        if adjust_storage(emall_api, product, standard_storage[1]):
+            messages.info(request, "API调用成功，产品库存已实时调整！")
+        else:
+            messages.warning(request, "API调用失败，请及时排查问题！")
+
         return HttpResponseRedirect("/coding/spider/storage/query/")
     else:
         return HttpResponse("非管理员用户禁止访问！")
