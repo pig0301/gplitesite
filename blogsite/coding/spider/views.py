@@ -19,8 +19,10 @@ from coding.spider import models as models_code
 
 def query_storage(request):
     if check_login(request):
+        is_auto = (get_client_ip(request) == '127.0.0.1')
+        
         msg_level = models.message_level.objects.get(id=1)
-        (prod_details, storage_warn) = get_product_details(['9003867817'], msg_level)
+        (prod_details, storage_warn) = get_product_details(['9003867817'], msg_level, is_auto)
         
         wechat_level = models.wechat_message.objects.all()
         dingding_level = models.dingding_message.objects.all()
@@ -29,7 +31,7 @@ def query_storage(request):
         timestamp = timezone.now()
         event_dt = timestamp.date()
 
-        if get_client_ip(request) == '127.0.0.1':
+        if is_auto:
             models_code.spider_product_storage.objects.filter(event_dt__lt=event_dt).delete()
             
             for prod in prod_details:
@@ -86,7 +88,7 @@ def query_reset(request):
         return HttpResponse("非管理员用户禁止访问！")
 
 
-def get_product_details(prod_links, msg_level):
+def get_product_details(prod_links, msg_level, is_auto):
     (options, profile) = init_firefox_option()
     browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options, firefox_profile=profile)
     
@@ -149,7 +151,7 @@ def get_product_details(prod_links, msg_level):
 
             standard_storage = constants.STORAGE_WARNING[product['merchantProdId']]
             if int(product['visibleStorage']) <= standard_storage[0]:
-                if msg_level.emall_api == None:
+                if not is_auto or msg_level.emall_api == None:
                     storage_warn += "\n{0}仅剩{1}件。".format(product['name'], product['visibleStorage'])
                 else:
                     if adjust_storage(msg_level.emall_api, product, standard_storage[1]):
