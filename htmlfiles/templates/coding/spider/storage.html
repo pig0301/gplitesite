@@ -48,7 +48,7 @@
                             <td style="vertical-align: middle;">{{ product.skuPrice }}</td>
                             <td style="vertical-align: middle;">
                                 <a href="{{ product.prodUrl }}"><h5>
-                                    <span class="badge badge-{% if product.is_warning == 1 %}danger{% elif product.visibleStorage > product.standard_storage %}success{% else %}light{% endif %}" data-toggle="tooltip" data-placement="right" title="{{ product.standard_storage }}">{{ product.visibleStorage }}
+                                    <span class="badge badge-{% if product.is_warning == 1 %}danger{% elif product.visibleStorage > product.standard_storage %}success{% else %}light{% endif %}">{{ product.visibleStorage }}
                                 </span></h5></a>
                             </td>
                             <td style="vertical-align: middle;">
@@ -56,7 +56,7 @@
                             </td>
                             <td style="vertical-align: middle;">
                                 <button class="btn btn-xs btn-info" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.merchantProdId }},{{ product.prodSkuId }},{{ product.logstorId }}';prod_name='{{ product.name }}'">
-                                    <i class="fas fa-magic"></i>
+                                    <i class="fas fa-magic"></i> ->{{ product.standard_storage }}
                                 </button>
                             </td>
                         </tr>

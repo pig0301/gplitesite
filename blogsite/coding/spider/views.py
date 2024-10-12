@@ -151,7 +151,9 @@ def get_product_details(prod_links, msg_level, is_auto):
 
             standard_storage = constants.STORAGE_WARNING[product['merchantProdId']]
             remain_storage = int(product['visibleStorage'])
+
             product['standard_storage'] = standard_storage[1]
+            product['visibleStorage'] = remain_storage
 
             if remain_storage <= standard_storage[0]:
                 if not is_auto or msg_level.emall_api == None:
