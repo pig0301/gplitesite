@@ -27,7 +27,7 @@
                             <td>{{ campaign.opponent.name }}{% if campaign.opponent_count > 1 %}（等{{ campaign.opponent_count }}人）{% endif %}</td>
                             <td>{{ campaign.campaign_break }}</td>
                             <td>
-                                <a class="btn btn-xs btn-{% if campaign.is_finished == '1' %}success{% else %}primary{% endif %}" href="/snooker/campaign/{{ campaign.id }}/"><i class="fas fa-{% if campaign.is_finished == '1' %}search{% else %}edit{% endif %}"></i></a>
+                                <a class="btn btn-xs btn-{% if campaign.is_finished == '1' %}success{% else %}info{% endif %}" href="/snooker/campaign/{{ campaign.id }}/"><i class="fas fa-{% if campaign.is_finished == '1' %}swimming-pool{% else %}swimmer{% endif %}"></i></a>
                             </td>
                         </tr>
                         {% endfor %}
