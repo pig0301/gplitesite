@@ -14,7 +14,7 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">是否确认重置<b>【${prod_name}】</b>线上可售库存？</div>
+                    <div class="modal-body">是否将<b>【${prod_name}】</b>可售库存调整为<b>【${standard_storage}】</b>件？</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
                         <form id="resetForm" action="/coding/spider/storage/reset/" method="post">
@@ -55,8 +55,8 @@
                                 <h5><span class="badge badge-{% if product.daySalesCount < 0 %}danger{% else %}warning{% endif %}">{{ product.daySalesCount }}</span></h5>
                             </td>
                             <td style="vertical-align: middle;">
-                                <button class="btn btn-xs btn-info" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.merchantProdId }},{{ product.prodSkuId }},{{ product.logstorId }}';prod_name='{{ product.name }}'">
-                                    <i class="fas fa-magic"></i> ->{{ product.standard_storage }}
+                                <button class="btn btn-xs btn-info" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.merchantProdId }},{{ product.prodSkuId }},{{ product.logstorId }}';prod_name='{{ product.name }}';standard_storage={{ product.standard_storage }}">
+                                    <i class="fas fa-magic"></i>
                                 </button>
                             </td>
                         </tr>
@@ -130,7 +130,7 @@
     <script type="text/javascript">
         new Vue({
             el: "#vue_app_storage",
-            data: { prod_sku: "", prod_name: "" },
+            data: { prod_sku: "", prod_name: "", standard_storage: 0 },
             delimiters: ["${", "}"]
         });
         
