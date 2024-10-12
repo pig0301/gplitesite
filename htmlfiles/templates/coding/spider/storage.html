@@ -35,8 +35,7 @@
                             <th>Product Id</th>
                             <th>Product Name</th>
                             <th>Total Price</th>
-                            <th>Storage(JS)</th>
-                            <th>Storage(Click)</th>
+                            <th>Storage Count</th>
                             <th>Today Sales</th>
                             <th>Reset Storage</th>
                         </tr>
@@ -48,9 +47,6 @@
                             <td style="vertical-align: middle;">{{ product.name }}</td>
                             <td style="vertical-align: middle;">{{ product.skuPrice }}</td>
                             <td style="vertical-align: middle;">
-                                <span class="badge badge-{% if product.is_warning == 1 %}danger{% else %}info{% endif %}">{{ product.totalStorage }}</span>
-                            </td>
-                            <td style="vertical-align: middle;">
                                 <a href="{{ product.prodUrl }}"><h5>
                                     <span class="badge badge-{% if product.is_warning == 1 %}danger{% else %}light{% endif %}">{{ product.visibleStorage }}
                                 </span></h5></a>
@@ -59,8 +55,8 @@
                                 <h5><span class="badge badge-{% if product.daySalesCount < 0 %}danger{% else %}warning{% endif %}">{{ product.daySalesCount }}</span></h5>
                             </td>
                             <td style="vertical-align: middle;">
-                                <button class="btn btn-xs btn-primary" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.merchantProdId }},{{ product.prodSkuId }},{{ product.logstorId }}';prod_name='{{ product.name }}'">
-                                    <i class="fas fa-hamburger"></i>
+                                <button class="btn btn-xs btn-info" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.merchantProdId }},{{ product.prodSkuId }},{{ product.logstorId }}';prod_name='{{ product.name }}'">
+                                    <i class="fas fa-magic"></i>
                                 </button>
                             </td>
                         </tr>

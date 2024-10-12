@@ -150,14 +150,16 @@ def get_product_details(prod_links, msg_level, is_auto):
                 product['visibleStorage'] = '0'
 
             standard_storage = constants.STORAGE_WARNING[product['merchantProdId']]
-            if int(product['visibleStorage']) <= standard_storage[0]:
+            remain_storage = int(product['visibleStorage'])
+
+            if remain_storage <= standard_storage[0]:
                 if not is_auto or msg_level.emall_api == None:
-                    storage_warn += "\n{0}仅剩{1}件。".format(product['name'], product['visibleStorage'])
+                    storage_warn += "\n{0}仅剩{1}件。".format(product['name'], remain_storage)
                 else:
                     if adjust_storage(msg_level.emall_api, product, standard_storage[1]):
-                        storage_warn += "\n{0}仅剩{1}件，已自动增加库存至{2}件。".format(product['name'], product['visibleStorage'], standard_storage[1])
+                        storage_warn += "\n{0}仅剩{1}件，已自动增加{2}件库存。".format(product['name'], remain_storage, standard_storage[1] - remain_storage)
                     else:
-                        storage_warn += "\n{0}仅剩{1}件，自动增加库存失败！".format(product['name'], product['visibleStorage'])
+                        storage_warn += "\n{0}仅剩{1}件，自动增加库存失败！".format(product['name'], remain_storage)
 
                 product['is_warning'] = 1
         
