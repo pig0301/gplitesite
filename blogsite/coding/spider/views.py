@@ -162,6 +162,8 @@ def get_product_details(prod_links, msg_level, is_auto):
                         storage_warn += "\n{0}仅剩{1}件，自动增加库存失败！".format(product['name'], remain_storage)
 
                 product['is_warning'] = 1
+            elif remain_storage > standard_storage[0]:
+                product['is_too_much'] = 1
         
         prod_details = prod_details + prods_info
     
