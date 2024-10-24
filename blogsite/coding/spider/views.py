@@ -1,3 +1,5 @@
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 
 from django.http import HttpResponse, HttpResponseRedirect
@@ -87,12 +89,19 @@ def query_reset(request):
 
 
 def get_product_details(prod_links, msg_level, is_auto):
+    (options, profile) = init_firefox_option()
+    browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options, firefox_profile=profile)
+    
+    storage_re = re.compile(r'\s(\d+)\s')
     prod_details = []
     storage_warn = ""
     
     for link_id in prod_links:
         url = 'https://mall.icbc.com.cn/products/pd_' + link_id + '.jhtml'
-        soup = BeautifulSoup(requests.get(url).content, "html.parser")
+        browser.get(url)
+        
+        WebDriverWait(browser, 5).until(lambda x: x.find_element_by_id('skuSelected').is_displayed())
+        soup = BeautifulSoup(browser.page_source, 'html.parser')
         
         re_results = [None, None, None, None]
         re_exps = [
@@ -117,9 +126,31 @@ def get_product_details(prod_links, msg_level, is_auto):
             product['sku_info'] = prods_sku[product['prodSkuId']][0]
             product['name'] = prod_name + prods_spec[product['sku_info']['prodEnumId']]
             product['prodUrl'] = url
+            
+            try:
+                specBox = browser.find_element_by_id(product['sku_info']['prodPropId'] + product['sku_info']['prodEnumId'])
+                
+                storage = None
+                errTimes = 0
+                while storage == None and errTimes < 10:
+                    browser.execute_script("skuClickFun(arguments[0],'{0}','{1}','');".format(product['sku_info']['prodPropId'], product['sku_info']['prodEnumId']), specBox)
+                    WebDriverWait(browser, 5).until(lambda x: x.find_element_by_id("productStorage").is_displayed())
+                    
+                    try:
+                        storage_str = browser.find_element_by_id("productStorage").text
+                        storage = storage_re.search(storage_str).group(1)
+                    except Exception:
+                        errTimes += 1
+                
+                if storage == None:
+                    product['visibleStorage'] = '-1'
+                else:
+                    product['visibleStorage'] = storage
+            except Exception:
+                product['visibleStorage'] = '0'
 
             standard_storage = constants.STORAGE_WARNING[product['merchantProdId']]
-            remain_storage = int(product['totalStorage'])
+            remain_storage = int(product['visibleStorage'])
 
             product['standard_storage'] = standard_storage[1]
             product['visibleStorage'] = remain_storage
@@ -136,6 +167,9 @@ def get_product_details(prod_links, msg_level, is_auto):
                 product['is_warning'] = 1
         
         prod_details = prod_details + prods_info
+    
+    browser.close()
+    browser.quit()
     
     return (prod_details, storage_warn)
 
@@ -169,3 +203,21 @@ def adjust_storage(emall_api, product, final_storage):
     pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
     
     return int(pattern.group(1)) == 0
+
+
+def init_firefox_option():
+    options = webdriver.FirefoxOptions()
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    
+    profile = webdriver.FirefoxProfile()
+    profile.set_preference('browser.cache.disk.enable', False);
+    profile.set_preference('browser.cache.memory.enable', False);
+    profile.set_preference('browser.cache.offline.enable', False);
+    profile.set_preference('network.http.use-cache', False);
+    profile.set_preference('permissions.default.image', 2)
+    profile.set_preference('permissions.default.stylesheet', 2)
+    profile.set_preference('browser.migration.version', 9001)
+    profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
+    
+    return (options, profile)
