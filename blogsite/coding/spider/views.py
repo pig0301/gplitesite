@@ -89,19 +89,27 @@ def query_reset(request):
 
 
 def get_product_details(prod_links, msg_level, is_auto):
-    (options, profile) = init_firefox_option()
-    browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options, firefox_profile=profile)
+    browser = None
+    soup = None
     
     storage_re = re.compile(r'\s(\d+)\s')
     prod_details = []
     storage_warn = ""
     
+    if is_auto:
+        (options, profile) = init_firefox_option()
+        browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options, firefox_profile=profile)
+
     for link_id in prod_links:
         url = 'https://mall.icbc.com.cn/products/pd_' + link_id + '.jhtml'
-        browser.get(url)
         
-        WebDriverWait(browser, 5).until(lambda x: x.find_element_by_id('skuSelected').is_displayed())
-        soup = BeautifulSoup(browser.page_source, 'html.parser')
+        if browser is not None:
+            browser.get(url)
+        
+            WebDriverWait(browser, 5).until(lambda x: x.find_element_by_id('skuSelected').is_displayed())
+            soup = BeautifulSoup(browser.page_source, 'html.parser')
+        else:
+            soup = BeautifulSoup(requests.get(url).content, "html.parser")
         
         re_results = [None, None, None, None]
         re_exps = [
@@ -127,30 +135,34 @@ def get_product_details(prod_links, msg_level, is_auto):
             product['name'] = prod_name + prods_spec[product['sku_info']['prodEnumId']]
             product['prodUrl'] = url
             
-            try:
-                specBox = browser.find_element_by_id(product['sku_info']['prodPropId'] + product['sku_info']['prodEnumId'])
-                
-                storage = None
-                errTimes = 0
-                while storage == None and errTimes < 10:
-                    browser.execute_script("skuClickFun(arguments[0],'{0}','{1}','');".format(product['sku_info']['prodPropId'], product['sku_info']['prodEnumId']), specBox)
-                    WebDriverWait(browser, 5).until(lambda x: x.find_element_by_id("productStorage").is_displayed())
-                    
-                    try:
-                        storage_str = browser.find_element_by_id("productStorage").text
-                        storage = storage_re.search(storage_str).group(1)
-                    except Exception:
-                        errTimes += 1
-                
-                if storage == None:
-                    product['visibleStorage'] = '-1'
-                else:
-                    product['visibleStorage'] = storage
-            except Exception:
-                product['visibleStorage'] = '0'
-
             standard_storage = constants.STORAGE_WARNING[product['merchantProdId']]
-            remain_storage = int(product['visibleStorage'])
+            
+            if browser is not None:
+                try:
+                    specBox = browser.find_element_by_id(product['sku_info']['prodPropId'] + product['sku_info']['prodEnumId'])
+                
+                    storage = None
+                    errTimes = 0
+                    while storage == None and errTimes < 10:
+                        browser.execute_script("skuClickFun(arguments[0],'{0}','{1}','');".format(product['sku_info']['prodPropId'], product['sku_info']['prodEnumId']), specBox)
+                        WebDriverWait(browser, 5).until(lambda x: x.find_element_by_id("productStorage").is_displayed())
+                    
+                        try:
+                            storage_str = browser.find_element_by_id("productStorage").text
+                            storage = storage_re.search(storage_str).group(1)
+                        except Exception:
+                            errTimes += 1
+                
+                    if storage == None:
+                        product['visibleStorage'] = '-1'
+                    else:
+                        product['visibleStorage'] = storage
+                except Exception:
+                    product['visibleStorage'] = '0'
+
+                remain_storage = int(product['visibleStorage'])
+            else:
+                remain_storage = int(product['totalStorage'])
 
             product['standard_storage'] = standard_storage[1]
             product['visibleStorage'] = remain_storage
@@ -168,8 +180,9 @@ def get_product_details(prod_links, msg_level, is_auto):
         
         prod_details = prod_details + prods_info
     
-    browser.close()
-    browser.quit()
+    if browser is not None:
+        browser.close()
+        browser.quit()
     
     return (prod_details, storage_warn)
 
