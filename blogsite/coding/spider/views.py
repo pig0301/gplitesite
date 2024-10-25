@@ -1,7 +1,3 @@
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from bs4 import BeautifulSoup
-
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import OuterRef, Subquery, F
 from django.utils import timezone
@@ -36,7 +32,7 @@ def query_storage(request):
             
             for prod in prod_details:
                 detail = models_code.spider_product_storage(event_dt=event_dt, product_id=prod['merchantProdId'], product_name=prod['name'],
-                    price=float(prod['skuPrice'].replace(',', '')), storage_cnt=int(prod['visibleStorage']), create_dttm=timezone.now())
+                    price=float(prod['skuPrice'].replace(',', '')), storage_cnt=int(prod['skuStorage']), create_dttm=timezone.now())
                 detail.save()
             
             if msg_level and len(storage_warn) > 0:
@@ -60,8 +56,8 @@ def query_storage(request):
         
         for prod in prod_details:
             if prod['merchantProdId'] in init_storages.keys():
-                prod['daySalesCount'] = init_storages[prod['merchantProdId']] - int(prod['visibleStorage'])
-        
+                prod['daySalesCount'] = init_storages[prod['merchantProdId']] - int(prod['skuStorage'])
+
         return render_template("coding/spider/storage.html", {
                 'msg_level': msg_level, 'wechat_level': wechat_level, 'dingding_level': dingding_level, 'emall_api': emall_api,
                 'products': prod_details, 'legends': prod_storages, 'chart_datas': storage_dtls
@@ -89,101 +85,37 @@ def query_reset(request):
 
 
 def get_product_details(prod_links, msg_level, is_auto):
-    browser = None
-    soup = None
-    
-    storage_re = re.compile(r'\s(\d+)\s')
     prod_details = []
     storage_warn = ""
-    
-    if is_auto:
-        (options, profile) = init_firefox_option()
-        browser = webdriver.Firefox(executable_path="/data/firefox/geckodriver", options=options, firefox_profile=profile)
 
     for link_id in prod_links:
-        url = 'https://mall.icbc.com.cn/products/pd_' + link_id + '.jhtml'
-        
-        if browser is not None:
-            browser.get(url)
-        
-            WebDriverWait(browser, 5).until(lambda x: x.find_element_by_id('skuSelected').is_displayed())
-            soup = BeautifulSoup(browser.page_source, 'html.parser')
-        else:
-            soup = BeautifulSoup(requests.get(url).content, "html.parser")
-        
-        re_results = [None, None, None, None]
-        re_exps = [
-            re.compile(r'var proName = (.*?);'),
-            re.compile(r'var skuToPropJson = (.*?);'),
-            re.compile(r'var prodSkuJson = (.*?);'),
-            re.compile(r'var prodEnumMap = (.*?);')
-        ]
-        
-        for script in soup.find_all('script'):
-            for i in range(len(re_results)):
-                match_exp = re_exps[i].search(script.prettify())
-                if match_exp:
-                    re_results[i] = json.loads(match_exp.group(1))
-        
-        (prod_name, prods_sku, prods_info, prods_spec) = re_results
-        
+        url = "https://mall.icbc.com.cn/products/queryProdSkuAjax.jhtml?productId={0}&isProdDraft=&isBranch=0".format(link_id)
+        prods_info = json.loads(json.loads(requests.get(url).content)['prodSkuJson'])
         prods_info = sorted(prods_info, key=lambda x: x['prodSkuId'])
-        
+
         for product in prods_info:
             product['merchantProdId'] = product['merchantProdId'].rjust(9, '0')
-            product['sku_info'] = prods_sku[product['prodSkuId']][0]
-            product['name'] = prod_name + prods_spec[product['sku_info']['prodEnumId']]
-            product['prodUrl'] = url
-            
             standard_storage = constants.STORAGE_WARNING[product['merchantProdId']]
             
-            if browser is not None:
-                try:
-                    specBox = browser.find_element_by_id(product['sku_info']['prodPropId'] + product['sku_info']['prodEnumId'])
-                
-                    storage = None
-                    errTimes = 0
-                    while storage == None and errTimes < 10:
-                        browser.execute_script("skuClickFun(arguments[0],'{0}','{1}','');".format(product['sku_info']['prodPropId'], product['sku_info']['prodEnumId']), specBox)
-                        WebDriverWait(browser, 5).until(lambda x: x.find_element_by_id("productStorage").is_displayed())
-                    
-                        try:
-                            storage_str = browser.find_element_by_id("productStorage").text
-                            storage = storage_re.search(storage_str).group(1)
-                        except Exception:
-                            errTimes += 1
-                
-                    if storage == None:
-                        product['visibleStorage'] = '-1'
-                    else:
-                        product['visibleStorage'] = storage
-                except Exception:
-                    product['visibleStorage'] = '0'
-
-                remain_storage = int(product['visibleStorage'])
-            else:
-                remain_storage = int(product['totalStorage'])
-
+            product['name'] = standard_storage[2]
+            product['prodUrl'] = 'https://mall.icbc.com.cn/products/pd_{0}.jhtml'.format(link_id)
+            
+            product['skuStorage'] = int(product['skuStorage'])
             product['standard_storage'] = standard_storage[1]
-            product['visibleStorage'] = remain_storage
 
-            if remain_storage <= standard_storage[0]:
+            if product['skuStorage'] <= standard_storage[0]:
                 if not is_auto or msg_level.emall_api == None:
-                    storage_warn += "\n{0}仅剩{1}件。".format(product['name'], remain_storage)
+                    storage_warn += "\n{0}仅剩{1}件。".format(product['name'], product['skuStorage'])
                 else:
                     if adjust_storage(msg_level.emall_api, product, standard_storage[1]):
-                        storage_warn += "\n{0}仅剩{1}件，已自动增加{2}件库存。".format(product['name'], remain_storage, standard_storage[1] - remain_storage)
+                        storage_warn += "\n{0}仅剩{1}件，已自动增加{2}件库存。".format(product['name'], product['skuStorage'], standard_storage[1] - product['skuStorage'])
                     else:
-                        storage_warn += "\n{0}仅剩{1}件，自动增加库存失败！".format(product['name'], remain_storage)
-
+                        storage_warn += "\n{0}仅剩{1}件，自动增加库存失败！".format(product['name'], product['skuStorage'])
+            
                 product['is_warning'] = 1
         
         prod_details = prod_details + prods_info
-    
-    if browser is not None:
-        browser.close()
-        browser.quit()
-    
+
     return (prod_details, storage_warn)
 
 
@@ -216,21 +148,3 @@ def adjust_storage(emall_api, product, final_storage):
     pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
     
     return int(pattern.group(1)) == 0
-
-
-def init_firefox_option():
-    options = webdriver.FirefoxOptions()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    
-    profile = webdriver.FirefoxProfile()
-    profile.set_preference('browser.cache.disk.enable', False);
-    profile.set_preference('browser.cache.memory.enable', False);
-    profile.set_preference('browser.cache.offline.enable', False);
-    profile.set_preference('network.http.use-cache', False);
-    profile.set_preference('permissions.default.image', 2)
-    profile.set_preference('permissions.default.stylesheet', 2)
-    profile.set_preference('browser.migration.version', 9001)
-    profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
-    
-    return (options, profile)

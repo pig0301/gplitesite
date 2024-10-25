@@ -48,7 +48,7 @@
                             <td style="vertical-align: middle;">{{ product.skuPrice }}</td>
                             <td style="vertical-align: middle;">
                                 <a href="{{ product.prodUrl }}"><h5>
-                                    <span class="badge badge-{% if product.is_warning == 1 %}danger{% elif product.visibleStorage > product.standard_storage %}success{% else %}light{% endif %}">{{ product.visibleStorage }}
+                                    <span class="badge badge-{% if product.is_warning == 1 %}danger{% elif product.skuStorage > product.standard_storage %}success{% else %}light{% endif %}">{{ product.skuStorage }}
                                 </span></h5></a>
                             </td>
                             <td style="vertical-align: middle;">
