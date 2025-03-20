@@ -3,8 +3,8 @@ from django.db.models import OuterRef, Subquery, F
 from django.utils import timezone
 from django.contrib import messages
 
-import re, json, datetime, time, requests, urllib3
-import hmac, hashlib, base64
+import re, json, datetime, time, requests
+import hmac, hashlib, base64, codecs
 
 from libs.functions import render_template, check_login, get_client_ip
 from libs import wechat, dingding, constants
@@ -142,10 +142,9 @@ def adjust_storage(emall_api, product, final_storage):
     sign = hmac.new(bytes(app_secret, 'utf-8'), bytes(sign, 'utf-8'), digestmod=hashlib.sha256).digest()
     
     url = '{0}sign={1}'.format(url, base64.b64encode(sign).decode('utf-8')).replace('+', '%2B')
-    http_ssl = urllib3.PoolManager(cert_reqs='CERT_NONE', assert_hostname=False)
+    response = requests.get(url, verify=False)
     
-    response = http_ssl.request("GET", url)
-    response_xml = response.data.decode("utf-8")
+    response_xml = codecs.encode(response.text, 'latin-1').decode('utf-8')
     pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
     
     return int(pattern.group(1)) == 0
