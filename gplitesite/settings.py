@@ -99,7 +99,7 @@ if SERVER_TYPE == 'DEVELOP':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'local_gplitesite',
+            'NAME': 'postgres',
             'USER': 'heroku_usr',
             'PASSWORD': 'heroku_usr',
             'HOST': 'localhost',
