@@ -98,7 +98,7 @@ def get_product_details(prod_links, msg_level, is_auto):
             standard_storage = constants.STORAGE_WARNING[product['merchantProdId']]
             
             product['name'] = standard_storage[2]
-            product['prodUrl'] = 'https://mall.icbc.com.cn/products/pd_{0}.jhtml'.format(link_id)
+            product['prodUrl'] = 'https://m.mall.icbc.com.cn/products/pd_{0}.jhtml'.format(link_id)
             
             product['skuStorage'] = int(product['skuStorage'])
             product['standard_storage'] = standard_storage[1]
