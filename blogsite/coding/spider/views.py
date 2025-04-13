@@ -89,7 +89,7 @@ def get_product_details(prod_links, msg_level, is_auto):
     storage_warn = ""
 
     for link_id in prod_links:
-        url = "https://mall.icbc.com.cn/products/queryProdSkuAjax.jhtml?productId={0}&isProdDraft=&isBranch=0".format(link_id)
+        url = "https://m.mall.icbc.com.cn/products/queryProdSkuAjax.jhtml?productId={0}&isProdDraft=&isBranch=0".format(link_id)
         prods_info = json.loads(json.loads(requests.get(url).content)['prodSkuJson'])
         prods_info = sorted(prods_info, key=lambda x: x['prodSkuId'])
 
