@@ -3,8 +3,6 @@ from django.db.models import OuterRef, Subquery, F
 from django.utils import timezone
 from django.contrib import messages
 
-from urllib3.util import ssl_
-
 import re, json, datetime, time, requests
 import hmac, hashlib, base64, codecs
 
@@ -120,6 +118,27 @@ def get_product_details(prod_links, msg_level, is_auto):
 
     return (prod_details, storage_warn)
 
+import ssl
+from requests.adapters import HTTPAdapter
+
+class InsecureTLSAdapter(HTTPAdapter):
+    def init_poolmanager(self, *args, **kwargs):
+        # 创建完全自定义的 SSL 上下文
+        ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE  # 直接设置 verify_mode
+        
+        # 允许旧式重新协商（关键选项）
+        ctx.options |= 0x4  # OP_LEGACY_SERVER_CONNECT
+        
+        # 允许弱密钥（1024 位 RSA）和旧协议
+        ctx.set_ciphers("DEFAULT:@SECLEVEL=0")  # 覆盖安全等级
+        
+        kwargs['ssl_context'] = ctx
+        return super().init_poolmanager(*args, **kwargs)
+
+
+
 
 def adjust_storage(emall_api, product, final_storage):
     url = 'https://ops.mall.icbc.com.cn/icbcrouter?'
@@ -144,10 +163,21 @@ def adjust_storage(emall_api, product, final_storage):
     sign = hmac.new(bytes(app_secret, 'utf-8'), bytes(sign, 'utf-8'), digestmod=hashlib.sha256).digest()
     
     url = '{0}sign={1}'.format(url, base64.b64encode(sign).decode('utf-8')).replace('+', '%2B')
-    ssl_.DEFAULT_CIPHERS = 'DEFAULT:@SECLEVEL=0'
     
+    # 使用自定义适配器
     session = requests.Session()
-    response = session.get(url, verify=False)
+    adapter = InsecureTLSAdapter()
+    session.mount("https://", adapter)
+    
+    # 发送请求（必须保留 verify=False）
+    response = session.get(
+        url,
+        verify=False,  # 防止 requests 覆盖配置
+        headers={"User-Agent": "Bypass Tool/1.0"}  # 避免被服务器拦截 UA
+    )
+    print(response.status_code)
+    
+    response = requests.get(url, verify=False)
     
     response_xml = codecs.encode(response.text, 'latin-1').decode('utf-8')
     pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
