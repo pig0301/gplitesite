@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os, sys
-import django_heroku
 import dj_database_url
 
 
@@ -33,8 +32,6 @@ SERVER_TYPE = 'TENCENT'
 
 if os.sys.platform == 'win32':
     SERVER_TYPE = 'DEVELOP'
-elif 'heroku' in os.environ['PATH']:
-    SERVER_TYPE = 'HEROKU'
 
 
 DEBUG = (SERVER_TYPE == 'DEVELOP')
@@ -157,6 +154,3 @@ MEDIA_URL = '/media/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'htmlfiles', 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'htmlfiles', 'media')
-
-if SERVER_TYPE == 'HEROKU':
-    django_heroku.settings(locals())
