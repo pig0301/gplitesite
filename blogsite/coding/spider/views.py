@@ -3,6 +3,8 @@ from django.db.models import OuterRef, Subquery, F
 from django.utils import timezone
 from django.contrib import messages
 
+from urllib3.util import ssl_
+
 import re, json, datetime, time, requests
 import hmac, hashlib, base64, codecs
 
@@ -142,6 +144,7 @@ def adjust_storage(emall_api, product, final_storage):
     sign = hmac.new(bytes(app_secret, 'utf-8'), bytes(sign, 'utf-8'), digestmod=hashlib.sha256).digest()
     
     url = '{0}sign={1}'.format(url, base64.b64encode(sign).decode('utf-8')).replace('+', '%2B')
+    ssl_.DEFAULT_CIPHERS = 'DEFAULT:@SECLEVEL=0'
     response = requests.get(url, verify=False)
     
     response_xml = codecs.encode(response.text, 'latin-1').decode('utf-8')
