@@ -12,9 +12,6 @@ from libs import wechat, dingding, constants
 from home import models
 from coding.spider import models as models_code
 
-import urllib3
-from urllib3.util import ssl_
-
 
 def query_storage(request):
     if check_login(request):
@@ -145,22 +142,7 @@ def adjust_storage(emall_api, product, final_storage):
     sign = hmac.new(bytes(app_secret, 'utf-8'), bytes(sign, 'utf-8'), digestmod=hashlib.sha256).digest()
     
     url = '{0}sign={1}'.format(url, base64.b64encode(sign).decode('utf-8')).replace('+', '%2B')
-
-
-    # 创建自定义SSL上下文，允许不安全的重新协商
-    context = ssl_.create_urllib3_context()
-    context.options &= ~0x00040000  # 关闭OP_NO_LEGACY_SERVER_CONNECT选项
-    
-    # 在会话中使用自定义SSL上下文
-    session = requests.Session()
-    adapter = requests.adapters.HTTPAdapter(pool_connections=1, pool_maxsize=1)
-    adapter.ssl_context = context
-    session.mount('https://', adapter)
-    
-    # 使用此会话进行请求
-
-    
-    response = session.get(url, verify=False)
+    response = requests.get(url, verify=False)
     
     response_xml = codecs.encode(response.text, 'latin-1').decode('utf-8')
     pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
