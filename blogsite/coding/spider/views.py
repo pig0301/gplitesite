@@ -160,7 +160,7 @@ def adjust_storage(emall_api, product, final_storage):
     # 使用此会话进行请求
 
     
-    response = session.get(url)
+    response = session.get(url, verify=False)
     
     response_xml = codecs.encode(response.text, 'latin-1').decode('utf-8')
     pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
