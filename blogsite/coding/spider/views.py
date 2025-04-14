@@ -145,7 +145,9 @@ def adjust_storage(emall_api, product, final_storage):
     
     url = '{0}sign={1}'.format(url, base64.b64encode(sign).decode('utf-8')).replace('+', '%2B')
     ssl_.DEFAULT_CIPHERS = 'DEFAULT:@SECLEVEL=0'
-    response = requests.get(url, verify=False)
+    
+    session = requests.Session()
+    response = session.get(url, verify=False)
     
     response_xml = codecs.encode(response.text, 'latin-1').decode('utf-8')
     pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
