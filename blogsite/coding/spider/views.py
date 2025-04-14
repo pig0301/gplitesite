@@ -12,6 +12,9 @@ from libs import wechat, dingding, constants
 from home import models
 from coding.spider import models as models_code
 
+import urllib3
+from urllib3.util import ssl_
+
 
 def query_storage(request):
     if check_login(request):
@@ -118,27 +121,6 @@ def get_product_details(prod_links, msg_level, is_auto):
 
     return (prod_details, storage_warn)
 
-import ssl
-from requests.adapters import HTTPAdapter
-
-class InsecureTLSAdapter(HTTPAdapter):
-    def init_poolmanager(self, *args, **kwargs):
-        # 创建完全自定义的 SSL 上下文
-        ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE  # 直接设置 verify_mode
-        
-        # 允许旧式重新协商（关键选项）
-        ctx.options |= 0x4  # OP_LEGACY_SERVER_CONNECT
-        
-        # 允许弱密钥（1024 位 RSA）和旧协议
-        ctx.set_ciphers("DEFAULT:@SECLEVEL=0")  # 覆盖安全等级
-        
-        kwargs['ssl_context'] = ctx
-        return super().init_poolmanager(*args, **kwargs)
-
-
-
 
 def adjust_storage(emall_api, product, final_storage):
     url = 'https://ops.mall.icbc.com.cn/icbcrouter?'
@@ -163,21 +145,22 @@ def adjust_storage(emall_api, product, final_storage):
     sign = hmac.new(bytes(app_secret, 'utf-8'), bytes(sign, 'utf-8'), digestmod=hashlib.sha256).digest()
     
     url = '{0}sign={1}'.format(url, base64.b64encode(sign).decode('utf-8')).replace('+', '%2B')
+
+
+    # 创建自定义SSL上下文，允许不安全的重新协商
+    context = ssl_.create_urllib3_context()
+    context.options &= ~0x00040000  # 关闭OP_NO_LEGACY_SERVER_CONNECT选项
     
-    # 使用自定义适配器
+    # 在会话中使用自定义SSL上下文
     session = requests.Session()
-    adapter = InsecureTLSAdapter()
-    session.mount("https://", adapter)
+    adapter = requests.adapters.HTTPAdapter(pool_connections=1, pool_maxsize=1)
+    adapter.ssl_context = context
+    session.mount('https://', adapter)
     
-    # 发送请求（必须保留 verify=False）
-    response = session.get(
-        url,
-        verify=False,  # 防止 requests 覆盖配置
-        headers={"User-Agent": "Bypass Tool/1.0"}  # 避免被服务器拦截 UA
-    )
-    print(response.status_code)
+    # 使用此会话进行请求
+
     
-    response = requests.get(url, verify=False)
+    response = session.get(url)
     
     response_xml = codecs.encode(response.text, 'latin-1').decode('utf-8')
     pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
