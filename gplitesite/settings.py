@@ -35,7 +35,7 @@ if os.sys.platform == 'win32':
 
 
 DEBUG = (SERVER_TYPE == 'DEVELOP')
-DEBUG = True
+# DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
