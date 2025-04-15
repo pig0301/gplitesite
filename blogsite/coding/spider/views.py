@@ -18,12 +18,13 @@ def query_storage(request):
         is_auto = (get_client_ip(request) == '127.0.0.1')
         
         msg_level = models.message_level.objects.get(id=1)
-        (prod_details, storage_warn) = get_product_details(['9003867817'], msg_level, is_auto)
-        
         wechat_level = models.wechat_message.objects.all()
         dingding_level = models.dingding_message.objects.all()
         emall_api = models_code.spider_emall_api.objects.all()
-
+        
+        (prod_details, storage_warn) = get_product_details(['9003867817'], msg_level, is_auto)
+        ccb_details = get_ccb_product_details()
+        
         timestamp = timezone.now()
         event_dt = timestamp.date()
 
@@ -32,7 +33,7 @@ def query_storage(request):
             
             for prod in prod_details:
                 detail = models_code.spider_product_storage(event_dt=event_dt, product_id=prod['merchantProdId'], product_name=prod['name'],
-                    price=float(prod['skuPrice'].replace(',', '')), storage_cnt=int(prod['skuStorage']), create_dttm=timezone.now())
+                    price=prod['skuPrice'], storage_cnt=int(prod['skuStorage']), create_dttm=timezone.now())
                 detail.save()
             
             if msg_level and len(storage_warn) > 0:
@@ -57,6 +58,17 @@ def query_storage(request):
         for prod in prod_details:
             if prod['merchantProdId'] in init_storages.keys():
                 prod['daySalesCount'] = init_storages[prod['merchantProdId']] - int(prod['skuStorage'])
+        
+        store_prod = prod_details[0].copy()
+        store_prod['merchantProdId'] = '080020000501'
+        store_prod['name'] = '如意金积存'
+        store_prod['skuPrice'] -= 3
+        prod_details.append(store_prod)
+        
+        prod_details[3]['ccbPrice'] = ccb_details[0]['skuPrice']
+        prod_details[4]['ccbPrice'] = ccb_details[1]['skuPrice']
+        if len(ccb_details) > 2:
+            prod_details[-1]['ccbPrice'] = ccb_details[2]['skuPrice']
 
         return render_template("coding/spider/storage.html", {
                 'msg_level': msg_level, 'wechat_level': wechat_level, 'dingding_level': dingding_level, 'emall_api': emall_api,
@@ -102,6 +114,7 @@ def get_product_details(prod_links, msg_level, is_auto):
             
             product['skuStorage'] = int(product['skuStorage'])
             product['standard_storage'] = standard_storage[1]
+            product['skuPrice'] = round(float(product['skuPrice'].replace(',', '')) / standard_storage[3], 2)
 
             if product['skuStorage'] <= standard_storage[0]:
                 if not is_auto or msg_level.emall_api == None:
@@ -148,3 +161,34 @@ def adjust_storage(emall_api, product, final_storage):
     pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
     
     return int(pattern.group(1)) == 0
+
+
+def get_ccb_product_details():
+    ccb_brand_prods = ['261100101', '261100102']
+    ccb_store_prod = '291000001'
+    
+    ccb_details = []
+    
+    for brand_prod in ccb_brand_prods:
+        url_sign = "https://gold.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&TXCODE=100119"
+        url_brand = "https://gold.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&TXCODE=NGJS09&PM_PD_ID={0}&Hdl_InsID=110000000&Org_Inst_Rgon_Cd=SH&Txn_Itt_Chnl_TpCd=0006&AlSal_Ind=1"
+        
+        headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" }
+        
+        response = requests.get(url_sign, headers=headers)
+        cookies = response.cookies
+        
+        response = requests.get(url_brand.format(brand_prod), headers=headers, cookies=cookies)
+        prod_json = json.loads(response.content)['GRP'][0]
+        
+        ccb_details.append({ 'merchantProdId': prod_json['PM_PD_ID'], 'name': '建行' + prod_json['ASPD_Nm'], 'skuPrice': round(float(prod_json['Br_Sell_Prc']), 2), 'skuStorage': 0 })
+    
+    url_store = 'https://tool.ccb.com/webtran/static/trendchart/getAccountData.gsp?dateType=timeSharing&sec_code={0}_BUY'
+    
+    response = requests.get(url_store.format(ccb_store_prod))
+    prod_json = json.loads(response.content)
+    
+    if prod_json['new_pri'] is not None:
+        ccb_details.append({ 'merchantProdId': ccb_store_prod, 'name': '建行易存金', 'skuPrice': round(float(prod_json['new_pri']), 2), 'skuStorage': 0 })
+    
+    return ccb_details
