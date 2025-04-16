@@ -66,9 +66,13 @@ def query_storage(request):
         prod_details.append(store_prod)
         
         prod_details[3]['ccbPrice'] = ccb_details[0]['skuPrice']
+        prod_details[3]['ccbProdUrl'] = ccb_details[0]['prodUrl']
+        
         prod_details[4]['ccbPrice'] = ccb_details[1]['skuPrice']
+        prod_details[4]['ccbProdUrl'] = ccb_details[1]['prodUrl']
         if len(ccb_details) > 2:
             prod_details[-1]['ccbPrice'] = ccb_details[2]['skuPrice']
+            prod_details[-1]['ccbProdUrl'] = ccb_details[2]['prodUrl']
 
         return render_template("coding/spider/storage.html", {
                 'msg_level': msg_level, 'wechat_level': wechat_level, 'dingding_level': dingding_level, 'emall_api': emall_api,
@@ -172,6 +176,7 @@ def get_ccb_product_details():
     for brand_prod in ccb_brand_prods:
         url_sign = "https://gold.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&TXCODE=100119"
         url_brand = "https://gold.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&TXCODE=NGJS09&PM_PD_ID={0}&Hdl_InsID=110000000&Org_Inst_Rgon_Cd=SH&Txn_Itt_Chnl_TpCd=0006&AlSal_Ind=1"
+        url_shop = 'https://gold2.ccb.com/chn/home/gold_new/cpjs/swgjs/flsx/cpxq/index.shtml?PM_PD_ID={0}&Hdl_InsID=110000000&Org_Inst_Rgon_Cd=SH'
         
         headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" }
         
@@ -181,14 +186,15 @@ def get_ccb_product_details():
         response = requests.get(url_brand.format(brand_prod), headers=headers, cookies=cookies)
         prod_json = json.loads(response.content)['GRP'][0]
         
-        ccb_details.append({ 'merchantProdId': prod_json['PM_PD_ID'], 'name': '建行' + prod_json['ASPD_Nm'], 'skuPrice': round(float(prod_json['Br_Sell_Prc']), 2), 'skuStorage': 0 })
+        ccb_details.append({ 'merchantProdId': prod_json['PM_PD_ID'], 'name': '建行' + prod_json['ASPD_Nm'], 'skuPrice': round(float(prod_json['Br_Sell_Prc']), 2), 'skuStorage': 0, 'prodUrl': url_shop.format(brand_prod) })
     
     url_store = 'https://tool.ccb.com/webtran/static/trendchart/getAccountData.gsp?dateType=timeSharing&sec_code={0}_BUY'
+    url_price = 'https://tool.ccb.com/webtran/static/trendchart/ccbgold.html?priceType=BUY'
     
     response = requests.get(url_store.format(ccb_store_prod))
     prod_json = json.loads(response.content)
     
     if prod_json['new_pri'] is not None:
-        ccb_details.append({ 'merchantProdId': ccb_store_prod, 'name': '建行易存金', 'skuPrice': round(float(prod_json['new_pri']), 2), 'skuStorage': 0 })
+        ccb_details.append({ 'merchantProdId': ccb_store_prod, 'name': '建行易存金', 'skuPrice': round(float(prod_json['new_pri']), 2), 'skuStorage': 0, 'prodUrl': url_price })
     
     return ccb_details

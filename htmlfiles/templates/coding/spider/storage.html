@@ -51,7 +51,7 @@
                             <td style="vertical-align: middle;">
                                 {% if product.ccbPrice is not None %}
                                     <h5><small>{{ product.ccbPrice }}</small>
-                                    <span class="badge badge-pill badge-{% if product.skuPrice > product.ccbPrice %}success{% elif product.skuPrice < product.ccbPrice %}danger{% else %}warning{% endif %}">{{ product.skuPrice | price_diff:product.ccbPrice }}</h5>
+                                    <a href="{{ product.ccbProdUrl }}" class="badge badge-pill badge-{% if product.skuPrice > product.ccbPrice %}success{% elif product.skuPrice < product.ccbPrice %}danger{% else %}warning{% endif %}">{{ product.skuPrice | price_diff:product.ccbPrice }}</a></h5>
                                 {% endif %}
                             </td>
                             <td style="vertical-align: middle;">
