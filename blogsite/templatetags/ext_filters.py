@@ -45,3 +45,13 @@ def show_guest(word, is_login):
         return word[0] + '.' * 3 + word[-1]
     else:
         return word
+
+@register.filter
+def price_diff(icbc_price, oth_price):
+    diff = oth_price - icbc_price
+    if diff > 0:
+        return '↑{0:.2f}'.format(diff)
+    elif diff < 0:
+        return '↓{0:.2f}'.format(-diff)
+    else:
+        return '~0.00'

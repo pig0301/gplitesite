@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load ext_filters %}
 
 {% block body_content %}
     <div class="container" id="vue_app_storage">
@@ -34,7 +35,7 @@
                         <tr>
                             <th>Product Id</th>
                             <th>Product Name</th>
-                            <th>Total Price</th>
+                            <th>ICBC Price</th>
                             <th>CCB Price</th>
                             <th>Storage Count</th>
                             <th>Today Sales</th>
@@ -44,10 +45,15 @@
                     <tbody>
                         {% for product in products %}
                         <tr>
-                            <td style="vertical-align: middle;">{{ product.merchantProdId }}</td>
-                            <td style="vertical-align: middle;">{{ product.name }}</td>
-                            <td style="vertical-align: middle;">{{ product.skuPrice }}</td>
-                            <td style="vertical-align: middle;">{{ product.ccbPrice }}</td>
+                            <td style="vertical-align: middle;"><h5><small>{{ product.merchantProdId }}</small></h5></td>
+                            <td style="vertical-align: middle;"><h5><small>{{ product.name }}</small></h5></td>
+                            <td style="vertical-align: middle;"><h5><small>{{ product.skuPrice }}</small></h5></td>
+                            <td style="vertical-align: middle;">
+                                {% if product.ccbPrice is not None %}
+                                    <h5><small>{{ product.ccbPrice }}</small>
+                                    <span class="badge badge-pill badge-{% if product.skuPrice > product.ccbPrice %}success{% elif product.skuPrice < product.ccbPrice %}danger{% else %}warning{% endif %}">{{ product.skuPrice | price_diff:product.ccbPrice }}</h5>
+                                {% endif %}
+                            </td>
                             <td style="vertical-align: middle;">
                                 {% if not forloop.last %}
                                 <a href="{{ product.prodUrl }}"><h5>
