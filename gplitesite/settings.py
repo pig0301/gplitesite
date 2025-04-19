@@ -13,14 +13,15 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os, sys
 import dj_database_url
 
-from libs import constants
-
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 sys.path.append(os.path.join(BASE_DIR, 'gplitesite'))
 sys.path.append(os.path.join(BASE_DIR, 'blogsite'))
+
+
+from libs import constants
 
 
 # Quick-start development settings - unsuitable for production
