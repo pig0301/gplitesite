@@ -55,3 +55,7 @@ def price_diff(icbc_price, oth_price):
         return '↓{0:.2f}'.format(-diff)
     else:
         return '~0.00'
+
+@register.filter
+def subtract(value, arg):
+    return value - arg

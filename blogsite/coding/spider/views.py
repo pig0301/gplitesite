@@ -31,7 +31,7 @@ def query_storage(request):
         if is_auto:
             models_code.spider_product_storage.objects.filter(event_dt__lt=event_dt).delete()
             
-            for prod in prod_details:
+            for prod in prod_details + ccb_details:
                 detail = models_code.spider_product_storage(event_dt=event_dt, product_id=prod['merchantProdId'], product_name=prod['name'],
                     price=prod['skuPrice'], storage_cnt=int(prod['skuStorage']), create_dttm=timezone.now())
                 detail.save()
