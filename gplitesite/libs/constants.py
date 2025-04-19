@@ -17,6 +17,11 @@ STORAGE_WARNING = {
     '000010200': [10, 30, '如意金条200g', 200]
 }
 
+#coding.spider.cron
+CLEAN_MODE = 0
+NORMAL_MODE = 1
+SAVE_MODE = 2
+
 #templatetags
 ML_STEP_DESC_DICT = {
     1: "开箱", 2: "整理", 3: "制作"

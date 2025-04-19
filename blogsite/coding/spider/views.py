@@ -16,36 +16,18 @@ from coding.spider import models as models_code
 def query_storage(request):
     if check_login(request):
         is_auto = (get_client_ip(request) == '127.0.0.1')
+        dttm = timezone.now()
         
-        msg_level = models.message_level.objects.get(id=1)
-        wechat_level = models.wechat_message.objects.all()
-        dingding_level = models.dingding_message.objects.all()
-        emall_api = models_code.spider_emall_api.objects.all()
-        
-        (prod_details, storage_warn) = get_product_details(['9003867817'], msg_level, is_auto)
-        ccb_details = get_ccb_product_details()
-        
-        timestamp = timezone.now()
-        event_dt = timestamp.date()
+        msg_params = {
+            'msg_level': models.message_level.objects.get(id=1),
+            'wechat_level': models.wechat_message.objects.all(),
+            'dingding_level': models.dingding_message.objects.all(),
+            'emall_api': models_code.spider_emall_api.objects.all()
+        }
 
-        if is_auto:
-            models_code.spider_product_storage.objects.filter(event_dt__lt=event_dt).delete()
-            
-            for prod in prod_details + ccb_details:
-                detail = models_code.spider_product_storage(event_dt=event_dt, product_id=prod['merchantProdId'], product_name=prod['name'],
-                    price=prod['skuPrice'], storage_cnt=int(prod['skuStorage']), create_dttm=timezone.now())
-                detail.save()
-            
-            if msg_level and len(storage_warn) > 0:
-                storage_warn = "【重要】请关注以下贵金属产品线上库存！\n" + storage_warn + "\n\n[时间]：" + str(timestamp)[0:19]
-                
-                if msg_level.wechat_msg:
-                    wechat.send_text_message(msg_level.wechat_msg.id, storage_warn)
-                 
-                if msg_level.dingding_msg:
-                    dingding.send_text_message(msg_level.dingding_msg.id, storage_warn)
-        
-        prod_storages = models_code.spider_product_storage.objects.filter(event_dt=event_dt, product_id=OuterRef('product_id')).order_by('id').values_list('id')
+        (prod_details, ccb_details) = get_product_details(['9003867817'], msg_params['msg_level'], dttm, is_auto)
+
+        prod_storages = models_code.spider_product_storage.objects.filter(event_dt=dttm.date(), product_id=OuterRef('product_id')).order_by('id').values_list('id')
         prod_storages = models_code.spider_product_storage.objects.annotate(tag=Subquery(prod_storages[:1]))
         prod_storages = prod_storages.filter(id=F('tag')).order_by('product_id')
         
@@ -53,7 +35,7 @@ def query_storage(request):
         storage_dtls = []
         for prod in prod_storages:
             init_storages[prod.product_id] = prod.storage_cnt
-            storage_dtls.append(models_code.spider_product_storage.objects.filter(event_dt=event_dt, product_id=prod.product_id).order_by('id'))
+            storage_dtls.append(models_code.spider_product_storage.objects.filter(event_dt=dttm.date(), product_id=prod.product_id).order_by('id'))
         
         for prod in prod_details:
             if prod['merchantProdId'] in init_storages.keys():
@@ -75,8 +57,8 @@ def query_storage(request):
             prod_details[-1]['ccbProdUrl'] = ccb_details[2]['prodUrl']
 
         return render_template("coding/spider/storage.html", {
-                'msg_level': msg_level, 'wechat_level': wechat_level, 'dingding_level': dingding_level, 'emall_api': emall_api,
-                'products': prod_details, 'legends': prod_storages, 'chart_datas': storage_dtls
+                'msg_params': msg_params, 'legends': prod_storages,
+                'products': prod_details, 'chart_datas': storage_dtls
         }, request)
     else:
         return HttpResponse("非管理员用户禁止访问！")
@@ -100,7 +82,7 @@ def query_reset(request):
         return HttpResponse("非管理员用户禁止访问！")
 
 
-def get_product_details(prod_links, msg_level, is_auto):
+def get_product_details(prod_links, msg_level, dttm, is_auto):
     prod_details = []
     storage_warn = ""
 
@@ -132,8 +114,25 @@ def get_product_details(prod_links, msg_level, is_auto):
                 product['is_warning'] = 1
         
         prod_details = prod_details + prods_info
+    
+    ccb_details = get_ccb_product_details()
+    
+    if is_auto:
+        for prod in prod_details + ccb_details:
+            detail = models_code.spider_product_storage(event_dt=dttm.date(), product_id=prod['merchantProdId'], product_name=prod['name'],
+                price=prod['skuPrice'], storage_cnt=int(prod['skuStorage']), create_dttm=dttm)
+            detail.save()
+        
+        if msg_level and len(storage_warn) > 0:
+            storage_warn = "【重要】请关注以下贵金属产品线上库存！\n" + storage_warn + "\n\n[时间]：" + str(dttm)[0:19]
+            
+            if msg_level.wechat_msg:
+                wechat.send_text_message(msg_level.wechat_msg.id, storage_warn)
+             
+            if msg_level.dingding_msg:
+                dingding.send_text_message(msg_level.dingding_msg.id, storage_warn)
 
-    return (prod_details, storage_warn)
+    return (prod_details, ccb_details)
 
 
 def adjust_storage(emall_api, product, final_storage):

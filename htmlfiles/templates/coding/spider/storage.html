@@ -87,8 +87,8 @@
 				</div>
 				<select class="custom-select" id="inputGroupSelect01" name="wechat_msg">
 					<option value="0">[ 不通知 ]</option>
-					{% for wechat in wechat_level %}
-					<option value="{{ wechat.id }}" {% if wechat.id == msg_level.wechat_msg.id %}selected{% endif %}>{{ wechat.msg_type }}</option>
+					{% for wechat in msg_params.wechat_level %}
+					<option value="{{ wechat.id }}" {% if wechat.id == msg_params.msg_level.wechat_msg.id %}selected{% endif %}>{{ wechat.msg_type }}</option>
 					{% endfor %}
 				</select>
 				<div class="input-group-prepend">
@@ -96,8 +96,8 @@
 				</div>
 				<select class="custom-select" id="inputGroupSelect02" name="dingding_msg">
 					<option value="0">[ 不通知 ]</option>
-					{% for dingding in dingding_level %}
-					<option value="{{ dingding.id }}" {% if dingding.id == msg_level.dingding_msg.id %}selected{% endif %}>{{ dingding.msg_type }}</option>
+					{% for dingding in msg_params.dingding_level %}
+					<option value="{{ dingding.id }}" {% if dingding.id == msg_params.msg_level.dingding_msg.id %}selected{% endif %}>{{ dingding.msg_type }}</option>
 					{% endfor %}
 				</select>
 				<div class="input-group-prepend">
@@ -105,8 +105,8 @@
                 </div>
                 <select class="custom-select" id="inputGroupSelect03" name="emall_api">
                     <option value="0">[ 不处理 ]</option>
-                    {% for emall in emall_api %}
-                    <option value="{{ emall.id }}" {% if emall.id == msg_level.emall_api.id %}selected{% endif %}>{{ emall.msg_type }}</option>
+                    {% for emall in msg_params.emall_api %}
+                    <option value="{{ emall.id }}" {% if emall.id == msg_params.msg_level.emall_api.id %}selected{% endif %}>{{ emall.msg_type }}</option>
                     {% endfor %}
                 </select>
 				<div class="input-group-append">
@@ -114,7 +114,7 @@
 				</div>
 			</div>
 			<input type="hidden" value="{{ request.get_full_path }}" name="callbackurl">
-			<input type="hidden" value="{{ msg_level.id }}" name="msg_id">
+			<input type="hidden" value="{{ msg_params.msg_level.id }}" name="msg_id">
 		</form>
 	</div>
 	<div class="container">

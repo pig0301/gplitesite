@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os, sys
 import dj_database_url
 
+from libs import constants
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -109,9 +111,9 @@ else:
     }
     
     CRONJOBS = [
-        ('30,40,50 8 * * *', 'coding.spider.cron.query_storage', '>> /data/share/log/gplitesite/cron/query_storage.log'),
-        ('*/10 9-22 * * *', 'coding.spider.cron.query_storage', '>> /data/share/log/gplitesite/cron/query_storage.log'),
-        ('0 23 * * *', 'coding.spider.cron.query_storage', '>> /data/share/log/gplitesite/cron/query_storage.log')
+        ('30,40,50 8 * * *', 'coding.spider.cron.query_storage', ['--mode={0}'.format(constants.CLEAN_MODE)],'>> /data/share/log/gplitesite/cron/query_storage.log'),
+        ('*/10 9-22 * * *', 'coding.spider.cron.query_storage', ['--mode={0}'.format(constants.NORMAL_MODE)],'>> /data/share/log/gplitesite/cron/query_storage.log'),
+        ('0 23 * * *', 'coding.spider.cron.query_storage', ['--mode={0}'.format(constants.SAVE_MODE)],'>> /data/share/log/gplitesite/cron/query_storage.log')
     ]
 
 
