@@ -21,3 +21,5 @@ def query_storage(*args):
         models_code.spider_product_storage.objects.filter(event_dt__lt=dttm.date()).delete()
     
     views_code.get_product_details(['9003867817'], msg_level, dttm, True)
+
+    print('{0}: {1}'.format(dttm, parsed_args.mode))
