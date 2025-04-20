@@ -21,6 +21,9 @@ sys.path.append(os.path.join(BASE_DIR, 'gplitesite'))
 sys.path.append(os.path.join(BASE_DIR, 'blogsite'))
 
 
+from libs import constants
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
@@ -109,9 +112,9 @@ else:
     }
     
     CRONJOBS = [
-        ('30,40,50 8 * * *', 'coding.spider.cron.query_storage_with_clean', '>> /data/share/log/gplitesite/cron/query_storage.log'),
-        ('*/10 9-22 * * *', 'coding.spider.cron.query_storage', '>> /data/share/log/gplitesite/cron/query_storage.log'),
-        ('0 23 * * *', 'coding.spider.cron.query_storage_with_save', '>> /data/share/log/gplitesite/cron/query_storage.log')
+        ('30,40,50 8 * * *', 'coding.spider.cron.query_storage', ['--mode={0}'.format(constants.CLEAN_MODE)],'>> /data/share/log/gplitesite/cron/query_storage.log'),
+        ('*/10 9-22 * * *', 'coding.spider.cron.query_storage', ['--mode={0}'.format(constants.NORMAL_MODE)],'>> /data/share/log/gplitesite/cron/query_storage.log'),
+        ('0 23 * * *', 'coding.spider.cron.query_storage', ['--mode={0}'.format(constants.SAVE_MODE)],'>> /data/share/log/gplitesite/cron/query_storage.log')
     ]
 
 
