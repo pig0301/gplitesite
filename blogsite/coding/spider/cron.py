@@ -1,3 +1,5 @@
+import os, django
+
 from django.utils import timezone
 
 from home import models as models_home
@@ -9,7 +11,13 @@ from coding.spider import views as views_code
 from django.conf import settings
 
 
+
+
+
 def query_storage(mode=constants.NORMAL_MODE):
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gplitesite.settings")
+    django.setup()
+    
     dttm = timezone.now()
 #     msg_level = models_home.message_level.objects.get(id=1)
 #     
