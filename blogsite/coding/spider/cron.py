@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib, os
 
 
-def query_storage(mode=constants.NORMAL_MODE, fonta='Microsoft YaHei'):
+def query_storage(mode=constants.NORMAL_MODE):
     dttm = timezone.now()
     msg_level = models_home.message_level.objects.get(id=1)
     
@@ -37,7 +37,7 @@ def query_storage(mode=constants.NORMAL_MODE, fonta='Microsoft YaHei'):
         df_tmp['price'] = df_tmp['price'] - 1
         
         df_final = pd.concat([df_final, df_tmp])
-        draw_diagram(df_final, dttm.date(), fonta)
+        draw_diagram(df_final, dttm.date())
 
 
 def query_storage_with_clean():
@@ -48,17 +48,16 @@ def query_storage_with_save():
     query_storage(mode=constants.SAVE_MODE)
 
 
-def draw_diagram(df, tx_dt, fonta):
+def draw_diagram(df, tx_dt):
     matplotlib.use('Agg')
 
-    font_name = fonta
     file_dir = os.path.join(settings.BASE_DIR, 'backups/tmpimgs')
-    
     if settings.DEBUG == False:
         file_dir = '/data/share/log/gplitesite/cron/'
+        matplotlib.font_manager.fontManager.addfont('/usr/share/fonts/wqy-microhei/wqy-microhei.ttc')
     
     plt.style.use('seaborn')
-    plt.rcParams['font.sans-serif'] = [font_name]
+    plt.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'WenQuanYi Micro Hei']
     plt.rcParams['axes.unicode_minus'] = False
     
     CUSTOM_PALETTE = {
