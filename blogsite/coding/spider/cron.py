@@ -1,17 +1,27 @@
-import requests, datetime
-from bs4 import BeautifulSoup
+from django.utils import timezone
+
+from home import models as models_home
+from libs import constants
+
+from coding.spider import models as models_code
+from coding.spider import views as views_code
 
 
-def query_storage():
-    url = 'http://127.0.0.1:8000/coding/spider/storage/query/'
-    response = requests.get(url)
-    html = response.content
+def query_storage(mode=constants.NORMAL_MODE):
+    dttm = timezone.now()
+    msg_level = models_home.message_level.objects.get(id=1)
     
-    soup = BeautifulSoup(html, 'html.parser')
-    table = soup.find('table')
+    if mode == constants.CLEAN_MODE:
+        models_code.spider_product_storage.objects.filter(event_dt__lt=dttm.date()).delete()
     
-    print('-' * 30)
-    print(datetime.datetime.now())
-    print('-' * 30)
-    print(table.text.strip())
-    print('-' * 30 + "\n\n")
+    views_code.get_product_details(['9003867817'], msg_level, dttm, True)
+
+    print('[{0}] -> {1}'.format(dttm, mode))
+
+
+def query_storage_with_clean():
+    query_storage(mode=constants.CLEAN_MODE)
+
+
+def query_storage_with_save():
+    query_storage(mode=constants.SAVE_MODE)
