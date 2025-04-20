@@ -113,7 +113,7 @@ else:
     
     CRONJOBS = [
         ('30,40,50 8 * * *', 'coding.spider.cron.query_storage', ['--mode={0}'.format(constants.CLEAN_MODE)],'>> /data/share/log/gplitesite/cron/query_storage.log'),
-        ('*/10 9-22 * * *', 'coding.spider.cron.query_storage', ['--mode={0}'.format(constants.NORMAL_MODE)],'>> /data/share/log/gplitesite/cron/query_storage.log'),
+        ('*/1 9-22 * * *', 'coding.spider.cron.query_storage', ['--mode={0}'.format(constants.NORMAL_MODE)],'>> /data/share/log/gplitesite/cron/query_storage.log'),
         ('0 23 * * *', 'coding.spider.cron.query_storage', ['--mode={0}'.format(constants.SAVE_MODE)],'>> /data/share/log/gplitesite/cron/query_storage.log')
     ]
 
