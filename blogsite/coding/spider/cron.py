@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib, os
 
 
-def query_storage(mode=constants.NORMAL_MODE):
+def query_storage(mode=constants.NORMAL_MODE, fonta='Microsoft YaHei'):
     dttm = timezone.now()
     msg_level = models_home.message_level.objects.get(id=1)
     
@@ -37,7 +37,7 @@ def query_storage(mode=constants.NORMAL_MODE):
         df_tmp['price'] = df_tmp['price'] - 1
         
         df_final = pd.concat([df_final, df_tmp])
-        draw_diagram(df_final, dttm.date())
+        draw_diagram(df_final, dttm.date(), fonta)
 
 
 def query_storage_with_clean():
@@ -48,10 +48,10 @@ def query_storage_with_save():
     query_storage(mode=constants.SAVE_MODE)
 
 
-def draw_diagram(df, tx_dt):
+def draw_diagram(df, tx_dt, fonta):
     matplotlib.use('Agg')
 
-    font_name = 'Microsoft YaHei'
+    font_name = fonta
     file_dir = os.path.join(settings.BASE_DIR, 'backups/tmpimgs')
     
     if settings.DEBUG == False:
