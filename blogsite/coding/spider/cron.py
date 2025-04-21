@@ -91,6 +91,8 @@ def draw_diagram(df, tx_dt):
     ax.set_ylabel('价格 (元)', fontsize=12, labelpad=10, color='#555555')
 
     ax.margins(x=0)
+    ax.xaxis.set_major_locator(plt.MaxNLocator(45))
+
     ax.grid(True, linestyle='--', linewidth=0.5, alpha=0.7, color='#AAAAAA')
     ax.tick_params(axis='both', which='major', labelsize=10, colors='#666666')
     
