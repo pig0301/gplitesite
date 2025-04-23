@@ -47,14 +47,15 @@ def query_storage(request):
         store_prod['skuPrice'] -= 3
         prod_details.append(store_prod)
         
-        prod_details[3]['ccbPrice'] = ccb_details[0]['skuPrice']
-        prod_details[3]['ccbProdUrl'] = ccb_details[0]['prodUrl']
-        
-        prod_details[4]['ccbPrice'] = ccb_details[1]['skuPrice']
-        prod_details[4]['ccbProdUrl'] = ccb_details[1]['prodUrl']
-        if len(ccb_details) > 2:
-            prod_details[-1]['ccbPrice'] = ccb_details[2]['skuPrice']
-            prod_details[-1]['ccbProdUrl'] = ccb_details[2]['prodUrl']
+        if len(ccb_details) > 0:
+            prod_details[3]['ccbPrice'] = ccb_details[0]['skuPrice']
+            prod_details[3]['ccbProdUrl'] = ccb_details[0]['prodUrl']
+            
+            prod_details[4]['ccbPrice'] = ccb_details[1]['skuPrice']
+            prod_details[4]['ccbProdUrl'] = ccb_details[1]['prodUrl']
+            if len(ccb_details) > 2:
+                prod_details[-1]['ccbPrice'] = ccb_details[2]['skuPrice']
+                prod_details[-1]['ccbProdUrl'] = ccb_details[2]['prodUrl']
 
         return render_template("coding/spider/storage.html", {
                 'msg_params': msg_params, 'legends': prod_storages,
