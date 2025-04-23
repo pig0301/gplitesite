@@ -25,7 +25,7 @@ def query_storage(request):
             'emall_api': models_code.spider_emall_api.objects.all()
         }
 
-        (prod_details, ccb_details) = get_product_details(['9003867817'], msg_params['msg_level'], dttm, is_auto)
+        (prod_details, ccb_store, ccb_brands) = get_product_details(['9003867817'], msg_params['msg_level'], dttm, is_auto)
 
         prod_storages = models_code.spider_product_storage.objects.filter(event_dt=dttm.date(), product_id=OuterRef('product_id')).order_by('id').values_list('id')
         prod_storages = models_code.spider_product_storage.objects.annotate(tag=Subquery(prod_storages[:1]))
@@ -47,15 +47,13 @@ def query_storage(request):
         store_prod['skuPrice'] -= 3
         prod_details.append(store_prod)
         
-        if len(ccb_details) > 0:
-            prod_details[3]['ccbPrice'] = ccb_details[0]['skuPrice']
-            prod_details[3]['ccbProdUrl'] = ccb_details[0]['prodUrl']
+        for i in range(0, len(ccb_brands)):
+            prod_details[i + 3]['ccbPrice'] = ccb_brands[i]['skuPrice']
+            prod_details[i + 3]['ccbProdUrl'] = ccb_brands[i]['prodUrl']
             
-            prod_details[4]['ccbPrice'] = ccb_details[1]['skuPrice']
-            prod_details[4]['ccbProdUrl'] = ccb_details[1]['prodUrl']
-            if len(ccb_details) > 2:
-                prod_details[-1]['ccbPrice'] = ccb_details[2]['skuPrice']
-                prod_details[-1]['ccbProdUrl'] = ccb_details[2]['prodUrl']
+        if ccb_store is not None:
+            prod_details[-1]['ccbPrice'] = ccb_store['skuPrice']
+            prod_details[-1]['ccbProdUrl'] = ccb_store['prodUrl']
 
         return render_template("coding/spider/storage.html", {
                 'msg_params': msg_params, 'legends': prod_storages,
@@ -116,11 +114,11 @@ def get_product_details(prod_links, msg_level, dttm, is_auto):
         
         prod_details = prod_details + prods_info
     
-    try:
-        ccb_details = get_ccb_product_details()
-    except  Exception as e:
-        print(f"CCB Price Fetch Failed: {e}")
-        ccb_details = []
+    (ccb_store, ccb_brands) = get_ccb_product_details()
+    
+    ccb_details = ccb_brands.copy()
+    if ccb_store is not None:
+        ccb_details.append(ccb_store)
     
     if is_auto:
         for prod in prod_details + ccb_details:
@@ -137,7 +135,7 @@ def get_product_details(prod_links, msg_level, dttm, is_auto):
             if msg_level.dingding_msg:
                 dingding.send_text_message(msg_level.dingding_msg.id, storage_warn)
 
-    return (prod_details, ccb_details)
+    return (prod_details, ccb_store, ccb_brands)
 
 
 def adjust_storage(emall_api, product, final_storage):
@@ -175,7 +173,20 @@ def get_ccb_product_details():
     ccb_brand_prods = ['261100101', '261100102']
     ccb_store_prod = '291000001'
     
-    ccb_details = []
+    ccb_store = None
+    ccb_brands = []
+    
+    url_store = 'https://tool.ccb.com/webtran/static/trendchart/getAccountData.gsp?dateType=timeSharing&sec_code={0}_BUY'
+    url_price = 'https://tool.ccb.com/webtran/static/trendchart/ccbgold.html?priceType=BUY'
+    
+    try:
+        response = requests.get(url_store.format(ccb_store_prod))
+        prod_json = json.loads(response.content)
+        
+        if prod_json['new_pri'] is not None:
+            ccb_store = { 'merchantProdId': ccb_store_prod, 'name': '建行易存金', 'skuPrice': round(float(prod_json['new_pri']), 2), 'skuStorage': 0, 'prodUrl': url_price }
+    except Exception as e:
+        print(f"CCB Price Fetch Failed: {e}")
     
     for brand_prod in ccb_brand_prods:
         url_sign = "https://gold.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&TXCODE=100119"
@@ -187,18 +198,12 @@ def get_ccb_product_details():
         response = requests.get(url_sign, headers=headers)
         cookies = response.cookies
         
-        response = requests.get(url_brand.format(brand_prod), headers=headers, cookies=cookies)
-        prod_json = json.loads(response.content)['GRP'][0]
-        
-        ccb_details.append({ 'merchantProdId': prod_json['PM_PD_ID'], 'name': '建行' + prod_json['ASPD_Nm'], 'skuPrice': round(float(prod_json['Br_Sell_Prc']), 2), 'skuStorage': 0, 'prodUrl': url_shop.format(brand_prod) })
+        try:
+            response = requests.get(url_brand.format(brand_prod), headers=headers, cookies=cookies)
+            prod_json = json.loads(response.content)['GRP'][0]
+            
+            ccb_brands.append({ 'merchantProdId': prod_json['PM_PD_ID'], 'name': '建行' + prod_json['ASPD_Nm'], 'skuPrice': round(float(prod_json['Br_Sell_Prc']), 2), 'skuStorage': 0, 'prodUrl': url_shop.format(brand_prod) })
+        except Exception as e:
+            print(f"CCB Price Fetch Failed: {e}")
     
-    url_store = 'https://tool.ccb.com/webtran/static/trendchart/getAccountData.gsp?dateType=timeSharing&sec_code={0}_BUY'
-    url_price = 'https://tool.ccb.com/webtran/static/trendchart/ccbgold.html?priceType=BUY'
-    
-    response = requests.get(url_store.format(ccb_store_prod))
-    prod_json = json.loads(response.content)
-    
-    if prod_json['new_pri'] is not None:
-        ccb_details.append({ 'merchantProdId': ccb_store_prod, 'name': '建行易存金', 'skuPrice': round(float(prod_json['new_pri']), 2), 'skuStorage': 0, 'prodUrl': url_price })
-    
-    return ccb_details
+    return (ccb_store, ccb_brands)
