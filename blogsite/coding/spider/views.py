@@ -115,7 +115,11 @@ def get_product_details(prod_links, msg_level, dttm, is_auto):
         
         prod_details = prod_details + prods_info
     
-    ccb_details = get_ccb_product_details()
+    try:
+        ccb_details = get_ccb_product_details()
+    except  Exception as e:
+        print(f"CCB Price Fetch Failed: {e}")
+        ccb_details = []
     
     if is_auto:
         for prod in prod_details + ccb_details:
@@ -175,7 +179,7 @@ def get_ccb_product_details():
     for brand_prod in ccb_brand_prods:
         url_sign = "https://gold.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&TXCODE=100119"
         url_brand = "https://gold.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&TXCODE=NGJS09&PM_PD_ID={0}&Hdl_InsID=110000000&Org_Inst_Rgon_Cd=SH&Txn_Itt_Chnl_TpCd=0006&AlSal_Ind=1"
-        url_shop = 'https://gold2.ccb.com/chn/home/gold_new/cpjs/swgjs/flsx/cpxq/index.shtml?PM_PD_ID={0}&Hdl_InsID=110000000&Org_Inst_Rgon_Cd=SH'
+        url_shop = 'https://gold.ccb.com/chn/home/gold_new/cpjs/swgjs/flsx/cpxq/index.shtml?PM_PD_ID={0}&Hdl_InsID=110000000&Org_Inst_Rgon_Cd=SH'
         
         headers = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" }
         
