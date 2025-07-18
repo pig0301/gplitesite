@@ -25,7 +25,8 @@ def query_storage(mode=constants.NORMAL_MODE):
         data = models_code.spider_product_storage.objects.filter(event_dt=dttm.date()).all().values('product_name', 'create_dttm', 'price', 'storage_cnt')
     
         df = pd.DataFrame.from_records(data)
-        print(df)
+        with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.expand_frame_repr', False):
+            print(df)
         
         df['create_dttm'] = pd.to_datetime(df['create_dttm'])
         df['create_dttm'] = df['create_dttm'].dt.strftime('%H:%M')
