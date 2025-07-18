@@ -23,6 +23,16 @@ def query_storage(mode=constants.NORMAL_MODE):
 
     if mode == constants.SAVE_MODE:
         data = models_code.spider_product_storage.objects.filter(event_dt=dttm.date()).all().values('product_name', 'create_dttm', 'price', 'storage_cnt')
+        
+        his_data = [
+            models_code.spider_product_storage_h (
+                product_name = obj['product_name'],
+                create_dttm = obj['create_dttm'],
+                price=obj['price'],
+                storage_cnt=obj['storage_cnt']
+            ) for obj in data
+        ]
+        models_code.spider_product_storage_h.objects.bulk_create(his_data, batch_size=1000)
     
         df = pd.DataFrame.from_records(data)
         with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.expand_frame_repr', False):
