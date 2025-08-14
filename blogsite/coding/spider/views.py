@@ -170,7 +170,7 @@ def adjust_storage(emall_api, product, final_storage):
 
 
 def get_ccb_product_details():
-    ccb_brand_prods = ['261100101', '261100102']
+    ccb_brand_prods = ['261100121', '261100122']
     ccb_store_prod = '291000001'
     
     ccb_store = None
