@@ -44,7 +44,7 @@ def query_storage(request):
         store_prod = prod_details[0].copy()
         store_prod['merchantProdId'] = '080020000501'
         store_prod['name'] = '如意金积存'
-        store_prod['skuPrice'] -= 3
+        store_prod['skuPrice'] -= 5
         prod_details.append(store_prod)
         
         for i in range(0, len(ccb_brands)):
