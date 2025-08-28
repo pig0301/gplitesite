@@ -6,7 +6,8 @@ tx_dt, min(tx_tm) as start_tm, max(tx_tm) as end_tm,
 
 count(*) as price_cnt,
 cast(avg(icbc_price1 - ccb_price1) as decimal(18, 2)) as avg_100g_diff,
-cast(avg(icbc_price2 - ccb_price2) as decimal(18, 2)) as avg_store_diff
+cast(avg(icbc_price2 - ccb_price2) as decimal(18, 2)) -
+case when tx_dt between '2025-08-28' and '2025-11-08' then 2 else 0 end as avg_store_diff
 
 from (
 	SELECT 
