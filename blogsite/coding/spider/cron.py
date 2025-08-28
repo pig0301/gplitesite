@@ -41,11 +41,11 @@ def query_storage(mode=constants.NORMAL_MODE):
         df['create_dttm'] = pd.to_datetime(df['create_dttm'])
         df['create_dttm'] = df['create_dttm'].dt.strftime('%H:%M')
         
-        df_final = df[df['product_name'].isin(['如意金条100g', '建行投资金条(100克)', '建行易存金'])]
+        df_final = df[df['product_name'].isin(['如意金条100g', '建行投资金条100g（配送）', '建行易存金'])]
         df_tmp = df[df['product_name'] == '如意金条200g'].copy()
     
         df_tmp['product_name'] = '如意金积存'
-        df_tmp['price'] = df_tmp['price'] - 1
+        df_tmp['price'] = df_tmp['price'] - 3
         
         df_final = pd.concat([df_final, df_tmp])
         draw_diagram(df_final, dttm.date())
