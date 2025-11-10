@@ -45,7 +45,7 @@ def query_storage(mode=constants.NORMAL_MODE):
         df_tmp = df[df['product_name'] == '如意金条200g'].copy()
     
         df_tmp['product_name'] = '如意金积存'
-        df_tmp['price'] = df_tmp['price'] - 3
+        df_tmp['price'] = df_tmp['price'] - 1
         
         df_final = pd.concat([df_final, df_tmp])
         draw_diagram(df_final, dttm.date())
