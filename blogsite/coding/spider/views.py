@@ -102,7 +102,7 @@ def get_product_details(prod_links, msg_level, dttm, is_auto):
             product['skuPrice'] = round(float(product['skuPrice'].replace(',', '')) / standard_storage[3], 2)
 
             if product['skuStorage'] <= standard_storage[0]:
-                if not is_auto or msg_level.emall_api == None:
+                if not is_auto or msg_level.emall_api == None or not dttm.minute in [0]:
                     storage_warn += "\n{0}仅剩{1}件。".format(product['name'], product['skuStorage'])
                 else:
                     if adjust_storage(msg_level.emall_api, product, standard_storage[1]):
