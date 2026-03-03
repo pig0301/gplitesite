@@ -67,14 +67,15 @@ def query_reset(request):
     if check_login(request):
         prod_sku = request.POST.get('prod_sku').split(',')
         emall_api = models_code.spider_emall_api.objects.get(id=1)
+        prod_strategy = models_code.spider_product_strategy.objects.filter(product_id=prod_sku[0])
         
-        standard_storage = constants.STORAGE_WARNING[prod_sku[0]]
-        product = { 'prodSkuId': prod_sku[1], 'logstorId': prod_sku[2] }
-        
-        if adjust_storage(emall_api, product, standard_storage[1]):
-            messages.info(request, "API调用成功，产品库存已实时调整！")
-        else:
-            messages.warning(request, "API调用失败，请及时排查问题！")
+        if prod_strategy.exists():
+            product = { 'prodSkuId': prod_sku[1], 'logstorId': prod_sku[2] }
+            
+            if adjust_storage(emall_api, product, prod_strategy.adj_storage_cnt):
+                messages.info(request, "API调用成功，产品库存已实时调整！")
+            else:
+                messages.warning(request, "API调用失败，请及时排查问题！")
 
         return HttpResponseRedirect("/coding/spider/storage/query/")
     else:
@@ -93,7 +94,11 @@ def strategy_index(request):
 
 def get_product_details(prod_links, msg_level, dttm, is_auto):
     prod_details = []
+    prod_strategys = {}
     storage_warn = ""
+    
+    for strategy in models_code.spider_product_strategy.objects.all():
+        prod_strategys[strategy.product_id] = strategy
 
     for link_id in prod_links:
         url = "https://m.mall.icbc.com.cn/products/queryProdSkuAjax.jhtml?productId={0}&isProdDraft=&isBranch=0".format(link_id)
@@ -102,21 +107,21 @@ def get_product_details(prod_links, msg_level, dttm, is_auto):
 
         for product in prods_info:
             product['merchantProdId'] = product['merchantProdId'].rjust(9, '0')
-            standard_storage = constants.STORAGE_WARNING[product['merchantProdId']]
+            storage_strategy = prod_strategys[product['merchantProdId']]
             
-            product['name'] = standard_storage[2]
+            product['name'] = storage_strategy.product_name
             product['prodUrl'] = 'https://m.mall.icbc.com.cn/products/pd_{0}.jhtml'.format(link_id)
             
             product['skuStorage'] = int(product['skuStorage'])
-            product['standard_storage'] = standard_storage[1]
-            product['skuPrice'] = round(float(product['skuPrice'].replace(',', '')) / standard_storage[3], 2)
+            product['standard_storage'] = storage_strategy.adj_storage_cnt
+            product['skuPrice'] = round(float(product['skuPrice'].replace(',', '')) / storage_strategy.spec, 2)
 
-            if product['skuStorage'] <= standard_storage[0]:
-                if not is_auto or msg_level.emall_api == None or not dttm.minute in [0]:
+            if product['skuStorage'] <= storage_strategy.min_storage_cnt:
+                if not is_auto or msg_level.emall_api == None or not dttm.minute in storage_strategy.adj_minutes:
                     storage_warn += "\n{0}仅剩{1}件。".format(product['name'], product['skuStorage'])
                 else:
-                    if adjust_storage(msg_level.emall_api, product, standard_storage[1]):
-                        storage_warn += "\n{0}仅剩{1}件，已自动增加{2}件库存。".format(product['name'], product['skuStorage'], standard_storage[1] - product['skuStorage'])
+                    if adjust_storage(msg_level.emall_api, product, storage_strategy.adj_storage_cnt):
+                        storage_warn += "\n{0}仅剩{1}件，已自动增加{2}件库存。".format(product['name'], product['skuStorage'], storage_strategy.adj_storage_cnt - product['skuStorage'])
                     else:
                         storage_warn += "\n{0}仅剩{1}件，自动增加库存失败！".format(product['name'], product['skuStorage'])
             
