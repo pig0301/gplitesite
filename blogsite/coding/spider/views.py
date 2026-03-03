@@ -81,6 +81,16 @@ def query_reset(request):
         return HttpResponse("非管理员用户禁止访问！")
 
 
+def strategy_index(request):
+    if check_login(request):
+        prod_strategys = models_code.spider_product_strategy.objects.all().order_by('id')
+        return render_template("coding/spider/strategy.html", {
+            'prod_strategys': prod_strategys, 'minute_steps': [0, 10, 20, 30, 40, 50]
+        }, request)
+    else:
+        return HttpResponse("非管理员用户禁止访问！")
+
+
 def get_product_details(prod_links, msg_level, dttm, is_auto):
     prod_details = []
     storage_warn = ""

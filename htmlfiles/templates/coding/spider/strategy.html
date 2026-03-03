@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load ext_filters %}
+
+{% block body_content %}
+	<div class="container">
+        <h4><br />Product Storage Strategy</h4>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Product Id</th>
+                            <th>Product Name</th>
+                            <th>Min Count</th>
+                            <th>Adjust Count</th>
+                            {% for step in minute_steps %}
+                            <th>{{ step }} Mins</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for strategy in prod_strategys %}
+                        <tr>
+                            <td style="vertical-align: middle;"><h5><small>{{ strategy.product_id }}</small></h5></td>
+                            <td style="vertical-align: middle;"><h5><small>{{ strategy.product_name }}</small></h5></td>
+                            <td style="vertical-align: middle;"><h5><small>{{ strategy.min_storage_cnt }}</small></h5></td>
+                            <td style="vertical-align: middle;"><h5><small>{{ strategy.adj_storage_cnt }}</small></h5></td>
+                            {% for step in minute_steps %}
+                            <td style="vertical-align: middle;"><h5>
+                            	{% if step in strategy.adj_minutes %}<i class="fas fa-check-square text-success"></i>{% else %}<i class="fas fa-times-circle text-danger"></i>{% endif %}
+                            </h5></td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
