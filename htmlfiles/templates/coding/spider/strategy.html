@@ -3,40 +3,103 @@
 {% load ext_filters %}
 
 {% block body_content %}
-	<div class="container">
-        <h4><br />Product Storage Strategy</h4>
-        
-        <div class="row">
-            <div class="col-md-12">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Product Id</th>
-                            <th>Product Name</th>
-                            <th>Min Count</th>
-                            <th>Adjust Count</th>
-                            {% for step in minute_steps %}
-                            <th>{{ step }} Mins</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for strategy in prod_strategys %}
-                        <tr>
-                            <td style="vertical-align: middle;"><h5><small>{{ strategy.product_id }}</small></h5></td>
-                            <td style="vertical-align: middle;"><h5><small>{{ strategy.product_name }}</small></h5></td>
-                            <td style="vertical-align: middle;"><h5><small>{{ strategy.min_storage_cnt }}</small></h5></td>
-                            <td style="vertical-align: middle;"><h5><small>{{ strategy.adj_storage_cnt }}</small></h5></td>
-                            {% for step in minute_steps %}
-                            <td style="vertical-align: middle;"><h5>
-                            	{% if step in strategy.adj_minutes %}<i class="fas fa-check-square text-success"></i>{% else %}<i class="fas fa-times-circle text-danger"></i>{% endif %}
-                            </h5></td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+	<div id="app" class="container" v-cloak>
+	    <div class="d-flex justify-content-between align-items-center">
+	        <h4><br />Product Storage Strategy</h4>
+	        <button @click="saveAll" class="btn btn-info" :disabled="isSaving" style="margin-top: 20px;">
+	            <i class="fas" :class="isSaving ? 'fa-spinner fa-spin' : 'fa-save'"></i> &nbsp;
+	            <b>${isSaving ? 'Saving...' : 'Update All'}</b>
+	        </button>
+	    </div>
+	
+	    <div class="row">
+	        <div class="col-md-12">
+	            <table class="table table-striped">
+	                <thead>
+	                    <tr>
+	                        <th>Product Id</th>
+	                        <th>Product Name</th>
+	                        <th width="120">Min Count</th>
+	                        <th width="120">Adjust Count</th>
+	                        <th v-for="step in minuteSteps" :key="step">${step} Mins</th>
+	                    </tr>
+	                </thead>
+	                <tbody>
+	                    <tr v-for="(item, index) in strategies" :key="item.id">
+	                        <td style="vertical-align: middle;"><h5><small>${item.product_id}</small></h5></td>
+	                        <td style="vertical-align: middle;"><h5><small>${item.product_name}</small></h5></td>
+	                        
+	                        <td style="vertical-align: middle;">
+	                            <input type="number" v-model.number="item.min_storage_cnt" class="form-control form-control-sm">
+	                        </td>
+	                        <td style="vertical-align: middle;">
+	                            <input type="number" v-model.number="item.adj_storage_cnt" class="form-control form-control-sm">
+	                        </td>
+	
+	                        <td v-for="step in minuteSteps" :key="step" class="text-center" style="vertical-align: middle;">
+	                            <div @click="toggleMinute(item, step)" style="cursor: pointer;">
+	                                <i v-if="item.adj_minutes.includes(step)" class="fas fa-check-square text-success fa-lg"></i>
+	                                <i v-else class="fas fa-times-circle text-secondary fa-lg"></i>
+	                            </div>
+	                        </td>
+	                    </tr>
+	                </tbody>
+	            </table>
+	        </div>
+	    </div>
+	</div>
+	
+	<style>
+	    [v-cloak] { display: none; }
+	</style>
+{% endblock %}
+
+{% block js_content %}
+	<script src="{% static 'plugins/vue/vue.min.js' %}"></script>
+	
+	<script>
+		new Vue({
+		    el: '#app',
+		    delimiters: ["${", "}"],
+		    data: {
+		        minuteSteps: [0, 10, 20, 30, 40, 50],
+		        strategies: {% autoescape off %}{{ prod_strategys_json }}{% endautoescape %},
+		        isSaving: false
+		    },
+		    methods: {
+		        toggleMinute(item, step) {
+		            const index = item.adj_minutes.indexOf(step);
+		            if (index > -1) {
+		                item.adj_minutes.splice(index, 1);
+		            } else {
+		                item.adj_minutes.push(step);
+		            }
+		        },
+		        saveAll() {
+		            this.isSaving = true;
+		            fetch('/coding/spider/storage/strategy/update/', {
+		                method: 'POST',
+		                headers: {
+		                    'Content-Type': 'application/json',
+		                    'X-CSRFToken': '{{ csrf_token }}'
+		                },
+		                body: JSON.stringify(this.strategies)
+		            })
+		            .then(response => {
+		                if (response.ok) {
+		                    window.location.href = "/coding/spider/storage/strategy/";
+		                } else {
+		                    alert("服务器返回错误");
+		                    this.isSaving = false;
+		                }
+		            })
+		            .catch(err => {
+		                console.error(err);
+		                alert("网络请求失败");
+		                this.isSaving = false;
+		            });
+		        }
+		    }
+		});
+	</script>
 {% endblock %}

@@ -27,7 +27,8 @@ urlpatterns = [
     url(r'^coding/wechat/mail/parse/', coding_wechat.mail_parse),
     url(r'^coding/spider/storage/query/', coding_spider.query_storage),
     url(r'^coding/spider/storage/reset/', coding_spider.query_reset),
-    url(r'^coding/spider/storage/strategy/', coding_spider.strategy_index),
+    url(r'^coding/spider/storage/strategy/$', coding_spider.strategy_index),
+    url(r'^coding/spider/storage/strategy/update/', coding_spider.strategy_update),
 
     url(r'^snooker/$', snooker.index),
     url(r'^snooker/campaign/$', snooker_campaign.index),

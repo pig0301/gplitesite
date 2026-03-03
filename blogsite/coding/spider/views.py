@@ -7,7 +7,7 @@ import re, json, datetime, time, requests
 import hmac, hashlib, base64, codecs
 
 from libs.functions import render_template, check_login, get_client_ip
-from libs import wechat, dingding, constants
+from libs import wechat, dingding
 
 from home import models
 from coding.spider import models as models_code
@@ -72,7 +72,7 @@ def query_reset(request):
         if prod_strategy.exists():
             product = { 'prodSkuId': prod_sku[1], 'logstorId': prod_sku[2] }
             
-            if adjust_storage(emall_api, product, prod_strategy.adj_storage_cnt):
+            if adjust_storage(emall_api, product, prod_strategy.first().adj_storage_cnt):
                 messages.info(request, "API调用成功，产品库存已实时调整！")
             else:
                 messages.warning(request, "API调用失败，请及时排查问题！")
@@ -85,11 +85,31 @@ def query_reset(request):
 def strategy_index(request):
     if check_login(request):
         prod_strategys = models_code.spider_product_strategy.objects.all().order_by('id')
+        strategies_list = list(prod_strategys.values('id', 'product_id', 'product_name', 'min_storage_cnt', 'adj_storage_cnt', 'adj_minutes'))
         return render_template("coding/spider/strategy.html", {
-            'prod_strategys': prod_strategys, 'minute_steps': [0, 10, 20, 30, 40, 50]
+            'prod_strategys_json': json.dumps(strategies_list),
+            'minute_steps': [0, 10, 20, 30, 40, 50]
         }, request)
     else:
         return HttpResponse("非管理员用户禁止访问！")
+
+
+def strategy_update(request):
+    if check_login(request):
+        if request.method == "POST":
+            data = json.loads(request.body)
+            for item in data:
+                obj = models_code.spider_product_strategy.objects.get(id=item['id'])
+                obj.min_storage_cnt = item['min_storage_cnt']
+                obj.adj_storage_cnt = item['adj_storage_cnt']
+                obj.adj_minutes = item['adj_minutes']
+                obj.save()
+            
+            messages.info(request, "产品策略保存成功，库存调整将按新策略执行！")
+        
+        return HttpResponse("success")
+    else:
+        return HttpResponse("非管理员用户禁止访问！", status=403)
 
 
 def get_product_details(prod_links, msg_level, dttm, is_auto):
