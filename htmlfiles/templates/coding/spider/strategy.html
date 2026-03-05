@@ -14,37 +14,39 @@
 	
 	    <div class="row">
 	        <div class="col-md-12">
-	            <table class="table table-striped">
-	                <thead>
-	                    <tr>
-	                        <th>Product Id</th>
-	                        <th>Product Name</th>
-	                        <th width="120">Min Count</th>
-	                        <th width="120">Adjust Count</th>
-	                        <th v-for="step in minuteSteps" :key="step">${step} Mins</th>
-	                    </tr>
-	                </thead>
-	                <tbody>
-	                    <tr v-for="(item, index) in strategies" :key="item.id">
-	                        <td style="vertical-align: middle;"><h5><small>${item.product_id}</small></h5></td>
-	                        <td style="vertical-align: middle;"><h5><small>${item.product_name}</small></h5></td>
-	                        
-	                        <td style="vertical-align: middle;">
-	                            <input type="number" v-model.number="item.min_storage_cnt" class="form-control form-control-sm">
-	                        </td>
-	                        <td style="vertical-align: middle;">
-	                            <input type="number" v-model.number="item.adj_storage_cnt" class="form-control form-control-sm">
-	                        </td>
-	
-	                        <td v-for="step in minuteSteps" :key="step" class="text-center" style="vertical-align: middle;">
-	                            <div @click="toggleMinute(item, step)" style="cursor: pointer;">
-	                                <i v-if="item.adj_minutes.includes(step)" class="fas fa-check-square text-success fa-lg"></i>
-	                                <i v-else class="fas fa-times-circle text-secondary fa-lg"></i>
-	                            </div>
-	                        </td>
-	                    </tr>
-	                </tbody>
-	            </table>
+				<table class="table table-striped">
+				    <thead>
+				        <tr>
+				            <th>Product Id</th>
+				            <th>Product Name</th>
+				            <th width="100">Hour Total</th>
+				            <th width="100">Min Count</th>
+				            <th width="100">Adj Count</th>
+				            <th v-for="step in minuteSteps" :key="step">M${ String(step).padStart(2, '0') }</th>
+				        </tr>
+				    </thead>
+				    <tbody>
+				        <tr v-for="(item, index) in strategies" :key="item.id">
+				            <td style="vertical-align: middle;"><h5><small>${item.product_id}</small></h5></td>
+				            <td style="vertical-align: middle;"><h5><small>${item.product_name}</small></h5></td>
+				            <td style="vertical-align: middle;">
+								<input type="number" v-model.number="item.total_x" @input="calculateValues(item)" class="form-control form-control-sm">
+				            </td>
+				            <td style="vertical-align: middle;">
+				                <input type="number" v-model.number="item.min_storage_cnt" class="form-control form-control-sm" readonly>
+				            </td>
+				            <td style="vertical-align: middle;">
+				                <input type="number" v-model.number="item.adj_storage_cnt" class="form-control form-control-sm" readonly>
+				            </td>
+				            <td v-for="step in minuteSteps" :key="step" class="text-center" style="vertical-align: middle;">
+				                <div @click="toggleMinute(item, step)" style="cursor: pointer;">
+				                    <i v-if="item.adj_minutes.includes(step)" class="fas fa-check-square text-success fa-lg"></i>
+				                    <i v-else class="fas fa-times-circle text-secondary fa-lg"></i>
+				                </div>
+				            </td>
+				        </tr>
+				    </tbody>
+				</table>
 	        </div>
 	    </div>
 	</div>
@@ -63,10 +65,28 @@
 		    delimiters: ["${", "}"],
 		    data: {
 		        minuteSteps: [0, 10, 20, 30, 40, 50],
-		        strategies: {% autoescape off %}{{ prod_strategys_json }}{% endautoescape %},
+		        strategies: ({% autoescape off %}{{ prod_strategys_json }}{% endautoescape %}).map(item => {
+		            const initialX = item.adj_storage_cnt * (item.adj_minutes ? item.adj_minutes.length : 0);
+		            return {
+		                ...item,
+		                total_x: initialX || 0
+		            };
+		        }),
 		        isSaving: false
 		    },
 		    methods: {
+		        calculateValues(item) {
+		            const totalX = parseFloat(item.total_x) || 0;
+		            const checkedCount = item.adj_minutes.length;
+	
+		            if (checkedCount > 0) {
+		                item.adj_storage_cnt = Math.round(totalX / checkedCount);
+		                item.min_storage_cnt = Math.round(item.adj_storage_cnt / 3);
+		            } else {
+		                item.adj_storage_cnt = 0;
+		                item.min_storage_cnt = 0;
+		            }
+		        },
 		        toggleMinute(item, step) {
 		            const index = item.adj_minutes.indexOf(step);
 		            if (index > -1) {
@@ -74,6 +94,7 @@
 		            } else {
 		                item.adj_minutes.push(step);
 		            }
+		            this.calculateValues(item);
 		        },
 		        saveAll() {
 		            this.isSaving = true;
