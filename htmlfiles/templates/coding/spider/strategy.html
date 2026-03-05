@@ -19,9 +19,9 @@
 				        <tr>
 				            <th>Product Id</th>
 				            <th>Product Name</th>
-				            <th width="100">Hour Total</th>
-				            <th width="100">Min Count</th>
-				            <th width="100">Adj Count</th>
+				            <th width="110"><i class="fas fa-faucet text-primary fa-lg"></i></th>
+				            <th width="110"><i class="fas fa-battery-quarter text-danger fa-lg"></i></th>
+				            <th width="110"><i class="fas fa-battery-full text-success fa-lg"></i></th>
 				            <th v-for="step in minuteSteps" :key="step">M${ String(step).padStart(2, '0') }</th>
 				        </tr>
 				    </thead>
