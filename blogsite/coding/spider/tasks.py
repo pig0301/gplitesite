@@ -9,7 +9,11 @@ from coding.spider import views as views_code
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib, os
+import matplotlib, os, django
+
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gplitesite.settings')
+django.setup()
 
 
 def query_storage(mode):
