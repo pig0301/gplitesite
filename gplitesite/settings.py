@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_crontab',
+    'django_rq',
     'blogsite',
     'htmlfiles',
     'home',
@@ -113,6 +114,21 @@ else:
         ('*/10 9-22 * * *', 'coding.spider.cron.query_storage', '>> /data/share/log/gplitesite/cron/query_storage.log'),
         ('0 23 * * *', 'coding.spider.cron.query_storage_with_save', '>> /data/share/log/gplitesite/cron/query_storage.log')
     ]
+    
+    RQ_QUEUES = {
+        'icbc_worker': {
+            'HOST': 'localhost',
+            'PORT': 6379,
+            'DB': 0,
+            'DEFAULT_TIMEOUT': 300,
+        },
+        'ths_worker': {
+            'HOST': 'localhost',
+            'PORT': 6379,
+            'DB': 0,
+            'DEFAULT_TIMEOUT': 1800,
+        }
+    }
 
 
 # Password validation
