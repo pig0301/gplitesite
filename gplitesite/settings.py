@@ -121,12 +121,14 @@ else:
             'PORT': 6379,
             'DB': 0,
             'DEFAULT_TIMEOUT': 300,
+            'RESULT_TTL': 86400,
         },
         'ths_worker': {
             'HOST': 'localhost',
             'PORT': 6379,
             'DB': 0,
             'DEFAULT_TIMEOUT': 1800,
+            'RESULT_TTL': 86400,
         }
     }
 
