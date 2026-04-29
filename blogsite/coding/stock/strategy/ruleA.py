@@ -33,13 +33,12 @@ def get_good_stocks():
 
     if not df_ret.empty:
         formatted_lines = df_ret.apply(
-            lambda x: f"{x['code']} {x['name']}【{x['type']}】WR:{x['wr10']}", 
-            axis=1
+            lambda x: f"{x['code'][:6]} {x['name']}【{x['type']}】", axis=1
         ).tolist()
         
-        header = f"{df['time'].iloc[0]} | 双叉十字斩 | 共 {len(df)}只："
+        header = f"{df['time'].iloc[0]} | 双叉| 共 {len(df_ret)}只："
         formatted_lines.insert(0, header)
-        formatted_lines.insert(1, "-" * 20)
+        formatted_lines.insert(1, "-" * 40)
         
         ret_summary = "\r\n".join(formatted_lines)
  
