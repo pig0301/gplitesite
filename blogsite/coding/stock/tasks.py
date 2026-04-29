@@ -4,7 +4,6 @@ from iFinDPy import *
 
 import django_rq, os, json
 import pandas as pd
-from pandas.tests.generic.test_label_or_level_utils import df
 
 
 @job('ths_worker', timeout=600, result_ttl=86400)
@@ -23,6 +22,7 @@ def get_stocks_list():
         if not codes or not names:
             df = pd.DataFrame({ 'code': codes, 'name': names })
             df = df[df['code'].str.contains(r'\.(SZ|SH|BJ)$', na=False, regex=True)]
+            
             return df
     
     raise Exception(f"iFind 未查询到任何A股信息！")
