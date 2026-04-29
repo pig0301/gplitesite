@@ -18,10 +18,10 @@ def is_trade_day():
             return info.get('is_trade_day')
 
     ths_login()
-    res = THS_DateQueries('SSE', today, today, 'isTradeDay')
+    res = THS_Date_Query('SSE', 'mode:1,dateType:0,period:D,dateFormat:0', today, today)
     
     if res.errorcode == 0:
-        is_trade_day = str(res.data.iloc[0, 0])
+        is_trade_day = (today in res.data)
         flag = { 'date': today, 'is_trade_day': is_trade_day }
         
         redis_conn.set('GLOBAL_TRADE_DAY_FLAG', json.dumps(flag), ex=54000)
