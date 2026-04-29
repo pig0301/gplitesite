@@ -102,17 +102,18 @@ def get_good_stocks():
         selected.append(row)
 
     df_ret = pd.DataFrame(selected)
+    df_ret['type'] = df_ret['type'].fillna('普通')
 
-    columns = list(df_ret.columns)
-    columns.remove('wr10')
-    columns.remove('type')
-
-    columns.insert(columns.index('name') + 1, 'wr10')
-    columns.insert(columns.index('name') + 1, 'type')
-    
-    ret_df = df_ret[columns]
-
-    if not ret_df.empty:
-        return ret_df.to_string(index=False)
+    if not df_ret.empty:
+        formatted_lines = df_ret.apply(
+            lambda x: f"{x['code']} {x['name']}【{x['type']}】WR:{x['wr10']}", 
+            axis=1
+        ).tolist()
+        
+        header = f"{df['time'].iloc[0]} | 双叉十字斩 | 共 {len(df)}只："
+        formatted_lines.insert(0, header)
+        formatted_lines.insert(1, "-" * 20)
+        
+        return "\r\n".join(formatted_lines)
     else:
-        return "今日无信号。"
+        return "今日无【双叉十字斩】信号。"

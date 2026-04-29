@@ -9,4 +9,4 @@ def update_daily_quotes():
 
 
 def run_pick_strategy():
-    ruleA.get_good_stocks.delay()
+    wechat.send_text_message(1, ruleA.get_good_stocks.delay())
