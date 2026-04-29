@@ -1,4 +1,4 @@
-from coding.stock.tasks import init_daily_trade_flag
+from coding.stock.tasks import is_trade_day
 
 
 def test1():
