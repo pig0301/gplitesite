@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.db import transaction
 from iFinDPy import *
 
-from coding.stock import models as stock_ths_stocks
+from coding.stock.models import stock_ths_stocks
 
 import django_rq, os, json
 import pandas as pd
