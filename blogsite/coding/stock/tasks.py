@@ -25,7 +25,7 @@ def get_stocks_list():
             
             return df
         else:
-            return 1
+            return table
     raise Exception(f"iFind 未查询到任何A股信息！")
 
 
