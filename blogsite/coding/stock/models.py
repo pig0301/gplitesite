@@ -8,7 +8,14 @@ class stock_ths_stocks(models.Model):
 
 
 class stock_ths_daily_quotes(models.Model):
-    stock_code = models.CharField(max_length=12)
+    stock_code = models.ForeignKey(
+        stock_ths_stocks, 
+        to_field='stock_code', 
+        on_delete=models.DO_NOTHING,
+        db_column='stock_code',
+        related_name='daily_quotes'
+    )
+
     trade_dt = models.DateField()
     open_price = models.DecimalField(max_digits=12, decimal_places=4)
     high_price = models.DecimalField(max_digits=12, decimal_places=4)

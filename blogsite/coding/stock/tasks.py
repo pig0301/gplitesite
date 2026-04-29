@@ -84,7 +84,7 @@ def update_daily_quote(df):
 
                 quote_objs = [
                     stock_ths_daily_quotes(
-                        stock_code=row['code'],
+                        stock_code_id=row['code'],
                         trade_dt=row['trade_dt'],
                         open_price=row['open'],
                         high_price=row['high'],
