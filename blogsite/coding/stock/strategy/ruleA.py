@@ -36,7 +36,7 @@ def pick_stocks_with_wr10():
         )
         return group
 
-    df = df.groupby('code').apply(calc_wr10)
+    df = df.groupby('code', group_keys=False).apply(calc_wr10)
     df['wr10'] = df['wr10'].abs().round(2)
 
     columns = ['open', 'high', 'low', 'close']
