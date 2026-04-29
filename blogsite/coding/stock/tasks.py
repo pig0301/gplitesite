@@ -6,4 +6,4 @@ from django.utils import timezone
 def init_daily_trade_flag():
     today = timezone.now().date().isoformat()
     
-    print(today)
+    return today
