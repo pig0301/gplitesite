@@ -23,7 +23,6 @@ def get_stocks_list():
         if not codes or not names:
             df = pd.DataFrame({ 'code': codes, 'name': names })
             df = df[df['code'].str.contains(r'\.(SZ|SH|BJ)$', na=False, regex=True)]
-            
             return df
     
     raise Exception(f"iFind 未查询到任何A股信息！")
