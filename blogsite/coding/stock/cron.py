@@ -1,5 +1,5 @@
-from coding.stock.tasks import get_stocks_list
+from coding.stock.tasks import download_daily_quotes
 
 
 def test1():
-    get_stocks_list.delay()
+    download_daily_quotes.delay()

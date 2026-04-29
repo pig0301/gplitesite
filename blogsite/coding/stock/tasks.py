@@ -1,17 +1,62 @@
 from django_rq import job
 from django.utils import timezone
+from django.db import transaction
 from iFinDPy import *
+
+from coding.stock import models as stock_ths_stocks
 
 import django_rq, os, json
 import pandas as pd
 
 
 @job('ths_worker', timeout=600, result_ttl=86400)
-def get_stocks_list():
+def download_daily_quotes():
     if not is_trade_day():
         return "非交易日"
     
     ths_login()
+    stock_df = get_stocks_list()
+    
+    return update_stock_info(stock_df)
+
+
+
+def update_stock_info(df):
+    current_time = timezone.now()
+    all_codes = df['code'].tolist()
+
+    existing_stocks = stock_ths_stocks.objects.filter(stock_code__in=all_codes)
+    existing_map = {s.stock_code: s for s in existing_stocks}
+    
+    to_update = []
+    to_create = []
+
+    for _, row in df.iterrows():
+        code = row['code']
+        name = row['name']
+        
+        if code in existing_map:
+            obj = existing_map[code]
+            obj.stock_name = name
+            obj.update_dttm = current_time
+            to_update.append(obj)
+        else:
+            to_create.append(stock_ths_stocks(
+                stock_code=code,
+                stock_name=name,
+                update_dttm=current_time
+            ))
+
+    with transaction.atomic():
+        if to_update:
+            stock_ths_stocks.objects.bulk_update(to_update, ['stock_name', 'update_dttm'], batch_size=500)
+        if to_create:
+            stock_ths_stocks.objects.bulk_create(to_create, batch_size=500)
+            
+    return f"同步结果：更新 {len(to_update)} 条，新增 {len(to_create)} 条。"
+
+
+def get_stocks_list():
     data = THS_iwencai('全A股,股票简称', 'stock')
 
     if isinstance(data, dict) and 'tables' in data:
@@ -26,7 +71,6 @@ def get_stocks_list():
             return df
 
     raise Exception(f"iFind 未查询到任何A股信息！")
-
 
 
 def is_trade_day():
