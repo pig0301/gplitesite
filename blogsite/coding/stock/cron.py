@@ -1,5 +1,5 @@
-from coding.stock.tasks import is_trade_day
+from coding.stock.tasks import get_stocks_list
 
 
 def test1():
-    is_trade_day.delay()
+    get_stocks_list.delay()

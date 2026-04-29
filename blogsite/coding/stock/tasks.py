@@ -6,6 +6,30 @@ import django_rq, os, json
 
 
 @job('ths_worker', timeout=600, result_ttl=86400)
+def get_stocks_list():
+    if not is_trade_day():
+        return "非交易日"
+    
+    ths_login()
+    data = THS_iwencai('全A股', 'stock')
+
+    if isinstance(data, dict) and 'tables' in data:
+        table = data['tables'][0].get('table', {})
+        stocks = table.get('thscode') or table.get('股票代码')
+        if stocks:
+            stocks = [s for s in stocks if s and (s.endswith('.SZ') or s.endswith('.SH') or s.endswith('.BJ'))]
+            print(f"✅ 成功获取 {len(stocks)} 只股票")
+            return stocks
+    else：
+        raise Exception(f"iFind 未查询到任何A股信息！")
+
+    # return ['300170.SZ']  # 保底
+
+
+
+
+
+
 def is_trade_day():
     today = timezone.now().date().isoformat()
     
@@ -27,7 +51,7 @@ def is_trade_day():
         redis_conn.set('GLOBAL_TRADE_DAY_FLAG', json.dumps(flag), ex=54000)
         return is_trade_day
     else:
-        raise Exception(f"iFind Query Error: {res.errormsg}")
+        raise Exception(f"iFind 交易日查询失败，错误信息: {res.errormsg}")
 
 
 def ths_login():
@@ -40,4 +64,4 @@ def ths_login():
     res = THS_iFinDLogin(account, password)
     
     if res not in [0, -202]:
-        raise Exception(f"iFind 登录失败，错误码: {res}")
+        raise Exception(f"iFind 登录失败，错误代码: {res}")
