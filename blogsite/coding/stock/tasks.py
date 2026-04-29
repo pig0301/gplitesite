@@ -20,7 +20,7 @@ def get_stocks_list():
             stocks = [s for s in stocks if s and (s.endswith('.SZ') or s.endswith('.SH') or s.endswith('.BJ'))]
             print(f"✅ 成功获取 {len(stocks)} 只股票")
             return stocks
-    else：
+    else:
         raise Exception(f"iFind 未查询到任何A股信息！")
 
     # return ['300170.SZ']  # 保底
