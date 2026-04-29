@@ -24,7 +24,8 @@ def get_stocks_list():
             df = df[df['code'].str.contains(r'\.(SZ|SH|BJ)$', na=False, regex=True)]
             
             return df
-    
+        else:
+            return 1
     raise Exception(f"iFind 未查询到任何A股信息！")
 
 
