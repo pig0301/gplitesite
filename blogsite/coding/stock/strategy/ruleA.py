@@ -24,25 +24,25 @@ def pick_stocks_with_wr10():
         'close_price': 'close'
     }, inplace=True)
 
-    for col in ['open', 'high', 'low', 'close']:
-        df[col] = df[col].astype(float)
-
-    def calc_wr10(group):
-        group['wr10'] = talib.WILLR(
-            group['high'].values, 
-            group['low'].values, 
-            group['close'].values, 
-            timeperiod=10
-        )
-        return group
-
-    df = df.groupby('code', group_keys=False).apply(calc_wr10)
-    df['wr10'] = df['wr10'].abs().round(2)
-
-    columns = ['open', 'high', 'low', 'close']
-    shifts = [1, 2]
-    for s in shifts:
-        for c in columns:
-            df[f'{c}_l{s}'] = df.groupby('code')[c].shift(s)
+#     for col in ['open', 'high', 'low', 'close']:
+#         df[col] = df[col].astype(float)
+# 
+#     def calc_wr10(group):
+#         group['wr10'] = talib.WILLR(
+#             group['high'].values, 
+#             group['low'].values, 
+#             group['close'].values, 
+#             timeperiod=10
+#         )
+#         return group
+# 
+#     df = df.groupby('code', group_keys=False).apply(calc_wr10)
+#     df['wr10'] = df['wr10'].abs().round(2)
+# 
+#     columns = ['open', 'high', 'low', 'close']
+#     shifts = [1, 2]
+#     for s in shifts:
+#         for c in columns:
+#             df[f'{c}_l{s}'] = df.groupby('code')[c].shift(s)
 
     return df.groupby('code').tail(1)
