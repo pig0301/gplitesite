@@ -6,7 +6,6 @@ from django.db.models import F
 from coding.stock.models import stock_ths_daily_quotes
 
 
-@job('ths_worker', timeout=600, result_ttl=86400)
 def pick_stocks_with_wr10():
     queryset = stock_ths_daily_quotes.objects.select_related('stock_code').annotate(
         name=F('stock_code__stock_name')
@@ -49,3 +48,71 @@ def pick_stocks_with_wr10():
             df[f'{c}_l{s}'] = df.groupby('code')[c].shift(s)
 
     return df.groupby('code').tail(1)
+
+
+def is_good_stock(row, is_abnormal=False):
+    open_l0 = row['open']
+    high_l0 = row['high']
+    low_l0 = row['low']
+    close_l0 = row['close']
+
+    open_l1 = row['open_l1']
+    high_l1 = row['high_l1']
+    low_l1 = row['low_l1']
+    close_l1 = row['close_l1']
+    
+    wr10 = row['wr10']
+
+    if is_abnormal:
+        open_l1 = row['open_l2']
+        high_l1 = max(row['high_l1'], row['high_l2'])
+        low_l1 = min(row['low_l1'], row['low_l2'])
+
+    isFirstX = (high_l0 > low_l0 and abs(open_l0 - close_l0) / (high_l0 - low_l0) <= 0.25)
+    isLastX = (high_l1 > low_l1 and abs(open_l1 - close_l1) / (high_l1 - low_l1) <= 0.25)
+
+    isPrice_Rule1 = (high_l0 < high_l1 and low_l0 < low_l1)
+    isPrice_Rule2 = (low_l0 < open_l1 < high_l0 and low_l0 < close_l1 < high_l0)
+    isPrice_Rule3 = (low_l1 < open_l0 < high_l1 and low_l1 < close_l0 < high_l1)
+
+    isPriceOK = (isPrice_Rule1 and isPrice_Rule2 and isPrice_Rule3)
+    
+    isWr10 = (wr10 <= 20)
+
+    return isFirstX and isLastX and isPriceOK and isWr10
+
+
+@job('ths_worker', timeout=600, result_ttl=86400)
+def get_good_stocks():
+    df = pick_stocks_with_wr10()
+    selected = []
+
+    for _, row in df.iterrows():
+        normal_good = is_good_stock(row)
+        abnormal_good = is_good_stock(row, is_abnormal=True)
+
+        if not normal_good and not abnormal_good:
+            continue
+        elif normal_good:
+            if row['close'] > row['close_l1']:
+                row['type'] = '强势'
+        elif abnormal_good:
+            row['type'] = '变异'
+
+        selected.append(row)
+
+    df_ret = pd.DataFrame(selected)
+
+    columns = list(df_ret.columns)
+    columns.remove('wr10')
+    columns.remove('type')
+
+    columns.insert(columns.index('name') + 1, 'wr10')
+    columns.insert(columns.index('name') + 1, 'type')
+    
+    ret_df = df_ret[columns]
+
+    if not ret_df.empty:
+        return ret_df.to_string(index=False)
+    else:
+        return "今日无信号。"

@@ -4,7 +4,6 @@ from django.db import transaction
 from iFinDPy import *
 
 from coding.stock.models import stock_ths_stocks, stock_ths_daily_quotes
-from libs import wechat
 
 import django_rq, os, json
 import pandas as pd
@@ -27,11 +26,8 @@ def download_daily_quotes():
     
     stock_summary = f"共更新 {ret_stock[0]} 条记录，成功新增 {ret_stock[1]} 条记录"
     quote_summary = f"共删除 {ret_quote[0]} 条记录，成功新增 {ret_quote[1]} 条记录"
-    full_summary = f"①股票信息：{stock_summary}；\r\n\r\n②行情信息：{quote_summary}。"
-    
-    wechat.send_text_message(1, full_summary)
-    
-    return full_summary
+
+    return f"①股票信息：{stock_summary}；\r\n\r\n②行情信息：{quote_summary}。"
 
 
 def update_daily_quote(df):
