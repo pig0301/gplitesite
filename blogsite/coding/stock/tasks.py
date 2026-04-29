@@ -3,10 +3,14 @@ from django.utils import timezone
 from django.db import transaction
 from iFinDPy import *
 
-from coding.stock.models import stock_ths_stocks
+from coding.stock.models import stock_ths_stocks, stock_ths_daily_quotes
 
 import django_rq, os, json
 import pandas as pd
+
+
+THS_BATCH_SIZE = 50
+DB_BATCH_SIZE = 500
 
 
 @job('ths_worker', timeout=600, result_ttl=86400)
@@ -17,8 +21,79 @@ def download_daily_quotes():
     ths_login()
     stock_df = get_stocks_list()
     
-    return update_stock_info(stock_df)
+    ret_stock = update_stock_info(stock_df)
+    ret_quote = update_daily_quote(stock_df)
+    
+    stock_summary = f"共更新 {ret_stock[0]} 条记录，成功新增 {ret_stock[1]} 条记录"
+    quote_summary = f"共删除 {ret_quote[0]} 条记录，成功新增 {ret_quote[1]} 条记录"
+    
+    return f"股票信息：{stock_summary}；\r\n行情信息：{quote_summary}。"
 
+
+def update_daily_quote(df):
+    all_codes = df['code'].tolist()
+    
+    total_deleted = 0
+    total_inserted = 0
+
+    for i in range(0, len(all_codes), THS_BATCH_SIZE):
+        batch = all_codes[i : i + THS_BATCH_SIZE]
+        code_str = ",".join(batch)
+
+        res = THS_RealtimeQuotes(code_str, 'open,high,low,latest,volume')
+
+        if not isinstance(res, dict) or 'tables' not in res:
+            continue
+
+        batch_data_list = []
+        for stock_data in res['tables']:
+            current_code = stock_data.get('thscode', 'Unknown')
+            times = stock_data.get('time', [])
+            tables = stock_data.get('table', {})
+            
+            if not tables: continue
+
+            temp_df = pd.DataFrame({
+                'code': current_code,
+                'time': times,
+                'open': tables.get('open', []),
+                'high': tables.get('high', []),
+                'low': tables.get('low', []),
+                'close': tables.get('latest', []),
+                'volume': tables.get('volume', [])
+            })
+            batch_data_list.append(temp_df)
+
+        if batch_data_list:
+            final_batch_df = pd.concat(batch_data_list)
+
+            final_batch_df['trade_dt'] = pd.to_datetime(final_batch_df['time']).dt.date
+            target_dates = final_batch_df['trade_dt'].unique()
+            current_batch_codes = final_batch_df['code'].unique().tolist()
+
+            with transaction.atomic():
+                deleted_count, _ = stock_ths_daily_quotes.objects.filter(
+                    trade_dt__in=target_dates,
+                    stock_code__in=current_batch_codes
+                ).delete()
+                total_deleted += deleted_count
+
+                quote_objs = [
+                    stock_ths_daily_quotes(
+                        stock_code=row['code'],
+                        trade_dt=row['trade_dt'],
+                        open_price=row['open'],
+                        high_price=row['high'],
+                        low_price=row['low'],
+                        close_price=row['close'],
+                        total_volume=row['volume']
+                    ) for _, row in final_batch_df.iterrows()
+                ]
+                
+                created_objs = stock_ths_daily_quotes.objects.bulk_create(quote_objs, batch_size=DB_BATCH_SIZE)
+                total_inserted += len(created_objs)
+
+    return [total_deleted, total_inserted]
 
 
 def update_stock_info(df):
@@ -49,11 +124,11 @@ def update_stock_info(df):
 
     with transaction.atomic():
         if to_update:
-            stock_ths_stocks.objects.bulk_update(to_update, ['stock_name', 'update_dttm'], batch_size=500)
+            stock_ths_stocks.objects.bulk_update(to_update, ['stock_name', 'update_dttm'], batch_size=DB_BATCH_SIZE)
         if to_create:
-            stock_ths_stocks.objects.bulk_create(to_create, batch_size=500)
+            stock_ths_stocks.objects.bulk_create(to_create, batch_size=DB_BATCH_SIZE)
             
-    return f"同步结果：更新 {len(to_update)} 条，新增 {len(to_create)} 条。"
+    return [len(to_update), len(to_create)]
 
 
 def get_stocks_list():
