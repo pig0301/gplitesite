@@ -3,6 +3,8 @@ from django.utils import timezone
 from iFinDPy import *
 
 import django_rq, os, json
+import pandas as pd
+from pandas.tests.generic.test_label_or_level_utils import df
 
 
 @job('ths_worker', timeout=600, result_ttl=86400)
@@ -11,22 +13,20 @@ def get_stocks_list():
         return "非交易日"
     
     ths_login()
-    data = THS_iwencai('全A股', 'stock')
+    data = THS_iwencai('全A股,股票简称', 'stock')
 
     if isinstance(data, dict) and 'tables' in data:
         table = data['tables'][0].get('table', {})
-        stocks = table.get('thscode') or table.get('股票代码')
-        if stocks:
-            stocks = [s for s in stocks if s and (s.endswith('.SZ') or s.endswith('.SH') or s.endswith('.BJ'))]
-            print(f"✅ 成功获取 {len(stocks)} 只股票")
-            return stocks
-    else:
-        raise Exception(f"iFind 未查询到任何A股信息！")
+        codes = table.get('thscode') or table.get('股票代码')
+        names = table.get('股票简称') or table.get('name')
 
-    # return ['300170.SZ']  # 保底
-
-
-
+        if not codes or not names:
+            df = pd.DataFrame({ 'code': codes, 'name': names })
+            df = df[df['code'].str.contains(r'\.(SZ|SH|BJ)$', na=False, regex=True)]
+            
+            return df
+    
+    raise Exception(f"iFind 未查询到任何A股信息！")
 
 
 
