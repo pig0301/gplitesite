@@ -27,7 +27,7 @@ def download_daily_quotes():
     
     stock_summary = f"共更新 {ret_stock[0]} 条记录，成功新增 {ret_stock[1]} 条记录"
     quote_summary = f"共删除 {ret_quote[0]} 条记录，成功新增 {ret_quote[1]} 条记录"
-    final_summary = f"①股票信息：{stock_summary}；\r\n\r\n②行情信息：{quote_summary}。"
+    final_summary = f"①股票信息：{stock_summary}；\r\n②行情信息：{quote_summary}。"
     
     wechat.send_text_message(1, final_summary)
 
