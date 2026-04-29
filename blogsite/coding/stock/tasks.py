@@ -7,7 +7,7 @@ import django_rq, os, json
 
 @job('ths_worker', timeout=600, result_ttl=86400)
 def is_trade_day():
-    today = timezone.localdate().isoformat()
+    today = timezone.now().date().isoformat()
     
     redis_conn = django_rq.get_connection('ths_worker')
     flag = redis_conn.get('GLOBAL_TRADE_DAY_FLAG')
