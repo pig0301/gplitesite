@@ -1,5 +1,6 @@
 from django.utils import timezone
 from django.conf import settings
+from django_rq import job
 
 from home import models as models_home
 from libs import constants
@@ -12,6 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib, os
 
 
+@job('icbc_worker', timeout=300, result_ttl=86400)
 def query_storage(mode):
     dttm = timezone.now()
     msg_level = models_home.message_level.objects.get(id=1)
