@@ -4,6 +4,48 @@ import talib
 from django_rq import job
 from django.db.models import F
 from coding.stock.models import stock_ths_daily_quotes
+from libs import wechat
+
+
+@job('ths_worker', timeout=600, result_ttl=86400)
+def get_good_stocks():
+    df = pick_stocks_with_wr10()
+    selected = []
+
+    for _, row in df.iterrows():
+        normal_good = is_good_stock(row)
+        abnormal_good = is_good_stock(row, is_abnormal=True)
+
+        if not normal_good and not abnormal_good:
+            continue
+        elif normal_good:
+            if row['close'] > row['close_l1']:
+                row['type'] = '强势'
+        elif abnormal_good:
+            row['type'] = '变异'
+
+        selected.append(row)
+
+    df_ret = pd.DataFrame(selected)
+    df_ret['type'] = df_ret['type'].fillna('普通')
+    
+    ret_summary = "今日无【双叉十字斩】信号。"
+
+    if not df_ret.empty:
+        formatted_lines = df_ret.apply(
+            lambda x: f"{x['code']} {x['name']}【{x['type']}】WR:{x['wr10']}", 
+            axis=1
+        ).tolist()
+        
+        header = f"{df['time'].iloc[0]} | 双叉十字斩 | 共 {len(df)}只："
+        formatted_lines.insert(0, header)
+        formatted_lines.insert(1, "-" * 20)
+        
+        ret_summary = "\r\n".join(formatted_lines)
+ 
+    wechat.send_text_message(1, ret_summary)
+    
+    return ret_summary
 
 
 def pick_stocks_with_wr10():
@@ -80,40 +122,3 @@ def is_good_stock(row, is_abnormal=False):
     isWr10 = (wr10 <= 20)
 
     return isFirstX and isLastX and isPriceOK and isWr10
-
-
-@job('ths_worker', timeout=600, result_ttl=86400)
-def get_good_stocks():
-    df = pick_stocks_with_wr10()
-    selected = []
-
-    for _, row in df.iterrows():
-        normal_good = is_good_stock(row)
-        abnormal_good = is_good_stock(row, is_abnormal=True)
-
-        if not normal_good and not abnormal_good:
-            continue
-        elif normal_good:
-            if row['close'] > row['close_l1']:
-                row['type'] = '强势'
-        elif abnormal_good:
-            row['type'] = '变异'
-
-        selected.append(row)
-
-    df_ret = pd.DataFrame(selected)
-    df_ret['type'] = df_ret['type'].fillna('普通')
-
-    if not df_ret.empty:
-        formatted_lines = df_ret.apply(
-            lambda x: f"{x['code']} {x['name']}【{x['type']}】WR:{x['wr10']}", 
-            axis=1
-        ).tolist()
-        
-        header = f"{df['time'].iloc[0]} | 双叉十字斩 | 共 {len(df)}只："
-        formatted_lines.insert(0, header)
-        formatted_lines.insert(1, "-" * 20)
-        
-        return "\r\n".join(formatted_lines)
-    else:
-        return "今日无【双叉十字斩】信号。"
