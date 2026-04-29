@@ -19,13 +19,12 @@ def get_stocks_list():
         codes = table.get('thscode') or table.get('股票代码')
         names = table.get('股票简称') or table.get('name')
 
-        if not codes or not names:
+        if codes and names:
             df = pd.DataFrame({ 'code': codes, 'name': names })
             df = df[df['code'].str.contains(r'\.(SZ|SH|BJ)$', na=False, regex=True)]
             
             return df
-        else:
-            return table
+
     raise Exception(f"iFind 未查询到任何A股信息！")
 
 
