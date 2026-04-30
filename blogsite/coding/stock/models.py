@@ -32,3 +32,9 @@ class stock_ths_daily_quotes(models.Model):
             models.Index(fields=['stock_code', '-trade_dt']),
             models.Index(fields=['trade_dt']),
         ]
+
+
+class stock_pick_strategy(models.Model):
+    strategy_name = models.CharField(max_length=50)
+    python_module = models.CharField(max_length=50)
+    exec_function = models.CharField(max_length=50)
