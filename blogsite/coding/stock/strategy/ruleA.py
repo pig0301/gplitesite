@@ -5,7 +5,7 @@ from django_rq import job
 from django.db.models import F
 from libs import wechat
 
-from coding.stock.models import stock_ths_daily_quotes, stock_pick_strategy, stock_pick_strategy_result
+from coding.stock.models import stock_ths_stocks, stock_ths_daily_quotes, stock_pick_strategy, stock_pick_strategy_result
 from coding.stock.tasks import is_trade_day
 
 
@@ -45,8 +45,9 @@ def get_good_stocks(strategy_id):
         formatted_lines = [header, "-" * 20]
         
         for _, row in df_ret.iterrows():
+            stock_instance = stock_ths_stocks.objects.get(stock_code=row['code'])
             strategy_ret = stock_pick_strategy_result(
-                strategy=strategy_id, pick_date=pick_date, stock_code=row['code']
+                strategy=strategy_obj, pick_date=pick_date, stock_code=stock_instance
             )
             
             strategy_ret.save()
