@@ -7,7 +7,7 @@ from coding.stock.models import stock_ths_daily_quotes
 from libs import wechat
 
 
-@job('ths_worker', timeout=600, result_ttl=86400)
+@job('ths_worker', timeout=600, result_ttl=54000)
 def get_good_stocks():
     df = pick_stocks_with_wr10()
     selected = []

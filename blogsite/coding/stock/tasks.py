@@ -14,7 +14,7 @@ THS_BATCH_SIZE = 50
 DB_BATCH_SIZE = 500
 
 
-@job('ths_worker', timeout=600, result_ttl=86400)
+@job('ths_worker', timeout=600, result_ttl=54000)
 def download_daily_quotes():
     if not is_trade_day():
         return "非交易日"
