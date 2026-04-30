@@ -68,14 +68,17 @@ def pick_stocks_with_wr10():
         'low_price': 'low',
         'close_price': 'close'
     }, inplace=True)
-    
+
+    for col in ['open', 'high', 'low', 'close']:
+        df[col] = df[col].astype(float)
+
     df['wr10'] = 0.0
     for _, group in df.groupby('code'):
         idx = group.index
         df.loc[idx, 'wr10'] = talib.WILLR(
-            group['high'].values.astype(float), 
-            group['low'].values.astype(float), 
-            group['close'].values.astype(float), 
+            group['high'].values, 
+            group['low'].values, 
+            group['close'].values, 
             timeperiod=10
         )
     
