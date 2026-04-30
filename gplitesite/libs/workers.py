@@ -15,5 +15,6 @@ class MaxJobsWorker(Worker):
         if self.jobs_processed >= self.max_jobs:
             self.log.info(f"达到最大处理数 {self.max_jobs}，准备安全退出...")
             os.kill(os.getppid(), signal.SIGTERM)
+            os._exit(0)
         
         return rv
