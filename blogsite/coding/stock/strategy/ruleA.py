@@ -3,12 +3,17 @@ import talib
 
 from django_rq import job
 from django.db.models import F
-from coding.stock.models import stock_ths_daily_quotes
 from libs import wechat
+
+from coding.stock.models import stock_ths_daily_quotes
+from coding.stock.tasks import is_trade_day
 
 
 @job('ths_worker', timeout=600, result_ttl=54000)
 def get_good_stocks():
+    if not is_trade_day():
+        return "非交易日"
+    
     df = pick_stocks_with_wr10()
     selected = []
 
