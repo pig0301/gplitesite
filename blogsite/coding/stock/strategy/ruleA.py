@@ -5,14 +5,16 @@ from django_rq import job
 from django.db.models import F
 from libs import wechat
 
-from coding.stock.models import stock_ths_daily_quotes
+from coding.stock.models import stock_ths_daily_quotes, stock_pick_strategy, stock_pick_strategy_result
 from coding.stock.tasks import is_trade_day
 
 
 @job('ths_worker', timeout=600, result_ttl=54000)
-def get_good_stocks():
+def get_good_stocks(strategy_id):
     if not is_trade_day():
         return "非交易日"
+    
+    strategy_obj = stock_pick_strategy.objects.get(id=strategy_id)
     
     df = pick_stocks_with_wr10()
     selected = []
@@ -34,16 +36,21 @@ def get_good_stocks():
     df_ret = pd.DataFrame(selected)
     df_ret['type'] = df_ret['type'].fillna('普通')
     
-    ret_summary = "今日无【双叉十字斩】信号。"
+    ret_summary = f"今日无【{strategy_obj.strategy_name}】信号。"
 
     if not df_ret.empty:
-        formatted_lines = df_ret.apply(
-            lambda x: f"{x['code']} {x['name']}【{x['type']}】", axis=1
-        ).tolist()
+        pick_date = df['time'].iloc[0]
+        header = f"{pick_date} | {strategy_obj.strategy_name} | 共{len(df_ret)}只："
         
-        header = f"{df['time'].iloc[0]} | 双叉| 共 {len(df_ret)}只："
-        formatted_lines.insert(0, header)
-        formatted_lines.insert(1, "-" * 20)
+        formatted_lines = [header, "-" * 20]
+        
+        for _, row in df_ret.iterrows():
+            strategy_ret = stock_pick_strategy_result(
+                strategy=strategy_obj.id, pick_date=pick_date, stock_code=row['code']
+            )
+            
+            strategy_ret.save()
+            formatted_lines.append(f"{row['code']} {row['name']}【{row['type']}】")
         
         ret_summary = "\r\n".join(formatted_lines)
  
