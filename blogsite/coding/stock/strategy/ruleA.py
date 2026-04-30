@@ -48,7 +48,12 @@ def get_good_stocks():
 
 
 def pick_stocks_with_wr10():
-    queryset = stock_ths_daily_quotes.objects.select_related('stock_code').annotate(
+    recent_dates = stock_ths_daily_quotes.objects.values_list('trade_dt', flat=True).distinct().order_by('-trade_dt')[:15]
+    min_date = list(recent_dates)[-1]
+    
+    queryset = stock_ths_daily_quotes.objects.filter(
+        trade_dt__gte=min_date
+    ).select_related('stock_code').annotate(
         name=F('stock_code__stock_name')
     ).values(
         'trade_dt', 'stock_code', 'name', 'open_price', 'high_price', 'low_price', 'close_price'
@@ -63,20 +68,17 @@ def pick_stocks_with_wr10():
         'low_price': 'low',
         'close_price': 'close'
     }, inplace=True)
-
-    for col in ['open', 'high', 'low', 'close']:
-        df[col] = df[col].astype(float)
-
-    def calc_wr10(group):
-        group['wr10'] = talib.WILLR(
-            group['high'].values, 
-            group['low'].values, 
-            group['close'].values, 
+    
+    df['wr10'] = 0.0
+    for _, group in df.groupby('code'):
+        idx = group.index
+        df.loc[idx, 'wr10'] = talib.WILLR(
+            group['high'].values.astype(float), 
+            group['low'].values.astype(float), 
+            group['close'].values.astype(float), 
             timeperiod=10
         )
-        return group
-
-    df = df.groupby('code').apply(calc_wr10)
+    
     df['wr10'] = df['wr10'].abs().round(2)
     
     column_order = ['time', 'code', 'name', 'wr10', 'open', 'high', 'low', 'close']
