@@ -1,4 +1,4 @@
-import os
+import os, signal
 from rq import Worker
 
 
@@ -14,6 +14,6 @@ class MaxJobsWorker(Worker):
         
         if self.jobs_processed >= self.max_jobs:
             self.log.info(f"达到最大处理数 {self.max_jobs}，准备安全退出...")
-            self.stop()
+            os.kill(os.getpid(), signal.SIGTERM)
         
         return rv
