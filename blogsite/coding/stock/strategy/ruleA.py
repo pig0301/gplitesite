@@ -28,14 +28,14 @@ def get_good_stocks(strategy_id):
         elif normal_good:
             if row['close'] > row['close_l1']:
                 row['type'] = '强势'
+            else:
+                row['type'] = '普通'
         elif abnormal_good:
             row['type'] = '变异'
 
         selected.append(row)
 
-    df_ret = pd.DataFrame(selected)
-    df_ret['type'] = df_ret['type'].fillna('普通')
-    
+    df_ret = pd.DataFrame(selected)    
     ret_summary = f"今日无【{strategy_obj.strategy_name}】信号。"
 
     if not df_ret.empty:
