@@ -114,7 +114,7 @@ else:
         ('*/10 9-22 * * *', 'coding.spider.cron.query_storage_as_normal', '>> /data/share/log/gplitesite/cron/query_storage.log'),
         ('0 23 * * *', 'coding.spider.cron.query_storage_with_save', '>> /data/share/log/gplitesite/cron/query_storage.log'),
         
-        ('0 17 * * *', 'coding.stock.cron.update_daily_quotes', '>> /data/share/log/gplitesite/cron/stock_daily_update.log'),
+        ('55 16 * * *', 'coding.stock.cron.update_daily_quotes', '>> /data/share/log/gplitesite/cron/stock_daily_update.log'),
         ('15 17 * * *', 'coding.stock.cron.run_pick_strategy', '>> /data/share/log/gplitesite/cron/stock_daily_update.log'),
     ]
     
