@@ -39,9 +39,10 @@ def get_good_stocks(strategy_id):
     ret_summary = f"今日无【{strategy_obj.strategy_name}】信号。"
 
     if not df_ret.empty:
-        pick_date = df['time'].iloc[0]
-        header = f"{pick_date} | {strategy_obj.strategy_name} | 共{len(df_ret)}只："
+        pick_date = df['time'].max()
+        stock_pick_strategy_result.objects.filter(strategy=strategy_obj, pick_date=pick_date).delete()
         
+        header = f"{pick_date} | {strategy_obj.strategy_name} | 共{len(df_ret)}只："
         formatted_lines = [header, "-" * 20]
         
         for _, row in df_ret.iterrows():
