@@ -46,7 +46,7 @@ def get_good_stocks(strategy_id):
         
         for _, row in df_ret.iterrows():
             strategy_ret = stock_pick_strategy_result(
-                strategy=strategy_obj.id, pick_date=pick_date, stock_code=row['code']
+                strategy=strategy_id, pick_date=pick_date, stock_code=row['code']
             )
             
             strategy_ret.save()

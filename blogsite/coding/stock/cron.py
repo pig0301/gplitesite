@@ -15,4 +15,4 @@ def run_pick_strategy():
         module = importlib.import_module(strategy.python_module)
         task_func = getattr(module, strategy.exec_function)
 
-        task_func.delay(strategy_id=strategy.id)
+        task_func.delay(strategy.id)
