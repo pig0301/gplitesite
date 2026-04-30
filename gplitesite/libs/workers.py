@@ -4,7 +4,7 @@ from rq import Worker
 
 class MaxJobsWorker(Worker):
     def __init__(self, *args, **kwargs):
-        self.max_jobs = int(os.getenv('RQ_MAX_JOBS', 1))
+        self.max_jobs = int(os.getenv('RQ_MAX_JOBS', 30))
         self.jobs_processed = 0
         super().__init__(*args, **kwargs)
 
@@ -14,6 +14,6 @@ class MaxJobsWorker(Worker):
         
         if self.jobs_processed >= self.max_jobs:
             self.log.info(f"达到最大处理数 {self.max_jobs}，准备安全退出...")
-            self._shutdown()
+            self.request_stop()
         
         return rv
