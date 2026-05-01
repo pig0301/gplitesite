@@ -53,7 +53,7 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
             addition_info = { 'type': row['type'], 'wr10': float(row['wr10']) }
             
             results_to_create.append(stock_pick_strategy_result(
-                strategy=strategy_obj, pick_date=tx_date, stock_code=stock_instance, addition_info_json=json.dumps(addition_info)
+                strategy=strategy_obj, pick_date=tx_date, stock_code=stock_instance, addition_info=json.dumps(addition_info)
             ))
 
             formatted_lines.append(f"{row['code']} {row['name']}【{row['type']}】")
