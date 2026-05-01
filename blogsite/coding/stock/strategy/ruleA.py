@@ -12,7 +12,7 @@ from coding.stock.tasks import is_trade_day
 
 @job('ths_worker', timeout=600, result_ttl=54000)
 def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
-    if ignore_trade_day and not is_trade_day():
+    if not ignore_trade_day and not is_trade_day():
         return "非交易日"
     
     strategy_obj = stock_pick_strategy.objects.get(id=strategy_id)
