@@ -65,4 +65,4 @@ class stock_pick_strategy_result(models.Model):
 
     @info_dict.setter
     def info_dict(self, value):
-        self.addition_info = json.dumps(value)
+        self.addition_info = json.dumps(value, ensure_ascii=False)
