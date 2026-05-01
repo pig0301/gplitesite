@@ -18,10 +18,10 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
     strategy_obj = stock_pick_strategy.objects.get(id=strategy_id)
     
     df = pick_stocks_with_wr10(tx_date)
-    pick_date = df['time'].max()
+    max_date = pd.to_datetime(df['time'].max()).strftime('%Y-%m-%d')
     
-    if pick_date != tx_date:
-        raise Exception(f"策略运行失败：无当日行情数据（最近行情数据为：{pick_date}）")
+    if max_date != tx_date:
+        raise Exception(f"策略运行失败：无当日行情数据（最近行情数据为：{max_date}）")
     
     selected = []
     for _, row in df.iterrows():
@@ -41,10 +41,10 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
         selected.append(row)
 
     df_ret = pd.DataFrame(selected)    
-    ret_summary = f"{pick_date} | {strategy_obj.strategy_name} | 今日无信号。"
+    ret_summary = f"{tx_date} | {strategy_obj.strategy_name} | 今日无信号。"
 
     if not df_ret.empty:
-        header = f"{pick_date} | {strategy_obj.strategy_name} | 共{len(df_ret)}只："
+        header = f"{tx_date} | {strategy_obj.strategy_name} | 共{len(df_ret)}只："
         formatted_lines = [header, "-" * 20]
         
         results_to_create = []
@@ -53,14 +53,14 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
             addition_info = { 'type': row['type'], 'wr10': float(row['wr10']) }
             
             results_to_create.append(stock_pick_strategy_result(
-                strategy=strategy_obj, pick_date=pick_date, stock_code=stock_instance, addition_info_json=json.dumps(addition_info)
+                strategy=strategy_obj, pick_date=tx_date, stock_code=stock_instance, addition_info_json=json.dumps(addition_info)
             ))
 
             formatted_lines.append(f"{row['code']} {row['name']}【{row['type']}】")
         
         ret_summary = "\r\n".join(formatted_lines)
         with transaction.atomic():
-            stock_pick_strategy_result.objects.filter(strategy=strategy_obj, pick_date=pick_date).delete()
+            stock_pick_strategy_result.objects.filter(strategy=strategy_obj, pick_date=tx_date).delete()
             stock_pick_strategy_result.objects.bulk_create(results_to_create)
  
     wechat.send_text_message(1, ret_summary)
