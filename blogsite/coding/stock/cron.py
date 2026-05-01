@@ -24,4 +24,4 @@ def run_pick_strategy():
 def test():
     from coding.stock.strategy import ruleA
     
-    ruleA.get_good_stocks(1, '2026-04-30', ignore_trade_day=True)
+    ruleA.get_good_stocks.delay(1, '2026-04-30', ignore_trade_day=True)
