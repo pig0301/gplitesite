@@ -23,5 +23,15 @@ def run_pick_strategy():
 
 def test():
     from coding.stock.strategy import ruleA
+    import pandas as pd
     
-    ruleA.get_good_stocks.delay(1, '2026-04-30', ignore_trade_day=True)
+    date_series = pd.date_range(start='2026-04-01', end='2026-04-30', freq='D')
+    
+    for dt in date_series:
+        tx_date_str = dt.strftime('%Y-%m-%d')
+        
+        print(f"正在提交 {tx_date_str} 的策略补数任务...")
+
+        ruleA.get_good_stocks.delay(1, tx_date_str, ignore_trade_day=True)
+    
+    print("所有任务已进入队列，请观察日志 /data/wwwlogs/gplitesite/rq_ths.log[cite: 1]")

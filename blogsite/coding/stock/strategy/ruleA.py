@@ -73,7 +73,7 @@ def pick_stocks_with_wr10(tx_date):
     min_date = list(recent_dates)[-1]
     
     queryset = stock_ths_daily_quotes.objects.filter(
-        trade_dt__gte=min_date
+        trade_dt__range=(min_date, tx_date)
     ).select_related('stock_code').annotate(
         name=F('stock_code__stock_name')
     ).values(
