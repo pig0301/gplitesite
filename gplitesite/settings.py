@@ -104,6 +104,8 @@ if SERVER_TYPE == 'DEVELOP':
             'PORT': '5432',
         }
     }
+    
+    RQ_QUEUES = { 'default': { 'ASYNC': False } }
 else:
     DATABASES = {
         'default': dj_database_url.config()
