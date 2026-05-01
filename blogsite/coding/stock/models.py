@@ -1,4 +1,5 @@
 from django.db import models
+import json
 
 
 class stock_ths_stocks(models.Model):
@@ -50,3 +51,18 @@ class stock_pick_strategy_result(models.Model):
         db_column='stock_code',
         related_name='strategy_stock_code'
     )
+    
+    addition_info = models.TextField()
+    
+    @property
+    def info_dict(self):
+        if self.addition_info:
+            try:
+                return json.loads(self.addition_info)
+            except ValueError:
+                return {}
+        return {}
+
+    @info_dict.setter
+    def info_dict(self, value):
+        self.addition_info = json.dumps(value)
