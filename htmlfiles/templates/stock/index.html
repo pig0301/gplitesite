@@ -1,5 +1,46 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 
 {% block body_content %}
+	<div class="container">
+		<h4><br />Candle Stick Diagram&nbsp;
+	    </h4>
+		<div id="chart"></div>
+	</div>
+{% endblock %}
 
+
+{% block js_content %}
+    <script src="{% static 'plugins/lightweight-charts/lightweight-charts.standalone.production.js' %}"></script>
+
+	<script>
+	    const chart = LightweightCharts.createChart(document.getElementById('chart'), {
+	        width: 1100,
+	        height: 400,
+	        layout: {
+	        	attributionLogo: false,
+	        },
+	    });
+	
+	    const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries);
+	    
+	    fetch('http://127.0.0.1:8000/stock/quotes/300170.SZ/')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('网络请求错误');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data && data.length > 0) {
+                candleSeries.setData(data);
+                chart.timeScale().fitContent();
+            } else {
+                console.warn("数据为空，请检查数据库中 300170.SZ 的行情");
+            }
+        })
+        .catch(err => {
+            console.error('获取数据失败:', err);
+        });
+	</script>
 {% endblock %}

@@ -60,6 +60,7 @@ urlpatterns = [
     url(r'^game/produce/prepare/status/$', game.produce_get_prepare_status),
     
     url(r'^stock/$', stock.index),
+    url(r'^stock/quotes/(\d{6}\.\w{2})/$', stock.stock_quotes_data),
 
     path('admin/', admin.site.urls),
     path('django-rq/', include('django_rq.urls')),

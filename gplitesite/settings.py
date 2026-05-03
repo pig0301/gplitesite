@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     'home',
     'snooker',
     'game',
-    'coding'
+    'coding',
+    'stock'
 ]
 
 MIDDLEWARE = [
