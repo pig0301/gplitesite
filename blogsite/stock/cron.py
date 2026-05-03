@@ -1,7 +1,7 @@
 from django.utils import timezone
 
-from coding.stock.tasks import download_daily_quotes
-from coding.stock.models import stock_pick_strategy
+from stock.tasks import download_daily_quotes
+from stock.models import pick_strategy
 
 import importlib
 
@@ -12,7 +12,7 @@ def update_daily_quotes():
 
 def run_pick_strategy():
     today = timezone.now().date().isoformat()
-    strategy_list = stock_pick_strategy.objects.all()
+    strategy_list = pick_strategy.objects.all()
     
     for strategy in strategy_list:
         module = importlib.import_module(strategy.python_module)
@@ -22,7 +22,7 @@ def run_pick_strategy():
 
 
 def test():
-    from coding.stock.strategy import ruleA
+    from stock.strategy import ruleA
     import pandas as pd
     
     date_series = pd.date_range(start='2026-04-01', end='2026-04-30', freq='D')

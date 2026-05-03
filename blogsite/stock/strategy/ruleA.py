@@ -6,8 +6,8 @@ from django.db import transaction
 from django.db.models import F
 from libs import wechat
 
-from coding.stock.models import stock_ths_stocks, stock_ths_daily_quotes, stock_pick_strategy, stock_pick_strategy_result
-from coding.stock.tasks import is_trade_day
+from stock.models import ths_stocks, ths_daily_quotes, pick_strategy, pick_strategy_result
+from stock.tasks import is_trade_day
 
 
 @job('ths_worker', timeout=600, result_ttl=54000)
@@ -15,7 +15,7 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
     if not ignore_trade_day and not is_trade_day():
         return "非交易日"
     
-    strategy_obj = stock_pick_strategy.objects.get(id=strategy_id)
+    strategy_obj = pick_strategy.objects.get(id=strategy_id)
     
     df = pick_stocks_with_wr10(tx_date)
     max_date = pd.to_datetime(df['time'].max()).strftime('%Y-%m-%d')
@@ -49,10 +49,10 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
         
         results_to_create = []
         for _, row in df_ret.iterrows():
-            stock_instance = stock_ths_stocks.objects.get(stock_code=row['code'])
+            stock_instance = ths_stocks.objects.get(stock_code=row['code'])
             addition_info = { 'type': row['type'], 'wr10': float(row['wr10']) }
             
-            results_to_create.append(stock_pick_strategy_result(
+            results_to_create.append(pick_strategy_result(
                 strategy=strategy_obj, pick_date=tx_date, stock_code=stock_instance, addition_info=json.dumps(addition_info, ensure_ascii=False)
             ))
 
@@ -60,8 +60,8 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
         
         ret_summary = "\r\n".join(formatted_lines)
         with transaction.atomic():
-            stock_pick_strategy_result.objects.filter(strategy=strategy_obj, pick_date=tx_date).delete()
-            stock_pick_strategy_result.objects.bulk_create(results_to_create)
+            pick_strategy_result.objects.filter(strategy=strategy_obj, pick_date=tx_date).delete()
+            pick_strategy_result.objects.bulk_create(results_to_create)
  
     wechat.send_text_message(1, ret_summary)
     
@@ -69,10 +69,10 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
 
 
 def pick_stocks_with_wr10(tx_date):
-    recent_dates = stock_ths_daily_quotes.objects.filter(trade_dt__lte=tx_date).values_list('trade_dt', flat=True).distinct().order_by('-trade_dt')[:15]
+    recent_dates = ths_daily_quotes.objects.filter(trade_dt__lte=tx_date).values_list('trade_dt', flat=True).distinct().order_by('-trade_dt')[:15]
     min_date = list(recent_dates)[-1]
     
-    queryset = stock_ths_daily_quotes.objects.filter(
+    queryset = ths_daily_quotes.objects.filter(
         trade_dt__range=(min_date, tx_date)
     ).select_related('stock_code').annotate(
         name=F('stock_code__stock_name')

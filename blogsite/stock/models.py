@@ -2,15 +2,15 @@ from django.db import models
 import json
 
 
-class stock_ths_stocks(models.Model):
+class ths_stocks(models.Model):
     stock_code = models.CharField(max_length=12, unique=True)
     stock_name = models.CharField(max_length=50)
     update_dttm = models.DateTimeField()
 
 
-class stock_ths_daily_quotes(models.Model):
+class ths_daily_quotes(models.Model):
     stock_code = models.ForeignKey(
-        stock_ths_stocks, 
+        ths_stocks, 
         to_field='stock_code', 
         on_delete=models.DO_NOTHING,
         db_column='stock_code',
@@ -35,17 +35,17 @@ class stock_ths_daily_quotes(models.Model):
         ]
 
 
-class stock_pick_strategy(models.Model):
+class pick_strategy(models.Model):
     strategy_name = models.CharField(max_length=50)
     python_module = models.CharField(max_length=50)
     exec_function = models.CharField(max_length=50)
 
 
-class stock_pick_strategy_result(models.Model):
-    strategy = models.ForeignKey(stock_pick_strategy, on_delete=models.DO_NOTHING, related_name='strategy_result')
+class pick_strategy_result(models.Model):
+    strategy = models.ForeignKey(pick_strategy, on_delete=models.DO_NOTHING, related_name='strategy_result')
     pick_date = models.DateField()
     stock_code = models.ForeignKey(
-        stock_ths_stocks, 
+        ths_stocks, 
         to_field='stock_code', 
         on_delete=models.DO_NOTHING,
         db_column='stock_code',

@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.db import transaction
 from iFinDPy import *
 
-from coding.stock.models import stock_ths_stocks, stock_ths_daily_quotes
+from stock.models import ths_stocks, ths_daily_quotes
 from libs import wechat
 
 import django_rq, os, json
@@ -76,14 +76,14 @@ def update_daily_quote(df):
             current_batch_codes = final_batch_df['code'].unique().tolist()
 
             with transaction.atomic():
-                deleted_count, _ = stock_ths_daily_quotes.objects.filter(
+                deleted_count, _ = ths_daily_quotes.objects.filter(
                     trade_dt__in=target_dates,
                     stock_code__in=current_batch_codes
                 ).delete()
                 total_deleted += deleted_count
 
                 quote_objs = [
-                    stock_ths_daily_quotes(
+                    ths_daily_quotes(
                         stock_code_id=row['code'],
                         trade_dt=row['trade_dt'],
                         open_price=row['open'],
@@ -94,7 +94,7 @@ def update_daily_quote(df):
                     ) for _, row in final_batch_df.iterrows()
                 ]
                 
-                created_objs = stock_ths_daily_quotes.objects.bulk_create(quote_objs, batch_size=DB_BATCH_SIZE)
+                created_objs = ths_daily_quotes.objects.bulk_create(quote_objs, batch_size=DB_BATCH_SIZE)
                 total_inserted += len(created_objs)
 
     return [total_deleted, total_inserted]
@@ -104,7 +104,7 @@ def update_stock_info(df):
     current_time = timezone.now()
     all_codes = df['code'].tolist()
 
-    existing_stocks = stock_ths_stocks.objects.filter(stock_code__in=all_codes)
+    existing_stocks = ths_stocks.objects.filter(stock_code__in=all_codes)
     existing_map = {s.stock_code: s for s in existing_stocks}
     
     to_update = []
@@ -120,7 +120,7 @@ def update_stock_info(df):
             obj.update_dttm = current_time
             to_update.append(obj)
         else:
-            to_create.append(stock_ths_stocks(
+            to_create.append(ths_stocks(
                 stock_code=code,
                 stock_name=name,
                 update_dttm=current_time
@@ -128,9 +128,9 @@ def update_stock_info(df):
 
     with transaction.atomic():
         if to_update:
-            stock_ths_stocks.objects.bulk_update(to_update, ['stock_name', 'update_dttm'], batch_size=DB_BATCH_SIZE)
+            ths_stocks.objects.bulk_update(to_update, ['stock_name', 'update_dttm'], batch_size=DB_BATCH_SIZE)
         if to_create:
-            stock_ths_stocks.objects.bulk_create(to_create, batch_size=DB_BATCH_SIZE)
+            ths_stocks.objects.bulk_create(to_create, batch_size=DB_BATCH_SIZE)
             
     return [len(to_update), len(to_create)]
 
@@ -186,4 +186,4 @@ def ths_login():
     res = THS_iFinDLogin(account, password)
     
     if res not in [0, -202]:
-        raise Exception(f"iFind 登录失败，错误代码: {res}|{account}|{password}")
+        raise Exception(f"iFind 登录失败，错误代码: {res}")
