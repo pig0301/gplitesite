@@ -24,7 +24,7 @@
 	
 	    const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries);
 	    
-	    fetch('http://127.0.0.1:8000/stock/quotes/300170.SZ/')
+	    fetch('/stock/quotes/300170.SZ/')
         .then(response => {
             if (!response.ok) {
                 throw new Error('网络请求错误');
