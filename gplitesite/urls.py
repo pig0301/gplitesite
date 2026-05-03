@@ -6,9 +6,12 @@ from django.contrib import admin
 admin.autodiscover()
 
 from home import views as home
+from game import views as game
+from stock import views as stock
+
 from snooker import views as snooker
 from snooker.campaign import views as snooker_campaign
-from game import views as game
+
 from coding.wechat import views as coding_wechat
 from coding.spider import views as coding_spider
 
@@ -55,6 +58,8 @@ urlpatterns = [
     url(r'^game/produce/prepare/update/$', game.produce_prepare_update),
     url(r'^game/produce/prepare/update/auto/$', game.produce_prepare_auto_update),
     url(r'^game/produce/prepare/status/$', game.produce_get_prepare_status),
+    
+    url(r'^stock/$', stock.index),
 
     path('admin/', admin.site.urls),
     path('django-rq/', include('django_rq.urls')),
