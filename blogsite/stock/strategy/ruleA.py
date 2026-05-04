@@ -4,13 +4,13 @@ import talib, json
 from django_rq import job
 from django.db import transaction
 from django.db.models import F
-from libs import wechat
+from libs import wechat, constants
 
 from stock.models import ths_stocks, ths_daily_quotes, pick_strategy, pick_strategy_result
 from stock.tasks import is_trade_day
 
 
-@job('ths_worker', timeout=600, result_ttl=54000)
+@job('ths_worker', timeout=constants.JOB_TIMEOUT, result_ttl=constants.RESULT_TTL)
 def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
     if not ignore_trade_day and not is_trade_day():
         return "非交易日"

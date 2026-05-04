@@ -6,7 +6,7 @@ from django.contrib import messages
 import re, json, datetime, time, requests
 import hmac, hashlib, base64, codecs
 
-from libs.functions import render_template, check_login, get_client_ip
+from libs.functions import render_template, check_login
 from libs import wechat, dingding
 
 from home import models
@@ -15,7 +15,6 @@ from coding.spider import models as models_code
 
 def query_storage(request):
     if check_login(request):
-        is_auto = (get_client_ip(request) == '127.0.0.1')
         dttm = timezone.now()
         
         msg_params = {
@@ -25,7 +24,7 @@ def query_storage(request):
             'emall_api': models_code.spider_emall_api.objects.all()
         }
 
-        (prod_details, ccb_store, ccb_brands) = get_product_details(['9003867817'], msg_params['msg_level'], dttm, is_auto)
+        (prod_details, ccb_store, ccb_brands) = get_product_details(['9003867817'], msg_params['msg_level'], dttm, False)
 
         prod_storages = models_code.spider_product_storage.objects.filter(event_dt=dttm.date(), product_id=OuterRef('product_id')).order_by('id').values_list('id')
         prod_storages = models_code.spider_product_storage.objects.annotate(tag=Subquery(prod_storages[:1]))

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib, os
 
 
-@job('icbc_worker', timeout=300, result_ttl=54000)
+@job('icbc_worker', timeout=constants.JOB_TIMEOUT, result_ttl=constants.RESULT_TTL)
 def query_storage(mode):
     dttm = timezone.now()
     msg_level = models_home.message_level.objects.get(id=1)

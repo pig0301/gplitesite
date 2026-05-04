@@ -126,13 +126,13 @@ else:
             'HOST': 'localhost',
             'PORT': 6379,
             'DB': 0,
-            'DEFAULT_TIMEOUT': 300,
+            'DEFAULT_TIMEOUT': 600,
         },
         'ths_worker': {
             'HOST': 'localhost',
             'PORT': 6379,
             'DB': 0,
-            'DEFAULT_TIMEOUT': 1800,
+            'DEFAULT_TIMEOUT': 600,
         }
     }
 

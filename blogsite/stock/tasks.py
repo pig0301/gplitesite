@@ -4,7 +4,7 @@ from django.db import transaction
 from iFinDPy import *
 
 from stock.models import ths_stocks, ths_daily_quotes
-from libs import wechat
+from libs import wechat, constants
 
 import django_rq, os, json
 import pandas as pd
@@ -14,7 +14,7 @@ THS_BATCH_SIZE = 50
 DB_BATCH_SIZE = 500
 
 
-@job('ths_worker', timeout=600, result_ttl=54000)
+@job('ths_worker', timeout=constants.JOB_TIMEOUT, result_ttl=constants.RESULT_TTL)
 def download_daily_quotes():
     if not is_trade_day():
         return "非交易日"

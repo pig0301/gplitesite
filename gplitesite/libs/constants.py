@@ -12,6 +12,10 @@ CLEAN_MODE = 0
 NORMAL_MODE = 1
 SAVE_MODE = 2
 
+#rq_workers
+RESULT_TTL = 3600 * 32
+JOB_TIMEOUT = 600
+
 #templatetags
 ML_STEP_DESC_DICT = {
     1: "开箱", 2: "整理", 3: "制作"
