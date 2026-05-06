@@ -14,8 +14,8 @@ def stock_quotes_data(request, code):
     chart_data = []
     for quote_obj in ths_quotes:
         chart_data.append({
-            "time": quote_obj.trade_dt.strftime('%Y-%m-%d'), # 日期格式必须为字符串或秒数
-            "open": float(quote_obj.open_price),               # 必须转为 float
+            "time": quote_obj.trade_dt.strftime('%Y-%m-%d'),
+            "open": float(quote_obj.open_price),
             "high": float(quote_obj.high_price),
             "low": float(quote_obj.low_price),
             "close": float(quote_obj.close_price),
