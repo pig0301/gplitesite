@@ -202,7 +202,7 @@
 {% endblock %}
 
 {% block js_content %}
-    <script src="{% static 'plugins/Chart/Chart.bundle.min.js' %}"></script>
+    <script src="{% static 'plugins/chartjs/chart.umd.min.js' %}"></script>
     <script src="{% static 'plugins/vue/vue.min.js' %}"></script>
     
     <script type="text/javascript">
@@ -218,6 +218,8 @@
                         pointBorderColor : "rgba(75,192,192,1)",
                         pointBackgroundColor : "#fff",
                         pointBorderWidth : 1,
+                        fill: true,
+                        tension: 0.4,
                         data : [
                             {% for frame in frames %}{{ frame.get_points }},{% endfor %}
                         ]
@@ -230,6 +232,7 @@
                         pointBorderWidth : 1,
                         fill: false,
                         borderDash: [5, 5],
+                        tension: 0.4,
                         data : [
                             {% for frame in frames %}{{ frame.oppo_points }},{% endfor %}
                         ]
@@ -237,9 +240,11 @@
                 ]
             },
             options: {
-                legend: {
-                    display: false
-                }
+            	plugins: {
+                    legend: {
+                        display: false
+                    }
+            	}
             }
         });
 	    

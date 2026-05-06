@@ -127,7 +127,7 @@
         
         <h4>Tendency Chart
 	        &nbsp;
-	        <button class="btn btn-xs btn-dark" id="saveChartBtn" v-show="chart_id==2">
+	        <button class="btn btn-xs btn-dark" v-show="chart_id==2" @click="saveChart">
 	            <i class="fas fa-save"></i>
 	        </button>
         </h4>
@@ -148,7 +148,7 @@
 {% endblock %}
 
 {% block js_content %}
-    <script src="{% static 'plugins/Chart/Chart.bundle.min.js' %}"></script>
+    <script src="{% static 'plugins/chartjs/chart.umd.min.js' %}"></script>
     <script src="{% static 'plugins/vue/vue.min.js' %}"></script>
     
     <script type="text/javascript">
@@ -161,7 +161,18 @@
         new Vue({
             el: "#vue_app_chart",
             data: { chart_id: 2 },
-            delimiters: ["${", "}"]
+            delimiters: ["${", "}"],
+            methods: {
+                saveChart() {
+                    if (this.chart_id == 2) {
+                        const imageData = priceChart.toBase64Image('image/png', 1.0);
+                        const link = document.createElement('a');
+                        link.download = 'price_chart.png';
+                        link.href = imageData;
+                        link.click();
+                    }
+                }
+            }
         });
     
         new Chart($("#canvas_storage1")[0], {
@@ -176,6 +187,7 @@
                         pointBackgroundColor : "#fff",
                         pointBorderWidth : 1,
                         fill: false,
+                        tension: 0.4,
                         data : [
                             {% for row in chart_datas.3 %}{{ row.storage_cnt }},{% endfor %}
                         ]
@@ -187,6 +199,7 @@
                         pointBackgroundColor : "#fff",
                         pointBorderWidth : 1,
                         fill: false,
+                        tension: 0.4,
                         data : [
                             {% for row in chart_datas.4 %}{{ row.storage_cnt }},{% endfor %}
                         ]
@@ -198,6 +211,7 @@
                         pointBackgroundColor : "#fff",
                         pointBorderWidth : 1,
                         fill: false,
+                        tension: 0.4,
                         data : [
                             {% for row in chart_datas.5 %}{{ row.storage_cnt }},{% endfor %}
                         ]
@@ -206,11 +220,11 @@
             },
             options: {
                 scales: {
-                    yAxes: [{
+                    y: {
                         ticks: {
                             stepSize: 100
                         }
-                    }]
+                    }
                 }
             }
         });
@@ -227,6 +241,7 @@
                         pointBackgroundColor : "#fff",
                         pointBorderWidth : 1,
                         fill: false,
+                        tension: 0.4,
                         data : [
                             {% for row in chart_datas.0 %}{{ row.storage_cnt }},{% endfor %}
                         ]
@@ -238,6 +253,7 @@
                         pointBackgroundColor : "#fff",
                         pointBorderWidth : 1,
                         fill: false,
+                        tension: 0.4,
                         data : [
                             {% for row in chart_datas.1 %}{{ row.storage_cnt }},{% endfor %}
                         ]
@@ -249,6 +265,7 @@
                         pointBackgroundColor : "#fff",
                         pointBorderWidth : 1,
                         fill: false,
+                        tension: 0.4,
                         data : [
                             {% for row in chart_datas.2 %}{{ row.storage_cnt }},{% endfor %}
                         ]
@@ -257,11 +274,11 @@
             },
             options: {
                 scales: {
-                    yAxes: [{
+                    y: {
                         ticks: {
                             stepSize: 20
                         }
-                    }]
+                    }
                 }
             }
         });
@@ -293,6 +310,7 @@
                         borderColor : "rgba(235,47,40,1)",
                         pointRadius: 0,
                         fill: false,
+                        tension: 0.4,
                         data : alignDataToLabels(rawData.datasets[0], priceLabels)
                     },
                     {
@@ -300,6 +318,7 @@
                         borderColor : "rgba(255,206,86,1)",
                         pointRadius: 0,
                         fill: false,
+                        tension: 0.4,
                         data : alignDataToLabels(rawData.datasets[1], priceLabels)
                     },
                     {
@@ -307,6 +326,7 @@
                         borderColor : "rgba(75,192,192,1)",
                         pointRadius: 0,
                         fill: false,
+                        tension: 0.4,
                         borderDash: [12, 8],
                         data : alignDataToLabels(rawData.datasets[2], priceLabels)
                     },
@@ -315,6 +335,7 @@
                         borderColor : "rgba(0,90,140,1)",
                         pointRadius: 0,
                         fill: false,
+                        tension: 0.4,
                         borderDash: [12, 8],
                         data : alignDataToLabels(rawData.datasets[3], priceLabels)
                     }
@@ -322,22 +343,13 @@
             },
             options: {
                 scales: {
-                    yAxes: [{
+                    y: {
                         ticks: {
                             stepSize: 1
                         }
-                    }]
+                    }
                 }
             }
         });
-        
-        document.getElementById('saveChartBtn').addEventListener('click', () => {
-            const imageData = priceChart.toBase64Image('image/png', 1.0);
-            const link = document.createElement('a');
-            
-            link.download = 'price_chart.png';
-            link.href = imageData;
-            link.click();
-       	});
     </script>
 {% endblock %}

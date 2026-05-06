@@ -106,7 +106,7 @@
 {% endblock %}
 
 {% block js_content %}
-    <script src="{% static 'plugins/Chart/Chart.bundle.min.js' %}"></script>
+    <script src="{% static 'plugins/chartjs/chart.umd.min.js' %}"></script>
     <script src="{% static 'plugins/vue/vue.min.js' %}"></script>
     
     <script type="text/javascript">
@@ -139,15 +139,17 @@
 	        },
 	        options: {
 	            scales: {
-	                yAxes: [{
+	                y: {
+	                	beginAtZero: true,
 	                    ticks: {
-	                        beginAtZero: true,
 	                        stepSize: 1
 	                    }
-	                }]
+	                }
 	            },
-	            legend: {
-	                display: false
+	            plugins: {
+	                legend: {
+	                    display: false
+	                }
 	            }
 	        }
 	    });
@@ -164,6 +166,8 @@
                         pointBorderColor : "rgba(75,192,192,1)",
                         pointBackgroundColor : "#fff",
                         pointBorderWidth : 1,
+                        fill: true,
+                        tension: 0.4,
                         data : [
                             {% for campaign in campaigns reversed %}{{ campaign.avg_get_points|default_if_none:0|floatformat:1 }},{% endfor %}
                         ]
@@ -176,6 +180,7 @@
                         pointBorderWidth : 1,
                         fill: false,
                         borderDash: [5, 5],
+                        tension: 0.4,
                         data : [
                             {% for campaign in campaigns reversed %}{{ campaign.avg_oppo_points|default_if_none:0|floatformat:1 }},{% endfor %}
                         ]
@@ -183,8 +188,10 @@
                 ]
             },
             options: {
-                legend: {
-                    display: false
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 }
             }
         });
