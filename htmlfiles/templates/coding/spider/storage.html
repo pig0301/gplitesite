@@ -60,17 +60,17 @@
                                 {% endif %}
                             </td>
                             <td style="vertical-align: middle;">
-                                {% if not forloop.last %}
+                                {% if not product.merchantProdId == '080020000501' %}
                                 <a href="{{ product.prodUrl }}"><h5>
                                     <span class="badge badge-{% if product.is_warning == 1 %}danger{% elif product.skuStorage > product.standard_storage %}success{% else %}light{% endif %}">{{ product.skuStorage }}
                                 </span></h5></a>
                                 {% endif %}
                             </td>
                             <td style="vertical-align: middle;">
-                                {% if not forloop.last %}<h5><span class="badge badge-{% if product.daySalesCount < 0 %}danger{% else %}warning{% endif %}">{{ product.daySalesCount }}</span></h5>{% endif %}
+                                {% if not product.merchantProdId == '080020000501' %}<h5><span class="badge badge-{% if product.daySalesCount < 0 %}danger{% else %}warning{% endif %}">{{ product.daySalesCount }}</span></h5>{% endif %}
                             </td>
                             <td style="vertical-align: middle;">
-                                {% if not forloop.last %}
+                                {% if not product.merchantProdId == '080020000501' %}
                                 <button class="btn btn-xs btn-info" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.merchantProdId }},{{ product.prodSkuId }},{{ product.logstorId }}';prod_name='{{ product.name }}';standard_storage={{ product.standard_storage }}">
                                     <i class="fas fa-magic"></i>
                                 </button>

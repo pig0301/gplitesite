@@ -6,10 +6,8 @@ from django.contrib import messages
 import re, json, datetime, time, requests
 import hmac, hashlib, base64, codecs
 
-from libs.functions import render_template, check_login
-from libs import wechat, dingding
-
 from home import models
+from libs.functions import render_template, check_login
 from coding.spider import models as models_code
 
 
@@ -18,13 +16,14 @@ def query_storage(request):
         dttm = timezone.now()
         
         msg_params = {
+            'emall_api': models_code.spider_emall_api.objects.all(),
             'msg_level': models.message_level.objects.get(id=1),
             'wechat_level': models.wechat_message.objects.all(),
-            'dingding_level': models.dingding_message.objects.all(),
-            'emall_api': models_code.spider_emall_api.objects.all()
+            'dingding_level': models.dingding_message.objects.all()
         }
-
-        (prod_details, ccb_store, ccb_brands) = get_product_details(['9003867817'], msg_params['msg_level'], dttm, False)
+        
+        icbc_prods = get_icbc_product_details('9003867817')
+        (ccb_store, ccb_brands) = get_ccb_product_details()
 
         prod_storages = models_code.spider_product_storage.objects.filter(event_dt=dttm.date(), product_id=OuterRef('product_id')).order_by('id').values_list('id')
         prod_storages = models_code.spider_product_storage.objects.annotate(tag=Subquery(prod_storages[:1]))
@@ -36,27 +35,28 @@ def query_storage(request):
             init_storages[prod.product_id] = prod.storage_cnt
             storage_dtls.append(models_code.spider_product_storage.objects.filter(event_dt=dttm.date(), product_id=prod.product_id).order_by('id'))
         
-        for prod in prod_details:
+        for prod in icbc_prods:
             if prod['merchantProdId'] in init_storages.keys():
                 prod['daySalesCount'] = init_storages[prod['merchantProdId']] - int(prod['skuStorage'])
-        
-        store_prod = prod_details[0].copy()
-        store_prod['merchantProdId'] = '080020000501'
-        store_prod['name'] = '如意金积存'
-        store_prod['skuPrice'] -= 3
-        prod_details.append(store_prod)
-        
+
         for i in range(0, len(ccb_brands)):
-            prod_details[i + 3]['ccbPrice'] = ccb_brands[i]['skuPrice']
-            prod_details[i + 3]['ccbProdUrl'] = ccb_brands[i]['prodUrl']
-            
+            icbc_prods[i + 3]['ccbPrice'] = ccb_brands[i]['skuPrice']
+            icbc_prods[i + 3]['ccbProdUrl'] = ccb_brands[i]['prodUrl']
+        
+        icbc_store = icbc_prods[0].copy()
+        icbc_store['merchantProdId'] = '080020000501'
+        icbc_store['name'] = '如意金积存'
+        icbc_store['skuPrice'] -= 3
         if ccb_store is not None:
-            prod_details[-1]['ccbPrice'] = ccb_store['skuPrice']
-            prod_details[-1]['ccbProdUrl'] = ccb_store['prodUrl']
+            icbc_store['ccbPrice'] = ccb_store['skuPrice']
+            icbc_store['ccbProdUrl'] = ccb_store['prodUrl']
+
+        icbc_prods.append(icbc_store)
+        icbc_prods = icbc_prods + get_icbc_product_details('9003877851')
 
         return render_template("coding/spider/storage.html", {
                 'msg_params': msg_params, 'legends': prod_storages,
-                'products': prod_details, 'chart_datas': storage_dtls
+                'products': icbc_prods, 'chart_datas': storage_dtls
         }, request)
     else:
         return HttpResponse("非管理员用户禁止访问！")
@@ -111,67 +111,6 @@ def strategy_update(request):
         return HttpResponse("非管理员用户禁止访问！", status=403)
 
 
-def get_product_details(prod_links, msg_level, dttm, is_auto):
-    prod_details = []
-    prod_strategys = {}
-    storage_warn = ""
-    
-    for strategy in models_code.spider_product_strategy.objects.all():
-        prod_strategys[strategy.product_id] = strategy
-
-    for link_id in prod_links:
-        url = "https://m.mall.icbc.com.cn/products/queryProdSkuAjax.jhtml?productId={0}&isProdDraft=&isBranch=0".format(link_id)
-        prods_info = json.loads(json.loads(requests.get(url).content)['prodSkuJson'])
-        prods_info = sorted(prods_info, key=lambda x: x['prodSkuId'])
-
-        for product in prods_info:
-            product['merchantProdId'] = product['merchantProdId'].rjust(9, '0')
-            storage_strategy = prod_strategys[product['merchantProdId']]
-            
-            product['name'] = storage_strategy.product_name
-            product['prodUrl'] = 'https://m.mall.icbc.com.cn/products/pd_{0}.jhtml'.format(link_id)
-            
-            product['skuStorage'] = int(product['skuStorage'])
-            product['standard_storage'] = storage_strategy.adj_storage_cnt
-            product['skuPrice'] = round(float(product['skuPrice'].replace(',', '')) / storage_strategy.spec, 2)
-
-            if product['skuStorage'] <= storage_strategy.min_storage_cnt:
-                if not is_auto or msg_level.emall_api == None or not dttm.minute in storage_strategy.adj_minutes:
-                    storage_warn += "\n{0}仅剩{1}件。".format(product['name'], product['skuStorage'])
-                else:
-                    if adjust_storage(msg_level.emall_api, product, storage_strategy.adj_storage_cnt):
-                        storage_warn += "\n{0}仅剩{1}件，已自动增加{2}件库存。".format(product['name'], product['skuStorage'], storage_strategy.adj_storage_cnt - product['skuStorage'])
-                    else:
-                        storage_warn += "\n{0}仅剩{1}件，自动增加库存失败！".format(product['name'], product['skuStorage'])
-            
-                product['is_warning'] = 1
-        
-        prod_details = prod_details + prods_info
-    
-    (ccb_store, ccb_brands) = get_ccb_product_details()
-    
-    ccb_details = ccb_brands.copy()
-    if ccb_store is not None:
-        ccb_details.append(ccb_store)
-    
-    if is_auto:
-        for prod in prod_details + ccb_details:
-            detail = models_code.spider_product_storage(event_dt=dttm.date(), product_id=prod['merchantProdId'], product_name=prod['name'],
-                price=prod['skuPrice'], storage_cnt=int(prod['skuStorage']), create_dttm=dttm)
-            detail.save()
-        
-        if msg_level and len(storage_warn) > 0:
-            storage_warn = "【重要】请关注以下贵金属产品线上库存！\n" + storage_warn + "\n\n[时间]：" + str(dttm)[0:19]
-            
-            if msg_level.wechat_msg:
-                wechat.send_text_message(msg_level.wechat_msg.id, storage_warn)
-             
-            if msg_level.dingding_msg:
-                dingding.send_text_message(msg_level.dingding_msg.id, storage_warn)
-
-    return (prod_details, ccb_store, ccb_brands)
-
-
 def adjust_storage(emall_api, product, final_storage):
     url = 'https://ops.mall.icbc.com.cn/icbcrouter?'
     app_secret = emall_api.app_secret
@@ -201,6 +140,32 @@ def adjust_storage(emall_api, product, final_storage):
     pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
     
     return int(pattern.group(1)) == 0
+
+
+def get_icbc_product_details(prod_link):
+    url = f"https://m.mall.icbc.com.cn/products/queryProdSkuAjax.jhtml?productId={prod_link}&isProdDraft=&isBranch=0"
+    prods_info = json.loads(json.loads(requests.get(url).content)['prodSkuJson'])
+    prods_info = sorted(prods_info, key=lambda x: x['prodSkuId'])
+    
+    prod_strategys = {}
+    for strategy in models_code.spider_product_strategy.objects.all():
+        prod_strategys[strategy.product_id] = strategy
+
+    for product in prods_info:
+        storage_strategy = prod_strategys[product['merchantProdId'].rjust(9, '0')]
+        
+        product['merchantProdId'] = storage_strategy.product_id
+        product['name'] = storage_strategy.product_name
+        product['prodUrl'] = f'https://m.mall.icbc.com.cn/products/pd_{prod_link}.jhtml'
+        
+        product['skuStorage'] = int(product['skuStorage'])
+        product['standard_storage'] = storage_strategy.adj_storage_cnt
+        product['skuPrice'] = round(float(product['skuPrice'].replace(',', '')) / storage_strategy.spec, 2)
+        
+        if product['skuStorage'] <= storage_strategy.min_storage_cnt:
+            product['is_warning'] = 1
+    
+    return prods_info
 
 
 def get_ccb_product_details():

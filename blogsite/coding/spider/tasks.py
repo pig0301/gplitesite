@@ -3,7 +3,7 @@ from django.conf import settings
 from django_rq import job
 
 from home import models as models_home
-from libs import constants
+from libs import constants, wechat, dingding
 
 from coding.spider import models as models_code
 from coding.spider import views as views_code
@@ -16,12 +16,15 @@ import matplotlib, os
 @job('icbc_worker', timeout=constants.JOB_TIMEOUT, result_ttl=constants.RESULT_TTL)
 def query_storage(mode):
     dttm = timezone.now()
-    msg_level = models_home.message_level.objects.get(id=1)
     
     if mode == constants.CLEAN_MODE:
         models_code.spider_product_storage.objects.filter(event_dt__lt=dttm.date()).delete()
     
-    views_code.get_product_details(['9003867817'], msg_level, dttm, True)
+    standard_prods = views_code.get_icbc_product_details('9003867817')
+    cucurbit_prods = views_code.get_icbc_product_details('9003877851')
+    
+    auto_save_product_storage(standard_prods, dttm)
+    auto_reset_product_storage(standard_prods + cucurbit_prods, dttm)
 
     if mode == constants.SAVE_MODE:
         data = models_code.spider_product_storage.objects.filter(event_dt=dttm.date()).all().values('product_name', 'create_dttm', 'price', 'storage_cnt')
@@ -51,6 +54,48 @@ def query_storage(mode):
         
         df_final = pd.concat([df_final, df_tmp])
         draw_diagram(df_final, dttm.date())
+
+
+def auto_save_product_storage(icbc_prods, dttm):
+    (ccb_store, ccb_brands) = views_code.get_ccb_product_details()
+    if ccb_store is not None:
+        ccb_brands.append(ccb_store)
+    
+    for prod in icbc_prods + ccb_brands:
+        models_code.spider_product_storage(
+            event_dt=dttm.date(), product_id=prod['merchantProdId'],
+            product_name=prod['name'], price=prod['skuPrice'],
+            storage_cnt=int(prod['skuStorage']), create_dttm=dttm
+        ).save()
+
+
+def auto_reset_product_storage(icbc_prods, dttm):
+    storage_warn = ""
+    msg_level = models_home.message_level.objects.get(id=1)
+    
+    prod_strategys = {}
+    for strategy in models_code.spider_product_strategy.objects.all():
+        prod_strategys[strategy.product_id] = strategy
+    
+    for product in icbc_prods:
+        storage_strategy = prod_strategys[product['merchantProdId']]
+        if product['skuStorage'] <= storage_strategy.min_storage_cnt:
+            if msg_level.emall_api == None or not dttm.minute in storage_strategy.adj_minutes:
+                storage_warn += "\n{0}仅剩{1}件。".format(product['name'], product['skuStorage'])
+            else:
+                if views_code.adjust_storage(msg_level.emall_api, product, storage_strategy.adj_storage_cnt):
+                    storage_warn += "\n{0}仅剩{1}件，已自动增加{2}件库存。".format(product['name'], product['skuStorage'], storage_strategy.adj_storage_cnt - product['skuStorage'])
+                else:
+                    storage_warn += "\n{0}仅剩{1}件，自动增加库存失败！".format(product['name'], product['skuStorage'])
+    
+    if msg_level and len(storage_warn) > 0:
+        storage_warn = "【重要】请关注以下贵金属产品线上库存！\n" + storage_warn + "\n\n[时间]：" + str(dttm)[0:19]
+        
+        if msg_level.wechat_msg:
+            wechat.send_text_message(msg_level.wechat_msg.id, storage_warn)
+         
+        if msg_level.dingding_msg:
+            dingding.send_text_message(msg_level.dingding_msg.id, storage_warn)
 
 
 def draw_diagram(df, tx_dt):
