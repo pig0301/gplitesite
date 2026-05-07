@@ -5,7 +5,7 @@
 	<div class="container">
 		<h4><br />Candle Stick Diagram&nbsp;
 	    </h4>
-		<div id="chart"></div>
+		<div id="chart" style="height: 400px; width: 100%;"></div>
 	</div>
 {% endblock %}
 
@@ -14,15 +14,69 @@
     <script src="{% static 'plugins/lightweight-charts/lightweight-charts.standalone.production.js' %}"></script>
 
 	<script>
-	    const chart = LightweightCharts.createChart(document.getElementById('chart'), {
-	        width: 1100,
-	        height: 400,
-	        layout: {
-	        	attributionLogo: false,
-	        },
-	    });
+		const chartContainer = $('#chart')[0];
 	
-	    const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries);
+		const chart = LightweightCharts.createChart(
+			chartContainer,
+		    {
+		        width: chartContainer.offsetWidth,
+		        height: 400,
+
+		        layout: {
+		            background: {
+		                color: '#fff',
+		            },
+		            textColor: '#333',
+		            attributionLogo: false,
+		        },
+
+		        grid: {
+		            vertLines: {
+		                color: '#f1f3f5',
+		            },
+		            horzLines: {
+		                color: '#f1f3f5',
+		            },
+		        },
+
+		        crosshair: {
+		            mode: LightweightCharts.CrosshairMode.Normal,
+		        },
+
+		        rightPriceScale: {
+		            borderColor: '#ddd',
+		        },
+		        
+		        localization: {
+		            timeFormatter: (time) => {
+						const parts = time.split('-');
+	                    return `${parts[1]}/${parts[2]}`;
+		            },
+		        },
+
+		        timeScale: {
+		            borderColor: '#ddd',
+		            barSpacing: 8,
+		            tickMarkFormatter: (time, tickMarkType, locale) => {
+		            	const parts = time.split('-');
+	                    return `${parts[1]}/${parts[2]}`;
+		            },
+		        },
+		    }
+		);
+	
+		const candleSeries = chart.addSeries(
+		    LightweightCharts.CandlestickSeries,
+		    {
+		        upColor: 'rgba(220,58,73,0.15)',
+		        borderUpColor: '#dc3a49',
+		        wickUpColor: '#dc3a49',
+
+		        downColor: '#306613',
+		        borderDownColor: '#306613',
+		        wickDownColor: '#306613',
+		    }
+		);
 	    
 	    fetch('/stock/quotes/300170.SZ/')
         .then(response => {
