@@ -60,9 +60,10 @@ urlpatterns = [
     url(r'^game/produce/prepare/status/$', game.produce_get_prepare_status),
     
     url(r'^stock/$', stock.index),
-    url(r'^stock/quotes/(\d{6}\.\w{2})/$', stock.stock_quotes_data),
-    url(r'^stock/strategy/dates/(\d+)/$', stock.strategy_dates_data),
-    url(r'^stock/strategy/result/(\d+)/(\d{4}-\d{2}-\d{2})/$', stock.strategy_result_data),
+    url(r'^stock/api/quotes/(\d{6}\.\w{2})/$', stock.stock_quotes_data),
+    url(r'^stock/api/strategy/$', stock.pick_strategy_data),
+    url(r'^stock/api/strategy/dates/(\d+)/$', stock.strategy_dates_data),
+    url(r'^stock/api/strategy/result/(\d+)/(\d{4}-\d{2}-\d{2})/$', stock.strategy_result_data),
 
     path('admin/', admin.site.urls),
     path('django-rq/', include('django_rq.urls')),

@@ -45,9 +45,7 @@
 	            <section id="strategy-section" class="mb-4">
 			        <h6>1. 选择策略</h6>
 			        <div class="btn-group" role="group" id="strategy-list">
-			            {% for strategy in strategies %}
-			            <button type="button" class="btn btn-sm btn-outline-primary" @click="selectStrategy('{{ strategy.id }}', '{{ strategy.strategy_name }}')">{{ strategy.strategy_name }}</button>
-			            {% endfor %}
+			            <button v-for="item in strategies" :key="item.id" type="button" class="btn btn-sm btn-outline-primary" @click="selectStrategy(item.id)">${ item.name }</button>
 			        </div>
 			    </section>
 			    <section id="date-section" class="mb-4" v-show="pickDates.length > 0">
@@ -71,7 +69,7 @@
 					</div>
 			    </section>
 			    <section id="stock-section" class="mb-4" v-show="stocksData.length > 0">
-				    <h6>3. 选股后10日走势<span class="text-secondary" v-if="activeDate">【${ strategyName } | ${ activeDate } | 收盘价】</span></h6>
+				    <h6>3. 选股后10日走势<span class="text-secondary" v-if="activeDate">【${ activeStrategy.name } | ${ activeDate } | 收盘价】</span></h6>
 				    <div class="bg-white border rounded shadow-sm">
 				        <div class="table-responsive">
 				            <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
@@ -136,32 +134,53 @@
 		    el: '#app',
 		    delimiters: ["${", "}"],
 		    data: {
-		        strategyId: null,
-		        strategyName: null,
+		    	strategies: [],
 		        pickDates: [],
-		        activeDate: null,
 		        recentDates: [],
 		        stocksData: [],
+	            activeStrategy: null,
+	            activeDate: null,
 		        activeStock: null
 		    },
+		    mounted() {
+		        this.initStrategy();
+		    },
 		    methods: {
-		        selectStrategy(id, name) {
-		            this.strategyId = id;
-		            this.strategyName = name;
+		    	initStrategy() {
+		    		fetch(`/stock/api/strategy/`)
+                    .then(res => res.json())
+                    .then(data => {
+                        this.strategies = data;
+                        if (data.length > 0) {
+                        	this.selectStrategy(data[0].id);
+                        }
+                    });
+		    	},
+		        selectStrategy(id) {
+		    		for (const item of this.strategies) {
+		    		    if (item.id === id) {
+		    		        this.activeStrategy = item;
+		    		        break;
+		    		    }
+		    		}
+
 		            this.stocksData = [];
 		            this.activeStock = null;
 		            
-		            fetch(`/stock/strategy/dates/${id}/`)
+		            fetch(`/stock/api/strategy/dates/${id}/`)
 	                .then(res => res.json())
 	                .then(data => {
 	                    this.pickDates = data;
+	                    if (data.length > 0) {
+                            this.selectPickDate(data[0].date);
+                        }
 	                });
 		        },
 		        selectPickDate(dateStr) {
 		        	this.activeDate = dateStr;
 		        	this.activeStock = null;
 		        	
-		            fetch(`/stock/strategy/result/${this.strategyId}/${dateStr}/`)
+		            fetch(`/stock/api/strategy/result/${this.activeStrategy.id}/${dateStr}/`)
 	                .then(res => res.json())
 	                .then(data => {
 	                    this.recentDates = data.recent_dates;
@@ -293,7 +312,7 @@
 		        initChart();
 		    }
 
-		    fetch(`/stock/quotes/${stockCode}/`)
+		    fetch(`/stock/api/quotes/${stockCode}/`)
 	        .then(res => res.json())
 	        .then(data => {
 	            if (data && data.length > 0) {

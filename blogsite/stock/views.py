@@ -8,11 +8,21 @@ from stock import models
 
 
 def index(request):
+    return render_template("stock/index.html", {}, request)
+
+
+def pick_strategy_data(request):
     strategies = models.pick_strategy.objects.all().order_by('id')
-    
-    return render_template("stock/index.html", {
-        'strategies': strategies
-    }, request)
+
+    data = [
+        {
+            "id": item.id,
+            "name": item.strategy_name
+        } 
+        for item in strategies
+    ]
+
+    return JsonResponse(data, safe=False)
 
 
 def stock_quotes_data(request, code):
