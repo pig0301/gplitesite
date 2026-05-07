@@ -202,7 +202,7 @@
 		                else classes.push('text-dark font-weight-bold');
 		            }
 
-		            if (currentIndex > 0) {
+		            if (currentIndex > 0 && currentPrice !== null) {
 		                if (currentPrice / pickPrice - 1 >= 0.05) {
 		                    classes.push('bg-danger-light');
 		                } else if (currentPrice / pickPrice - 1 <= -0.05) {
