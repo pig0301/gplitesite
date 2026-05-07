@@ -5,7 +5,7 @@
 	<div class="container">
 		<h4><br />Candle Stick Diagram&nbsp;
 	    </h4>
-		<div id="chart" style="height: 400px; width: 100%;"></div>
+		<div id="chart"></div>
 	</div>
 {% endblock %}
 
@@ -14,12 +14,10 @@
     <script src="{% static 'plugins/lightweight-charts/lightweight-charts.standalone.production.js' %}"></script>
 
 	<script>
-		const chartContainer = $('#chart')[0];
-	
 		const chart = LightweightCharts.createChart(
-			chartContainer,
+			$('#chart')[0],
 		    {
-		        width: chartContainer.offsetWidth,
+		        width: 1110,
 		        height: 400,
 
 		        layout: {
