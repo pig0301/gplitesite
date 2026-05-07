@@ -1,54 +1,122 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+
+{% block css_content %}
+	<style>
+	    .bg-danger-light {
+	        background-color: rgba(220, 58, 73, 0.2) !important;
+	    }
+	    .bg-success-light {
+	        background-color: rgba(48, 102, 19, 0.2) !important;
+	    }
+	    .pick-date-column {
+	        border-right: 2px dashed #dee2e6 !important;
+	        background-color: #f8f9fa;
+	    }
+
+	    .table .fas {
+	        width: 14px;
+	        display: inline-block;
+	        text-align: center;
+	    }
+	    .fa-angle-right {
+	        color: #adb5bd;
+	        font-size: 0.7rem;
+	    }
+	    
+	    .bg-light-warning {
+	        background-color: #fffaf0 !important;
+	    }
+	    .bg-soft-warning {
+	        background-color: #fdf2d5 !important; 
+	    }
+	</style>
+{% endblock %}
+
+
 {% block body_content %}
 	<div class="container">
 		<h4><br />Stock Strategy Result&nbsp;</h4>
 	    <hr />
 	    
-	    <div class="row">
+	    <div class="row" id='app'>
             <div class="col-md-12">
 	            <section id="strategy-section" class="mb-4">
 			        <h6>1. 选择策略</h6>
 			        <div class="btn-group" role="group" id="strategy-list">
 			            {% for strategy in strategies %}
-			            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDates('{{ strategy.id }}', '{{ strategy.strategy_name }}')">{{ strategy.strategy_name }}</button>
+			            <button type="button" class="btn btn-sm btn-outline-primary" @click="selectStrategy('{{ strategy.id }}', '{{ strategy.strategy_name }}')">{{ strategy.strategy_name }}</button>
 			            {% endfor %}
 			        </div>
 			    </section>
-			    <section id="date-section" class="mb-4" style="display:none;">
+			    <section id="date-section" class="mb-4" v-show="pickDates.length > 0">
 			        <h6>2. 选择日期</h6>
 			        <div class="d-flex align-items-center bg-light p-2 rounded shadow-sm">
 					    <button class="btn btn-link btn-scroll-left p-2">
 					        <i class="fas fa-chevron-left"></i>
 					    </button>
-					
 					    <div id="date-scroll-viewport" class="flex-grow-1 overflow-auto mx-2" style="scrollbar-width: none; -ms-overflow-style: none;">
-					        <div id="date-list" class="d-flex flex-nowrap py-2 ps-1" style="white-space: nowrap;"></div>
+					        <div id="date-list" class="d-flex flex-nowrap py-2 ps-1" style="white-space: nowrap;">
+						        <button class="btn btn-info text-white d-flex align-items-center justify-content-between flex-shrink-0 mx-1 px-3" style="min-width: 100px;"
+			                    v-for="item in pickDates" :key="item.date" @click="selectPickDate(item.date)">
+				                    <span class="font-weight-bold" style="font-size: 0.85rem;">${ formatDate(item.date) }</span>
+				                    <span class="badge rounded-pill bg-white text-dark ms-2 shadow-sm">${ item.count }</span>
+				                </button>
+					        </div>
 					    </div>
-					
 					    <button class="btn btn-link btn-scroll-right p-2">
 					        <i class="fas fa-chevron-right"></i>
 					    </button>
 					</div>
 			    </section>
-			    <section id="stock-section" class="mb-4" style="display: none;">
-				    <h6>3. 选股后10日走势<span id="active-info"></span></h6>
+			    <section id="stock-section" class="mb-4" v-show="stocksData.length > 0">
+				    <h6>3. 选股后10日走势<span class="text-secondary" v-if="activeDate">【${ strategyName } | ${ activeDate } | 收盘价】</span></h6>
 				    <div class="bg-white border rounded shadow-sm">
 				        <div class="table-responsive">
 				            <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
 				                <thead class="table-light">
-				                    <tr id="table-header" class="text-nowrap">
-				                        </tr>
+				                    <tr class="text-nowrap">
+				                        <th>股票代码</th>
+				                        <th>股票名称</th>
+				                        <th v-for="dt in recentDates" :key="dt" class="text-center">${ formatDate(dt) }</th>
+				                    </tr>
 				                </thead>
-				                <tbody id="stock-table-body">
-				                    </tbody>
+				                <tbody>
+					                <template v-for="stock in stocksData">
+					                    <tr :key="stock.code" @click="selectStock(stock)" style="cursor:pointer;">
+					                        <td>${ stock.code }</td>
+					                        <td>${ stock.name }</td>
+					                        <td v-for="(p, index) in stock.price_list" :key="index" :class="['text-center', getPriceStyle(stock, index), index === 0? 'pick-date-column' : '']">
+					                            ${ p ? p.toFixed(2) : '--' }&nbsp;<i v-if="index > 0" :class="[getTrendIcon(p, stock.price_list[index-1]), 'me-1']" style="font-size: 0.8rem; opacity: 0.8;"></i>
+					                        </td>
+					                    </tr>
+					                    <template v-if="activeStock && activeStock.code === stock.code">
+								            <tr class="bg-light-warning shadow-sm" style="font-size: 0.8rem;">
+								                <td colspan="2" class="text-end text-muted">较上日：</td>
+								                <td v-for="(p, index) in stock.price_list" :key="'daily-'+index" class="text-center">
+								                    <span :class="[getChangeColor(calcDailyChange(stock, index)), 'font-weight-bold']">
+								                        ${ calcDailyChange(stock, index) }
+								                    </span>
+								                </td>
+								            </tr>
+								            <tr class="bg-soft-warning shadow-sm" style="font-size: 0.8rem;">
+								                <td colspan="2" class="text-end text-muted">较选股日：</td>
+								                <td v-for="(p, index) in stock.price_list" :key="'total-'+index" class="text-center">
+								                    <span :class="[getChangeColor(calcTotalChange(stock, index)), 'font-weight-bold']">
+								                        ${ calcTotalChange(stock, index) }
+								                    </span>
+								                </td>
+								            </tr>
+								        </template>
+				                    </template>
+				                </tbody>
 				            </table>
 				        </div>
 				    </div>
 				</section>
-				<section id="chart-section" class="mb-4" style="display: none;">
-				    <h6>4. K线预览<span id="chart-stock-info" class="text-primary"></span></h6>
+				<section id="chart-section" class="mb-4" v-show="activeStock">
+				    <h6>4. K线预览<span id="chart-stock-info" class="text-primary" v-if="activeStock">【${ activeStock.name }（${ activeStock.code }）】</span></h6>
 				    <div class="bg-white border rounded shadow-sm p-3">
 				        <div id="chart" style="width: 100%; height: 400px;"></div>
 				    </div>
@@ -60,9 +128,112 @@
 
 
 {% block js_content %}
+    <script src="{% static 'plugins/vue/vue.min.js' %}"></script>
     <script src="{% static 'plugins/lightweight-charts/lightweight-charts.standalone.production.js' %}"></script>
 
 	<script>
+		var app = new Vue({
+		    el: '#app',
+		    delimiters: ["${", "}"],
+		    data: {
+		        strategyId: null,
+		        strategyName: null,
+		        pickDates: [],
+		        activeDate: null,
+		        recentDates: [],
+		        stocksData: [],
+		        activeStock: null
+		    },
+		    methods: {
+		        selectStrategy(id, name) {
+		            this.strategyId = id;
+		            this.strategyName = name;
+		            this.stocksData = [];
+		            this.activeStock = null;
+		            
+		            fetch(`/stock/strategy/dates/${id}/`)
+	                .then(res => res.json())
+	                .then(data => {
+	                    this.pickDates = data;
+	                });
+		        },
+		        selectPickDate(dateStr) {
+		        	this.activeDate = dateStr;
+		        	this.activeStock = null;
+		        	
+		            fetch(`/stock/strategy/result/${this.strategyId}/${dateStr}/`)
+	                .then(res => res.json())
+	                .then(data => {
+	                    this.recentDates = data.recent_dates;
+	                    this.stocksData = data.stocks_data;
+	                });
+		        },
+		        selectStock(stock) {
+		        	if (this.activeStock != null && this.activeStock.code === stock.code) {
+		                this.activeStock = null;
+		            } else {
+		                this.activeStock = stock;
+		                drawChart(stock.code);
+		            }
+		        },
+		        formatDate(dateStr) {
+		            return dateStr.slice(5).replace('-', '/');
+		        },
+		        getTrendIcon(price, prevPrice) {
+		            if (price === null || prevPrice === null || prevPrice === 0) return '';
+		            
+		            const change = (price - prevPrice) / prevPrice;
+		            if (change >= 0.05) return 'fas fa-angle-double-up';
+		            if (change >= 0.01) return 'fas fa-angle-up';
+		            if (change <= -0.05) return 'fas fa-angle-double-down';
+		            if (change <= -0.01) return 'fas fa-angle-down';
+		            
+		            return 'fas fa-angle-right';
+		        },
+		        getPriceStyle(stock, currentIndex) {
+		            const currentPrice = stock.price_list[currentIndex];
+		            const prevPrice = currentIndex > 0 ? stock.price_list[currentIndex - 1] : null;
+		            const pickPrice = stock.price_list[0];
+
+		            let classes = [];
+		            if (prevPrice !== null) {
+		                if (currentPrice > prevPrice) classes.push('text-danger font-weight-bold');
+		                else if (currentPrice < prevPrice) classes.push('text-success font-weight-bold');
+		                else classes.push('text-dark font-weight-bold');
+		            }
+
+		            if (currentIndex > 0) {
+		                if (currentPrice / pickPrice - 1 >= 0.05) {
+		                    classes.push('bg-danger-light');
+		                } else if (currentPrice / pickPrice - 1 <= -0.05) {
+		                    classes.push('bg-success-light');
+		                }
+		            }
+
+		            return classes.join(' ');
+		        },
+		        calcDailyChange(stock, index) {
+		            const p = stock.price_list[index];
+		            const prev = index > 0 ? stock.price_list[index-1] : null;
+		            if (index === 0 || p === null || prev === null || prev === 0) return '--';
+		            const res = ((p - prev) / prev * 100).toFixed(2);
+		            return (res > 0 ? '+' : '') + res + '%';
+		        },
+		        calcTotalChange(stock, index) {
+		            const p = stock.price_list[index];
+		            const pick = stock.price_list[0];
+		            if (index === 0 || p === null || pick === null || pick === 0) return '--';
+		            const res = ((p - pick) / pick * 100).toFixed(2);
+		            return (res > 0 ? '+' : '') + res + '%';
+		        },
+		        getChangeColor(val) {
+		            if (val.includes('+')) return 'text-danger';
+		            if (val.includes('-')) return 'text-success';
+		            return 'text-muted';
+		        }
+		    }
+		});
+	   
 		var chartInstance = null;
 		var candleSeries = null;
 	
@@ -117,69 +288,7 @@
 			);
 		}
 		
-		function loadDates(strategyId, strategyName) {
-		    $('#date-section').show();
-		    $('#stock-section, #chart-section').hide();
-		    
-		    fetch(`/stock/strategy/dates/${strategyId}/`)
-		        .then(res => res.json())
-		        .then(dates => {
-		            let html = '';
-		            dates.forEach(item => {
-		            	const displayDate = item.date.slice(5).replace('-', '/');
-		                html += `<button class="btn btn-info text-white d-flex align-items-center justify-content-between flex-shrink-0 mx-1 px-3" 
-		                    style="min-width: 100px;"
-		                    onclick="loadStocks('${strategyId}', '${strategyName}', '${item.date}')">
-		                <span class="fw-bold" style="font-size: 0.85rem; letter-spacing: 0.5px;">${displayDate}</span>&nbsp;
-		                <span class="badge rounded-pill bg-white text-dark ms-2 shadow-sm">${item.count}</span>
-		            </button>`;
-		            });
-		            $('#date-list').html(html);
-		        });
-		}
-		
-		function loadStocks(strategyId, strategyName, date) {
-			$('#active-info').text(`【${strategyName} | ${date} | 收盘价】`);
-			
-		    $('#stock-section').show();
-		    $('#stock-table-body').html('<tr><td colspan="100" class="text-center">加载数据中...</td></tr>');
-
-		    fetch(`/stock/strategy/result/${strategyId}/${date}/`)
-	        .then(res => res.json())
-	        .then(data => {
-	            let headerHtml = '<th>股票代码</th><th>股票名称</th>';
-	            data.recent_dates.forEach(d => {
-	                headerHtml += `<th>${d.slice(5).replace('-', '/')}</th>`; // 格式化为 MM/DD
-	            });
-	            $('#table-header').html(headerHtml);
-
-	            let bodyHtml = '';
-	            data.stocks_data.forEach(stock => {
-	                bodyHtml += `<tr onclick="drawChart('${stock.code}', '${stock.name}')" style="cursor:pointer;">
-	                    <td>${stock.code}</td>
-	                    <td>${stock.name}</td>`;
-
-	                stock.price_list.forEach((p, index) => {
-	                    let colorClass = 'text-dark';
-	                    if (index > 0) {
-	                        const prevPrice = stock.price_list[index-1];
-	                        colorClass = p > prevPrice ? 'text-danger fw-bold' : (p < prevPrice ? 'text-success fw-bold' : 'text-dark');
-	                    }
-	                    bodyHtml += `<td class="${colorClass}">${p.toFixed(2)}</td>`;
-	                });
-	                bodyHtml += '</tr>';
-	            });
-	            $('#stock-table-body').html(bodyHtml);
-	        })
-	        .catch(err => {
-	            $('#stock-table-body').html('<tr><td colspan="100" class="text-danger text-center">获取数据失败</td></tr>');
-	        });
-		}
-		
-		function drawChart(stockCode, stockName) {
-		    $('#chart-section').show();
-		    $('#chart-stock-info').text(`【${stockName} (${stockCode})】`);
-		    
+		function drawChart(stockCode) {
 		    if (!chartInstance) {
 		        initChart();
 		    }
