@@ -92,7 +92,7 @@
 					                        </td>
 					                    </tr>
 					                    <template v-if="activeStock && activeStock.code === stock.code">
-								            <tr class="bg-light-warning shadow-sm" style="font-size: 0.8rem;">
+								            <tr class="bg-light-warning shadow-sm" style="font-size: 0.8rem;" v-if="recentDates.length > 2">
 								                <td colspan="2" class="text-end text-muted">较上日：</td>
 								                <td v-for="(p, index) in stock.price_list" :key="'daily-'+index" class="text-center">
 								                    <span :class="[getChangeColor(calcDailyChange(stock, index)), 'font-weight-bold']">
@@ -100,7 +100,7 @@
 								                    </span>
 								                </td>
 								            </tr>
-								            <tr class="bg-soft-warning shadow-sm" style="font-size: 0.8rem;">
+								            <tr class="bg-soft-warning shadow-sm" style="font-size: 0.8rem;" v-if="recentDates.length > 1">
 								                <td colspan="2" class="text-end text-muted">较选股日：</td>
 								                <td v-for="(p, index) in stock.price_list" :key="'total-'+index" class="text-center">
 								                    <span :class="[getChangeColor(calcTotalChange(stock, index)), 'font-weight-bold']">
