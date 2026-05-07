@@ -50,26 +50,28 @@
                     <tbody>
                         {% for product in products %}
                         <tr>
-                            <td style="vertical-align: middle;"><h5><small>{{ product.merchantProdId }}</small></h5></td>
-                            <td style="vertical-align: middle;"><h5><small>{{ product.name }}</small></h5></td>
-                            <td style="vertical-align: middle;"><h5><small>{{ product.skuPrice }}</small></h5></td>
-                            <td style="vertical-align: middle;">
+                            <td class="align-middle">{{ product.merchantProdId }}</td>
+                            <td class="align-middle">{{ product.name }}</td>
+                            <td class="align-middle">{{ product.skuPrice }}</td>
+                            <td class="align-middle">
                                 {% if product.ccbPrice is not None %}
-                                    <h5><small>{{ product.ccbPrice }}</small>
-                                    <a href="{{ product.ccbProdUrl }}" class="badge badge-pill badge-{% if product.skuPrice > product.ccbPrice %}success{% elif product.skuPrice < product.ccbPrice %}danger{% else %}warning{% endif %}">{{ product.skuPrice | price_diff:product.ccbPrice }}</a></h5>
+                                    {{ product.ccbPrice }}
+                                    <a href="{{ product.ccbProdUrl }}" style="font-size:14px;" class="badge badge-pill badge-{% if product.skuPrice > product.ccbPrice %}success{% elif product.skuPrice < product.ccbPrice %}danger{% else %}warning{% endif %}">{{ product.skuPrice | price_diff:product.ccbPrice }}</a>
                                 {% endif %}
                             </td>
-                            <td style="vertical-align: middle;">
+                            <td class="align-middle">
                                 {% if not product.merchantProdId == '080020000501' %}
-                                <a href="{{ product.prodUrl }}"><h5>
-                                    <span class="badge badge-{% if product.is_warning == 1 %}danger{% elif product.skuStorage > product.standard_storage %}success{% else %}light{% endif %}">{{ product.skuStorage }}
-                                </span></h5></a>
+                                <a href="{{ product.prodUrl }}">
+                                    <span style="font-size:14px;" class="badge badge-{% if product.is_warning == 1 %}danger{% elif product.skuStorage > product.standard_storage %}success{% else %}light{% endif %}">{{ product.skuStorage }}</span>
+                                </a>
                                 {% endif %}
                             </td>
-                            <td style="vertical-align: middle;">
-                                {% if not product.merchantProdId == '080020000501' %}<h5><span class="badge badge-{% if product.daySalesCount < 0 %}danger{% else %}warning{% endif %}">{{ product.daySalesCount }}</span></h5>{% endif %}
+                            <td class="align-middle">
+                                {% if not product.merchantProdId == '080020000501' %}
+								<span style="font-size:14px;" class="badge badge-{% if product.daySalesCount < 0 %}danger{% else %}warning{% endif %}">{{ product.daySalesCount }}</span>
+								{% endif %}
                             </td>
-                            <td style="vertical-align: middle;">
+                            <td class="align-middle">
                                 {% if not product.merchantProdId == '080020000501' %}
                                 <button class="btn btn-xs btn-info" data-toggle="modal" data-target="#exampleModal" @click="prod_sku='{{ product.merchantProdId }},{{ product.prodSkuId }},{{ product.logstorId }}';prod_name='{{ product.name }}';standard_storage={{ product.standard_storage }}">
                                     <i class="fas fa-magic"></i>
