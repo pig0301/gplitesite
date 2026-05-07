@@ -3,9 +3,58 @@
 
 {% block body_content %}
 	<div class="container">
-		<h4><br />Candle Stick Diagram&nbsp;
-	    </h4>
-		<div id="chart"></div>
+		<h4><br />Stock Strategy Result&nbsp;</h4>
+	    <hr />
+	    
+	    <div class="row">
+            <div class="col-md-12">
+	            <section id="strategy-section" class="mb-4">
+			        <h6>1. 选择策略</h6>
+			        <div class="btn-group" role="group" id="strategy-list">
+			            {% for strategy in strategies %}
+			            <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadDates('{{ strategy.id }}', '{{ strategy.strategy_name }}')">{{ strategy.strategy_name }}</button>
+			            {% endfor %}
+			        </div>
+			    </section>
+			    <section id="date-section" class="mb-4" style="display:none;">
+			        <h6>2. 选择日期</h6>
+			        <div class="d-flex align-items-center bg-light p-2 rounded shadow-sm">
+					    <button class="btn btn-link btn-scroll-left p-2">
+					        <i class="fas fa-chevron-left"></i>
+					    </button>
+					
+					    <div id="date-scroll-viewport" class="flex-grow-1 overflow-auto mx-2" style="scrollbar-width: none; -ms-overflow-style: none;">
+					        <div id="date-list" class="d-flex flex-nowrap py-2 ps-1" style="white-space: nowrap;"></div>
+					    </div>
+					
+					    <button class="btn btn-link btn-scroll-right p-2">
+					        <i class="fas fa-chevron-right"></i>
+					    </button>
+					</div>
+			    </section>
+			    <section id="stock-section" class="mb-4" style="display: none;">
+				    <h6>3. 选股后10日走势<span id="active-info"></span></h6>
+				    <div class="bg-white border rounded shadow-sm">
+				        <div class="table-responsive">
+				            <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
+				                <thead class="table-light">
+				                    <tr id="table-header" class="text-nowrap">
+				                        </tr>
+				                </thead>
+				                <tbody id="stock-table-body">
+				                    </tbody>
+				            </table>
+				        </div>
+				    </div>
+				</section>
+				<section id="chart-section" class="mb-4" style="display: none;">
+				    <h6>4. K线预览<span id="chart-stock-info" class="text-primary"></span></h6>
+				    <div class="bg-white border rounded shadow-sm p-3">
+				        <div id="chart" style="width: 100%; height: 400px;"></div>
+				    </div>
+				</section>
+            </div>
+        </div>
 	</div>
 {% endblock %}
 
@@ -14,85 +63,153 @@
     <script src="{% static 'plugins/lightweight-charts/lightweight-charts.standalone.production.js' %}"></script>
 
 	<script>
-		const chart = LightweightCharts.createChart(
-			$('#chart')[0],
-		    {
-		        width: 1110,
-		        height: 400,
-
-		        layout: {
-		            background: {
-		                color: '#fff',
-		            },
-		            textColor: '#333',
-		            attributionLogo: false,
-		        },
-
-		        grid: {
-		            vertLines: {
-		                color: '#f1f3f5',
-		            },
-		            horzLines: {
-		                color: '#f1f3f5',
-		            },
-		        },
-
-		        crosshair: {
-		            mode: LightweightCharts.CrosshairMode.Normal,
-		        },
-
-		        rightPriceScale: {
-		            borderColor: '#ddd',
-		        },
-		        
-		        localization: {
-		            timeFormatter: (time) => {
-						const parts = time.split('-');
-	                    return `${parts[1]}/${parts[2]}`;
-		            },
-		        },
-
-		        timeScale: {
-		            borderColor: '#ddd',
-		            barSpacing: 8,
-		            tickMarkFormatter: (time, tickMarkType, locale) => {
-		            	const parts = time.split('-');
-	                    return `${parts[1]}/${parts[2]}`;
-		            },
-		        },
-		    }
-		);
+		var chartInstance = null;
+		var candleSeries = null;
 	
-		const candleSeries = chart.addSeries(
-		    LightweightCharts.CandlestickSeries,
-		    {
-		        upColor: 'rgba(220,58,73,0.15)',
-		        borderUpColor: '#dc3a49',
-		        wickUpColor: '#dc3a49',
+		function initChart() {
+		    chartInstance = LightweightCharts.createChart(
+				$('#chart')[0],
+			    {
+			        width: 1080,
+			        height: 400,
+			        layout: {
+			            background: { color: '#fff', },
+			            textColor: '#333',
+			            attributionLogo: false,
+			        },
+			        grid: {
+			            vertLines: { color: '#f1f3f5', },
+			            horzLines: { color: '#f1f3f5', },
+			        },
 
-		        downColor: '#306613',
-		        borderDownColor: '#306613',
-		        wickDownColor: '#306613',
+			        crosshair: { mode: LightweightCharts.CrosshairMode.Normal, },
+			        rightPriceScale: { borderColor: '#ddd', },
+			        
+			        localization: {
+			            timeFormatter: (time) => {
+							const parts = time.split('-');
+		                    return `${parts[1]}/${parts[2]}`;
+			            },
+			        },
+
+			        timeScale: {
+			            borderColor: '#ddd',
+			            barSpacing: 8,
+			            tickMarkFormatter: (time, tickMarkType, locale) => {
+			            	const parts = time.split('-');
+		                    return `${parts[1]}/${parts[2]}`;
+			            },
+			        },
+			    }
+			);
+		
+			candleSeries = chartInstance.addSeries(
+			    LightweightCharts.CandlestickSeries,
+			    {
+			        upColor: 'rgba(220,58,73,0.15)',
+			        borderUpColor: '#dc3a49',
+			        wickUpColor: '#dc3a49',
+
+			        downColor: '#306613',
+			        borderDownColor: '#306613',
+			        wickDownColor: '#306613',
+			    }
+			);
+		}
+		
+		function loadDates(strategyId, strategyName) {
+		    $('#date-section').show();
+		    $('#stock-section, #chart-section').hide();
+		    
+		    fetch(`/stock/strategy/dates/${strategyId}/`)
+		        .then(res => res.json())
+		        .then(dates => {
+		            let html = '';
+		            dates.forEach(item => {
+		            	const displayDate = item.date.slice(5).replace('-', '/');
+		                html += `<button class="btn btn-info text-white d-flex align-items-center justify-content-between flex-shrink-0 mx-1 px-3" 
+		                    style="min-width: 100px;"
+		                    onclick="loadStocks('${strategyId}', '${strategyName}', '${item.date}')">
+		                <span class="fw-bold" style="font-size: 0.85rem; letter-spacing: 0.5px;">${displayDate}</span>&nbsp;
+		                <span class="badge rounded-pill bg-white text-dark ms-2 shadow-sm">${item.count}</span>
+		            </button>`;
+		            });
+		            $('#date-list').html(html);
+		        });
+		}
+		
+		function loadStocks(strategyId, strategyName, date) {
+			$('#active-info').text(`【${strategyName} | ${date} | 收盘价】`);
+			
+		    $('#stock-section').show();
+		    $('#stock-table-body').html('<tr><td colspan="100" class="text-center">加载数据中...</td></tr>');
+
+		    fetch(`/stock/strategy/result/${strategyId}/${date}/`)
+	        .then(res => res.json())
+	        .then(data => {
+	            let headerHtml = '<th>股票代码</th><th>股票名称</th>';
+	            data.recent_dates.forEach(d => {
+	                headerHtml += `<th>${d.slice(5).replace('-', '/')}</th>`; // 格式化为 MM/DD
+	            });
+	            $('#table-header').html(headerHtml);
+
+	            let bodyHtml = '';
+	            data.stocks_data.forEach(stock => {
+	                bodyHtml += `<tr onclick="drawChart('${stock.code}', '${stock.name}')" style="cursor:pointer;">
+	                    <td>${stock.code}</td>
+	                    <td>${stock.name}</td>`;
+
+	                stock.price_list.forEach((p, index) => {
+	                    let colorClass = 'text-dark';
+	                    if (index > 0) {
+	                        const prevPrice = stock.price_list[index-1];
+	                        colorClass = p > prevPrice ? 'text-danger fw-bold' : (p < prevPrice ? 'text-success fw-bold' : 'text-dark');
+	                    }
+	                    bodyHtml += `<td class="${colorClass}">${p.toFixed(2)}</td>`;
+	                });
+	                bodyHtml += '</tr>';
+	            });
+	            $('#stock-table-body').html(bodyHtml);
+	        })
+	        .catch(err => {
+	            $('#stock-table-body').html('<tr><td colspan="100" class="text-danger text-center">获取数据失败</td></tr>');
+	        });
+		}
+		
+		function drawChart(stockCode, stockName) {
+		    $('#chart-section').show();
+		    $('#chart-stock-info').text(`【${stockName} (${stockCode})】`);
+		    
+		    if (!chartInstance) {
+		        initChart();
 		    }
-		);
-	    
-	    fetch('/stock/quotes/300170.SZ/')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('网络请求错误');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data && data.length > 0) {
-                candleSeries.setData(data);
-                chart.timeScale().fitContent();
-            } else {
-                console.warn("数据为空，请检查数据库中 300170.SZ 的行情");
-            }
-        })
-        .catch(err => {
-            console.error('获取数据失败:', err);
-        });
+
+		    fetch(`/stock/quotes/${stockCode}/`)
+	        .then(res => res.json())
+	        .then(data => {
+	            if (data && data.length > 0) {
+	                candleSeries.setData(data);
+	                chartInstance.timeScale().fitContent();
+	                document.getElementById('chart-section').scrollIntoView({ behavior: 'smooth' });
+	            } else {
+	                alert(`未找到 ${stockCode} 的行情数据`);
+	            }
+	        })
+	        .catch(err => console.error('图表加载失败:', err));
+		}
+
+		$('.btn-scroll-left').click(function() {
+		    var $view = $('#date-scroll-viewport');
+		    $view.animate({
+		        scrollLeft: $view.scrollLeft() - 600
+		    }, 300);
+		});
+	
+		$('.btn-scroll-right').click(function() {
+		    var $view = $('#date-scroll-viewport');
+		    $view.animate({
+		        scrollLeft: $view.scrollLeft() + 600
+		    }, 300);
+		});
 	</script>
 {% endblock %}
