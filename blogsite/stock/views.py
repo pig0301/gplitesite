@@ -16,7 +16,7 @@ def index(request):
 
 
 def stock_quotes_data(request, code):
-    ths_quotes = models.ths_daily_quotes.objects.filter(stock_code=code).order_by('trade_dt')
+    ths_quotes = models.ths_daily_quotes.objects.filter(stock_code=code, total_volume__gt=0).order_by('trade_dt')
 
     chart_data = []
     for quote_obj in ths_quotes:
@@ -57,12 +57,11 @@ def strategy_result_data(request, strategy_id, pick_date):
     
     stock_codes = [item.stock_code.stock_code for item in pick_results]
     recent_dates = list(models.ths_daily_quotes.objects.filter(
-        trade_dt__gte=pick_date
+        trade_dt__gte=pick_date, total_volume__gt=0
     ).values_list('trade_dt', flat=True).distinct().order_by('trade_dt')[:11])
     
     recent_quotes = models.ths_daily_quotes.objects.filter(
-        stock_code__in=stock_codes,
-        trade_dt__in=recent_dates
+        stock_code__in=stock_codes, trade_dt__in=recent_dates, total_volume__gt=0
     ).values('stock_code', 'trade_dt', 'close_price')
     
     quote_map= defaultdict(dict)
