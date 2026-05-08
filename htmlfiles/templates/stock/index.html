@@ -45,7 +45,7 @@
 	            <section id="strategy-section" class="mb-4">
 			        <h6>1. 选择策略</h6>
 			        <div class="btn-group" role="group" id="strategy-list">
-			            <button v-for="item in strategies" :key="item.id" type="button" class="btn btn-sm btn-outline-primary" @click="selectStrategy(item.id)">${ item.name }</button>
+			            <button v-for="item in strategies" :key="item.id" type="button" class="btn btn-sm btn-outline-primary" @click="selectStrategy(item)">${ item.name }</button>
 			        </div>
 			    </section>
 			    <section id="date-section" class="mb-4" v-show="pickDates.length > 0">
@@ -152,22 +152,16 @@
                     .then(data => {
                         this.strategies = data;
                         if (data.length > 0) {
-                        	this.selectStrategy(data[0].id);
+                        	this.selectStrategy(data[0]);
                         }
                     });
 		    	},
-		        selectStrategy(id) {
-		    		for (const item of this.strategies) {
-		    		    if (item.id === id) {
-		    		        this.activeStrategy = item;
-		    		        break;
-		    		    }
-		    		}
-
+		        selectStrategy(item) {
+		    		this.activeStrategy = item;
 		            this.stocksData = [];
 		            this.activeStock = null;
-		            
-		            fetch(`/stock/api/strategy/dates/${id}/`)
+
+		            fetch(`/stock/api/strategy/dates/${item.id}/`)
 	                .then(res => res.json())
 	                .then(data => {
 	                    this.pickDates = data;
