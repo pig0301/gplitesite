@@ -5,6 +5,10 @@ from django.db.models import Count
 from collections import defaultdict
 from stock import models
 
+import talib
+import pandas as pd
+import numpy as np
+
 
 def index(request):
     return render_template("stock/index.html", {}, request)
@@ -26,18 +30,46 @@ def pick_strategy_data(request):
 
 def stock_quotes_data(request, code):
     ths_quotes = models.ths_daily_quotes.objects.filter(stock_code=code, total_volume__gt=0).order_by('trade_dt')
+    
+    data_list = list(ths_quotes.values('trade_dt', 'open_price', 'high_price', 'low_price', 'close_price', 'total_volume'))
+    df = pd.DataFrame(data_list)
+    
+    close_prices = df['close_price'].astype(float).values 
+    time_series = df['trade_dt'].apply(lambda x: x.strftime('%Y-%m-%d')).values
 
-    chart_data = []
-    for quote_obj in ths_quotes:
-        chart_data.append({
-            "time": quote_obj.trade_dt.strftime('%Y-%m-%d'),
-            "open": float(quote_obj.open_price),
-            "high": float(quote_obj.high_price),
-            "low": float(quote_obj.low_price),
-            "close": float(quote_obj.close_price),
+    ma5 = talib.SMA(close_prices, timeperiod=5)
+    ma10 = talib.SMA(close_prices, timeperiod=10)
+
+    candles = []
+    volumes = []
+    for i in range(len(df)):
+        candles.append({
+            "time": time_series[i],
+            "open": float(df.iloc[i]['open_price']),
+            "high": float(df.iloc[i]['high_price']),
+            "low": float(df.iloc[i]['low_price']),
+            "close": float(df.iloc[i]['close_price']),
+        })
+        
+        volumes.append({
+            "time": time_series[i],
+            "value": float(df.iloc[i]['total_volume']) / 10000,
         })
 
-    return JsonResponse(chart_data, safe=False)
+    ma5_data = [
+        {"time": time_series[i], "value": float(ma5[i])} 
+        for i in range(len(ma5)) if not np.isnan(ma5[i])
+    ]
+    
+    ma10_data = [
+        {"time": time_series[i], "value": float(ma10[i])} 
+        for i in range(len(ma10)) if not np.isnan(ma10[i])
+    ]
+
+    return JsonResponse({
+        "candles": candles, "volumes": volumes,
+        "ma5": ma5_data, "ma10": ma10_data
+    })
 
 
 def strategy_dates_data(request, strategy_id):

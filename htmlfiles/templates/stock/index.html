@@ -249,6 +249,9 @@
 	   
 		var chartInstance = null;
 		var candleSeries = null;
+		var volumeSeries = null;
+		var ma5Series = null;
+		var ma10Series = null;
 	
 		function initChart() {
 		    chartInstance = LightweightCharts.createChart(
@@ -287,18 +290,42 @@
 			    }
 			);
 		
-			candleSeries = chartInstance.addSeries(
-			    LightweightCharts.CandlestickSeries,
-			    {
-			        upColor: 'rgba(220,58,73,0.15)',
-			        borderUpColor: '#dc3a49',
-			        wickUpColor: '#dc3a49',
+			candleSeries = chartInstance.addSeries(LightweightCharts.CandlestickSeries, {
+		        upColor: 'rgba(220,58,73,0.15)',
+		        borderUpColor: '#dc3a49',
+		        wickUpColor: '#dc3a49',
 
-			        downColor: '#306613',
-			        borderDownColor: '#306613',
-			        wickDownColor: '#306613',
-			    }
-			);
+		        downColor: '#306613',
+		        borderDownColor: '#306613',
+		        wickDownColor: '#306613',
+		    });
+			
+			volumeSeries = chartInstance.addSeries(LightweightCharts.HistogramSeries, {
+				color: 'rgba(135, 206, 235, 0.65)',
+	            priceFormat: { type: 'volume' },
+	            priceScaleId: '',
+			});
+			
+	        ma5Series = chartInstance.addSeries(LightweightCharts.LineSeries, {
+                color: '#FF6D00',
+                lineWidth: 1,
+                priceLineVisible: false,
+                crosshairMarkerVisible: false,
+            });
+	        
+			ma10Series = chartInstance.addSeries(LightweightCharts.LineSeries, {
+		        color: '#2962FF',
+		        lineWidth: 1,
+		        priceLineVisible: false,
+		        crosshairMarkerVisible: false,
+		    });
+			
+			chartInstance.priceScale('').applyOptions({
+		        scaleMargins: {
+		            top: 0.85,
+		            bottom: 0,
+		        },
+		    });
 		}
 		
 		function drawChart(stockCode) {
@@ -309,10 +336,15 @@
 		    fetch(`/stock/api/quotes/${stockCode}/`)
 	        .then(res => res.json())
 	        .then(data => {
-	            if (data && data.length > 0) {
-	                candleSeries.setData(data);
+	            if (data && data.candles && data.candles.length > 0) {
+	                candleSeries.setData(data.candles);
+	                volumeSeries.setData(data.volumes);
+	                
+	                ma5Series.setData(data.ma5);
+	                ma10Series.setData(data.ma10);
+
 	                chartInstance.timeScale().fitContent();
-	                document.getElementById('chart-section').scrollIntoView({ behavior: 'smooth' });
+	                $('#chart-section')[0].scrollIntoView({ behavior: 'smooth' });
 	            } else {
 	                alert(`未找到 ${stockCode} 的行情数据`);
 	            }
