@@ -31,6 +31,7 @@ urlpatterns = [
     url(r'^login/$', home.login),
     url(r'^logout/$', home.logout),
     url(r'^24f/$', home.floor24),
+    url(r'^MP_verify_q1pMB1P5nm5yu8tT.txt$', home.WXSDK),
 
     lgn(r'^message_level/update/$', home.message_level_update),
     

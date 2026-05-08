@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import auth
 from django.contrib import messages
 
@@ -14,6 +14,10 @@ def index(request):
 
 def floor24(request):
     return HttpResponseRedirect("https://gplite.notion.site/2024-c467147ca09c4776a2c15a23ca09ab3e?pvs=4")
+
+
+def WXSDK(request):
+    return HttpResponse("q1pMB1P5nm5yu8tT")
 
 
 def login(request):
