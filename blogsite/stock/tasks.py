@@ -1,7 +1,7 @@
 from django_rq import job
 from django.utils import timezone
 from django.db import transaction
-from iFinDPy import *
+from iFinDPy import THS_RealtimeQuotes, THS_iwencai, THS_Date_Query, THS_iFinDLogin, THS_iFinDLogout
 
 from stock.models import ths_stocks, ths_daily_quotes
 from libs import wechat, constants
@@ -24,6 +24,7 @@ def download_daily_quotes():
     
     ret_stock = update_stock_info(stock_df)
     ret_quote = update_daily_quote(stock_df)
+    THS_iFinDLogout()
     
     stock_summary = f"共更新 {ret_stock[0]} 条记录，成功新增 {ret_stock[1]} 条记录"
     quote_summary = f"共删除 {ret_quote[0]} 条记录，成功新增 {ret_quote[1]} 条记录"
@@ -165,6 +166,7 @@ def is_trade_day():
 
     ths_login()
     res = THS_Date_Query('SSE', 'mode:1,dateType:0,period:D,dateFormat:0', today, today)
+    THS_iFinDLogout()
     
     if res.errorcode == 0:
         is_trade_day = (today in res.data)
