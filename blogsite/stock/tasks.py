@@ -185,5 +185,5 @@ def ths_login():
 
     res = THS_iFinDLogin(account, password)
     
-    if res not in [0, -202]:
-        raise Exception(f"iFind 登录失败，错误代码: {res} | {account} | {password}")
+    if res not in [0, -201]:
+        raise Exception(f"iFind 登录失败，错误代码: {res}")
