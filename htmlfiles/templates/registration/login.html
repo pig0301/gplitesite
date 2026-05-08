@@ -9,7 +9,7 @@
 		}
 		.form-signin {
 		    max-width: 420px;
-		    padding: 30px 38px 66px;
+		    padding: 30px 38px 45px;
 		    margin: 0 auto;
 		    background-color: #eee;
 		    border: 3px dotted rgba(0,0,0,0.1);  
@@ -19,18 +19,18 @@
 		    margin-bottom: 30px;
 		}
 		
-		.form-control-text {
+		.form-control-signing {
 		    position: relative;
 		    font-size: 16px;
 		    height: auto;
 		    padding: 10px;
 		}
-		.form-signin-text {
+		#id_username {
 		    margin-bottom: 0px;
 		    border-bottom-left-radius: 0;
 		    border-bottom-right-radius: 0;
 		}
-		.form-signin-password {
+		#id_password {
 		    margin-bottom: 20px;
 		    border-top-left-radius: 0;
 		    border-top-right-radius: 0;
@@ -57,8 +57,8 @@
 	            <h3 class="form-signin-heading">Welcome Back!</h3>
 	            <hr class="colorgraph"><br>
 	            {% csrf_token %}
-	            <input type="text" class="form-control form-control-text form-signin-text" name="username" id="id_username" placeholder="Username" required="" autofocus="" />
-	            <input type="password" class="form-control form-control-text form-signin-password" name="password" id="id_password" placeholder="Password" required=""/>            
+	            <input type="text" class="form-control form-control-signing" name="username" id="id_username" placeholder="Username" required="" autofocus="" />
+	            <input type="password" class="form-control form-control-signing" name="password" id="id_password" placeholder="Password" required=""/>            
 	            <button class="btn btn-lg btn-primary btn-block" name="Submit" value="Login" type="Submit">Sign In</button>            
 	        </form>         
 	    </div>

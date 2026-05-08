@@ -7,108 +7,96 @@ import re, json, datetime, time, requests
 import hmac, hashlib, base64, codecs
 
 from home import models
-from libs.functions import render_template, check_login
+from libs.functions import render_template
 from coding.spider import models as models_code
 
 
 def query_storage(request):
-    if check_login(request):
-        dttm = timezone.now()
-        
-        msg_params = {
-            'emall_api': models_code.spider_emall_api.objects.all(),
-            'msg_level': models.message_level.objects.get(id=1),
-            'wechat_level': models.wechat_message.objects.all(),
-            'dingding_level': models.dingding_message.objects.all()
-        }
-        
-        icbc_prods = get_icbc_product_details('9003867817')
-        (ccb_store, ccb_brands) = get_ccb_product_details()
+    dttm = timezone.now()
+    
+    msg_params = {
+        'emall_api': models_code.spider_emall_api.objects.all(),
+        'msg_level': models.message_level.objects.get(id=1),
+        'wechat_level': models.wechat_message.objects.all(),
+        'dingding_level': models.dingding_message.objects.all()
+    }
+    
+    icbc_prods = get_icbc_product_details('9003867817')
+    (ccb_store, ccb_brands) = get_ccb_product_details()
 
-        prod_storages = models_code.spider_product_storage.objects.filter(event_dt=dttm.date(), product_id=OuterRef('product_id')).order_by('id').values_list('id')
-        prod_storages = models_code.spider_product_storage.objects.annotate(tag=Subquery(prod_storages[:1]))
-        prod_storages = prod_storages.filter(id=F('tag')).order_by('product_id')
-        
-        init_storages = {}
-        storage_dtls = []
-        for prod in prod_storages:
-            init_storages[prod.product_id] = prod.storage_cnt
-            storage_dtls.append(models_code.spider_product_storage.objects.filter(event_dt=dttm.date(), product_id=prod.product_id).order_by('id'))
-        
-        for prod in icbc_prods:
-            if prod['merchantProdId'] in init_storages.keys():
-                prod['daySalesCount'] = init_storages[prod['merchantProdId']] - int(prod['skuStorage'])
+    prod_storages = models_code.spider_product_storage.objects.filter(event_dt=dttm.date(), product_id=OuterRef('product_id')).order_by('id').values_list('id')
+    prod_storages = models_code.spider_product_storage.objects.annotate(tag=Subquery(prod_storages[:1]))
+    prod_storages = prod_storages.filter(id=F('tag')).order_by('product_id')
+    
+    init_storages = {}
+    storage_dtls = []
+    for prod in prod_storages:
+        init_storages[prod.product_id] = prod.storage_cnt
+        storage_dtls.append(models_code.spider_product_storage.objects.filter(event_dt=dttm.date(), product_id=prod.product_id).order_by('id'))
+    
+    for prod in icbc_prods:
+        if prod['merchantProdId'] in init_storages.keys():
+            prod['daySalesCount'] = init_storages[prod['merchantProdId']] - int(prod['skuStorage'])
 
-        for i in range(0, len(ccb_brands)):
-            icbc_prods[i + 3]['ccbPrice'] = ccb_brands[i]['skuPrice']
-            icbc_prods[i + 3]['ccbProdUrl'] = ccb_brands[i]['prodUrl']
-        
-        icbc_store = icbc_prods[0].copy()
-        icbc_store['merchantProdId'] = '080020000501'
-        icbc_store['name'] = '如意金积存'
-        icbc_store['skuPrice'] -= 3
-        if ccb_store is not None:
-            icbc_store['ccbPrice'] = ccb_store['skuPrice']
-            icbc_store['ccbProdUrl'] = ccb_store['prodUrl']
+    for i in range(0, len(ccb_brands)):
+        icbc_prods[i + 3]['ccbPrice'] = ccb_brands[i]['skuPrice']
+        icbc_prods[i + 3]['ccbProdUrl'] = ccb_brands[i]['prodUrl']
+    
+    icbc_store = icbc_prods[0].copy()
+    icbc_store['merchantProdId'] = '080020000501'
+    icbc_store['name'] = '如意金积存'
+    icbc_store['skuPrice'] -= 3
+    if ccb_store is not None:
+        icbc_store['ccbPrice'] = ccb_store['skuPrice']
+        icbc_store['ccbProdUrl'] = ccb_store['prodUrl']
 
-        icbc_prods.append(icbc_store)
-        icbc_prods = icbc_prods + get_icbc_product_details('9003877851')
+    icbc_prods.append(icbc_store)
+    icbc_prods = icbc_prods + get_icbc_product_details('9003877851')
 
-        return render_template("coding/spider/storage.html", {
-                'msg_params': msg_params, 'legends': prod_storages,
-                'products': icbc_prods, 'chart_datas': storage_dtls
-        }, request)
-    else:
-        return HttpResponse("非管理员用户禁止访问！")
+    return render_template("coding/spider/storage.html", {
+            'msg_params': msg_params, 'legends': prod_storages,
+            'products': icbc_prods, 'chart_datas': storage_dtls
+    }, request)
 
 
 def query_reset(request):
-    if check_login(request):
-        prod_sku = request.POST.get('prod_sku').split(',')
-        emall_api = models_code.spider_emall_api.objects.get(id=1)
-        prod_strategy = models_code.spider_product_strategy.objects.filter(product_id=prod_sku[0])
+    prod_sku = request.POST.get('prod_sku').split(',')
+    emall_api = models_code.spider_emall_api.objects.get(id=1)
+    prod_strategy = models_code.spider_product_strategy.objects.filter(product_id=prod_sku[0])
+    
+    if prod_strategy.exists():
+        product = { 'prodSkuId': prod_sku[1], 'logstorId': prod_sku[2] }
         
-        if prod_strategy.exists():
-            product = { 'prodSkuId': prod_sku[1], 'logstorId': prod_sku[2] }
-            
-            if adjust_storage(emall_api, product, prod_strategy.first().adj_storage_cnt):
-                messages.info(request, "API调用成功，产品库存已实时调整！")
-            else:
-                messages.warning(request, "API调用失败，请及时排查问题！")
+        if adjust_storage(emall_api, product, prod_strategy.first().adj_storage_cnt):
+            messages.info(request, "API调用成功，产品库存已实时调整！")
+        else:
+            messages.warning(request, "API调用失败，请及时排查问题！")
 
-        return HttpResponseRedirect("/coding/spider/storage/query/")
-    else:
-        return HttpResponse("非管理员用户禁止访问！")
+    return HttpResponseRedirect("/coding/spider/storage/query/")
 
 
 def strategy_index(request):
-    if check_login(request):
-        prod_strategys = models_code.spider_product_strategy.objects.all().order_by('id')
-        strategies_list = list(prod_strategys.values('id', 'product_id', 'product_name', 'min_storage_cnt', 'adj_storage_cnt', 'adj_minutes'))
-        return render_template("coding/spider/strategy.html", {
-            'prod_strategys_json': json.dumps(strategies_list),
-            'minute_steps': [0, 10, 20, 30, 40, 50]
-        }, request)
-    else:
-        return HttpResponse("非管理员用户禁止访问！")
+    prod_strategys = models_code.spider_product_strategy.objects.all().order_by('id')
+    strategies_list = list(prod_strategys.values('id', 'product_id', 'product_name', 'min_storage_cnt', 'adj_storage_cnt', 'adj_minutes'))
+    return render_template("coding/spider/strategy.html", {
+        'prod_strategys_json': json.dumps(strategies_list),
+        'minute_steps': [0, 10, 20, 30, 40, 50]
+    }, request)
 
 
 def strategy_update(request):
-    if check_login(request):
-        if request.method == "POST":
-            data = json.loads(request.body)
-            for item in data:
-                obj = models_code.spider_product_strategy.objects.get(id=item['id'])
-                obj.min_storage_cnt = item['min_storage_cnt']
-                obj.adj_storage_cnt = item['adj_storage_cnt']
-                obj.adj_minutes = item['adj_minutes']
-                obj.save()
-            
-            messages.info(request, "产品策略保存成功，库存调整将按新策略执行！")
+    if request.method == "POST":
+        data = json.loads(request.body)
+        for item in data:
+            obj = models_code.spider_product_strategy.objects.get(id=item['id'])
+            obj.min_storage_cnt = item['min_storage_cnt']
+            obj.adj_storage_cnt = item['adj_storage_cnt']
+            obj.adj_minutes = item['adj_minutes']
+            obj.save()
         
-        return HttpResponse("success")
-    else:
-        return HttpResponse("非管理员用户禁止访问！", status=403)
+        messages.info(request, "产品策略保存成功，库存调整将按新策略执行！")
+    
+    return HttpResponse("success")
 
 
 def adjust_storage(emall_api, product, final_storage):

@@ -23,6 +23,7 @@ def index(request):
 
     return render_template("game/index.html", {'produces': paginator.get_page(page)}, request)
 
+
 def produce_start(request):
     if check_java_client(request):
         warehouse = request.GET['w']
@@ -52,6 +53,7 @@ def produce_start(request):
     else:
         return HttpResponse("非授权终端访问！")
 
+
 def produce_finish(request, produce_id):
     if check_java_client(request):
         finish_last_step(produce_id)
@@ -67,16 +69,15 @@ def produce_finish(request, produce_id):
     else:
         return HttpResponse("非授权终端访问！")
 
+
 def produce_clear(request):
-    if check_login(request):
-        max_id = models.cg_mp700_produce.objects.order_by('-id').first().id - constants.PRODUCE_LIST_COUNT_PER_PAGE
-        
-        models.cg_mp700_detail.objects.filter(produce__id__lte=max_id).delete()
-        models.cg_mp700_produce.objects.filter(id__lte=max_id).delete()
-        
-        return HttpResponseRedirect("/game/")
-    else:
-        return HttpResponse("非管理员用户禁止访问！")
+    max_id = models.cg_mp700_produce.objects.order_by('-id').first().id - constants.PRODUCE_LIST_COUNT_PER_PAGE
+    
+    models.cg_mp700_detail.objects.filter(produce__id__lte=max_id).delete()
+    models.cg_mp700_produce.objects.filter(id__lte=max_id).delete()
+    
+    return HttpResponseRedirect("/game/")
+
 
 def produce_error_add(request, errors):
     if check_java_client(request):
@@ -106,6 +107,7 @@ def produce_error_add(request, errors):
     else:
         return HttpResponse("非授权终端访问！")
 
+
 def produce_detail_add(request, produce_id):
     if check_java_client(request):
         round1 = request.GET['r']
@@ -120,6 +122,7 @@ def produce_detail_add(request, produce_id):
     else:
         return HttpResponse("非授权终端访问！")
 
+
 def produce_detail_latest(request):
     if check_java_client(request):
         current = models.cg_mp700_detail.objects.prefetch_related('produce').order_by("-id").first()
@@ -132,21 +135,20 @@ def produce_detail_latest(request):
     else:
         return HttpResponse("非授权终端访问！")
 
+
 def produce_prepare(request):
-    if check_login(request):
-        prepares = list(models.cg_mp700_prepare.objects.order_by('id'))
-        status = models.cg_mp700_status.objects.get(id=1)
-        current = models.cg_mp700_detail.objects.prefetch_related('produce').order_by("-id").first().produce.warehouse
+    prepares = list(models.cg_mp700_prepare.objects.order_by('id'))
+    status = models.cg_mp700_status.objects.get(id=1)
+    current = models.cg_mp700_detail.objects.prefetch_related('produce').order_by("-id").first().produce.warehouse
 
-        i = 0
-        while i < len(prepares) and prepares[-1].warehouse != current:
-            prepares.append(prepares[0])
-            del prepares[0]
-            i = i + 1
+    i = 0
+    while i < len(prepares) and prepares[-1].warehouse != current:
+        prepares.append(prepares[0])
+        del prepares[0]
+        i = i + 1
 
-        return render_template("game/produce/prepare.html", {'prepares': prepares, 'status': status}, request)
-    else:
-        return HttpResponse("非管理员用户禁止访问！")
+    return render_template("game/produce/prepare.html", {'prepares': prepares, 'status': status}, request)
+
 
 def produce_status_reconnect(request):
     if check_java_client(request):
@@ -157,6 +159,7 @@ def produce_status_reconnect(request):
         return HttpResponse("success")
     else:
         return HttpResponse("非授权终端访问！")
+
 
 def produce_status_change(request, operation):
     if check_login(request) or check_java_client(request):
@@ -180,21 +183,20 @@ def produce_status_change(request, operation):
     else:
         return HttpResponse("非管理员用户禁止访问！")
 
+
 def produce_prepare_update(request):
-    if check_login(request):
-        ids = request.POST.getlist('prepareIDs')
-        status_id = request.POST.get('status_id')
-        
-        rows = models.cg_mp700_prepare.objects.filter(id__in=ids)
-        
-        if status_id == '1':
-            rows.update(is_ready=status_id, last_ready_dttm=timezone.now())
-        else:
-            rows.update(is_ready=status_id)
-        
-        return HttpResponseRedirect("/game/produce/prepare/")
+    ids = request.POST.getlist('prepareIDs')
+    status_id = request.POST.get('status_id')
+    
+    rows = models.cg_mp700_prepare.objects.filter(id__in=ids)
+    
+    if status_id == '1':
+        rows.update(is_ready=status_id, last_ready_dttm=timezone.now())
     else:
-        return HttpResponse("非管理员用户禁止访问！")
+        rows.update(is_ready=status_id)
+    
+    return HttpResponseRedirect("/game/produce/prepare/")
+
 
 def produce_prepare_auto_update(request):
     if check_java_client(request):
@@ -209,6 +211,7 @@ def produce_prepare_auto_update(request):
     else:
         return HttpResponse("非授权终端访问！")
 
+
 def produce_get_prepare_status(request):
     if check_java_client(request):
         warehouse = request.GET['w']
@@ -220,6 +223,7 @@ def produce_get_prepare_status(request):
             return HttpResponse("none")
     else:
         return HttpResponse("非授权终端访问！")
+
 
 def finish_last_step(produce_id):
     produce = models.cg_mp700_produce.objects.prefetch_related('produce_detail').get(id=produce_id)
