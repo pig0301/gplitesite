@@ -1,5 +1,6 @@
 from libs.functions import render_template
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 
 from collections import defaultdict
@@ -7,6 +8,7 @@ from collections import defaultdict
 from stock import models
 
 
+@login_required
 def index(request):
     return render_template("stock/index.html", {}, request)
 

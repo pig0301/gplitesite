@@ -67,5 +67,7 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('django-rq/', include('django_rq.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
+    
     url(r'^media/(?P<path>.*)$', serve, {"document_root": settings.MEDIA_ROOT}),
 ]
