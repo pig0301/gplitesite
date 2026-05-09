@@ -3,7 +3,7 @@
 
 {% block css_content %}
 	<style>
-		.wrapper {    
+		.wrapper {
 		    margin-top: 35px;
 		    margin-bottom: 35px;
 		}
@@ -12,7 +12,7 @@
 		    padding: 30px 38px 45px;
 		    margin: 0 auto;
 		    background-color: #eee;
-		    border: 3px dotted rgba(0,0,0,0.1);  
+		    border: 3px dotted rgba(0,0,0,0.1);
 		}
 		.form-signin-heading {
 		    text-align:center;
@@ -53,14 +53,15 @@
 {% block body_content %}
     <div class = "container">
 	    <div class="wrapper">
-	        <form method="post" class="form-signin">       
+	        <form method="post" class="form-signin">
+	            <img class="mb-4 d-block mx-auto" src="/media/image/logo/logo-250x250.png" width="250" height="250">
 	            <h3 class="form-signin-heading">Welcome Back!</h3>
 	            <hr class="colorgraph"><br>
 	            {% csrf_token %}
 	            <input type="text" class="form-control form-control-signing" name="username" id="id_username" placeholder="Username" required="" autofocus="" />
-	            <input type="password" class="form-control form-control-signing" name="password" id="id_password" placeholder="Password" required=""/>            
-	            <button class="btn btn-lg btn-primary btn-block" name="Submit" value="Login" type="Submit">Sign In</button>            
-	        </form>         
+	            <input type="password" class="form-control form-control-signing" name="password" id="id_password" placeholder="Password" required=""/>
+	            <button class="btn btn-lg btn-primary btn-block" name="Submit" value="Login" type="Submit">Sign In</button>
+	        </form>
 	    </div>
 	</div>
 {% endblock %}

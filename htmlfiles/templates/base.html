@@ -13,13 +13,14 @@
     {% load ext_filters %}
     <title>GPL[it]e.147 - {{ request.path|default_title }}</title>
     
-    <link rel="icon" href="/media/icon/{% if IS_DEBUG %}debugicon{% else %}favicon{% endif %}.ico">
+    <link rel="shortcut icon" href="/media/icon/{% if IS_DEBUG %}debugicon{% else %}favicon{% endif %}.ico">
+	<link rel="icon" type="image/png" sizes="32x32" href="/media/image/logo/logo-32x32.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/media/image/logo/logo-180x180.png">
+	<link rel="manifest" href="/media/site.webmanifest">
 
-    <!-- Common plugins core CSS -->
     <link href="{% static 'plugins/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'plugins/font-awesome/css/fontawesome.all.min.css' %}" rel="stylesheet">
 
-    <!-- Custom styles for this template -->
     <link href="{% static 'css/theme.css' %}" rel="stylesheet">
     
     {% block css_content %}{% endblock %}
