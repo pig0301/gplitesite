@@ -1,6 +1,6 @@
-from libs.functions import render_template
 from django.http import JsonResponse
 from django.db.models import Count
+from django.shortcuts import render
 
 from collections import defaultdict
 from stock import models
@@ -11,7 +11,7 @@ import numpy as np
 
 
 def index(request):
-    return render_template("stock/index.html", {}, request)
+    return render(request, "stock/index.html", {})
 
 
 def pick_strategy_data(request):

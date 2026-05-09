@@ -1,6 +1,6 @@
-from snooker import models
+from django.shortcuts import render
 
-from libs.functions import render_template
+from snooker import models
 from libs import constants
 
 
@@ -13,6 +13,6 @@ def index(request):
     cues = models.cue.objects.order_by('id')
     opponents = models.player.objects.filter(group__is_show='1').order_by('-id')
 
-    return render_template("snooker/index.html", {
+    return render(request, "snooker/index.html", {
         'campaigns': campaigns, 'gyms': gyms, 'cues': cues, 'opponents': opponents
-    }, request)
+    })

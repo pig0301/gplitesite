@@ -1,8 +1,9 @@
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import timezone
+from django.shortcuts import render
 
-from libs.functions import render_template, check_login, check_java_client
+from libs.functions import check_login, check_java_client
 from libs.wechat import send_text_message
 
 from libs import constants
@@ -21,7 +22,7 @@ def index(request):
     else:
         page = int(page)
 
-    return render_template("game/index.html", {'produces': paginator.get_page(page)}, request)
+    return render(request, "game/index.html", {'produces': paginator.get_page(page)})
 
 
 def produce_start(request):
@@ -147,7 +148,7 @@ def produce_prepare(request):
         del prepares[0]
         i = i + 1
 
-    return render_template("game/produce/prepare.html", {'prepares': prepares, 'status': status}, request)
+    return render(request, "game/produce/prepare.html", {'prepares': prepares, 'status': status})
 
 
 def produce_status_reconnect(request):

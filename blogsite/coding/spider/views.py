@@ -2,12 +2,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import OuterRef, Subquery, F
 from django.utils import timezone
 from django.contrib import messages
+from django.shortcuts import render
 
 import re, json, datetime, time, requests
 import hmac, hashlib, base64, codecs
 
 from home import models
-from libs.functions import render_template
 from coding.spider import models as models_code
 
 
@@ -53,10 +53,10 @@ def query_storage(request):
     icbc_prods.append(icbc_store)
     icbc_prods = icbc_prods + get_icbc_product_details('9003877851')
 
-    return render_template("coding/spider/storage.html", {
+    return render(request, "coding/spider/storage.html", {
             'msg_params': msg_params, 'legends': prod_storages,
             'products': icbc_prods, 'chart_datas': storage_dtls
-    }, request)
+    })
 
 
 def query_reset(request):
@@ -78,10 +78,10 @@ def query_reset(request):
 def strategy_index(request):
     prod_strategys = models_code.spider_product_strategy.objects.all().order_by('id')
     strategies_list = list(prod_strategys.values('id', 'product_id', 'product_name', 'min_storage_cnt', 'adj_storage_cnt', 'adj_minutes'))
-    return render_template("coding/spider/strategy.html", {
+    return render(request, "coding/spider/strategy.html", {
         'prod_strategys_json': json.dumps(strategies_list),
         'minute_steps': [0, 10, 20, 30, 40, 50]
-    }, request)
+    })
 
 
 def strategy_update(request):

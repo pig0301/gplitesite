@@ -1,15 +1,14 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import auth
 from django.contrib import messages
-
-from libs.functions import render_template
+from django.shortcuts import render
 
 from home import models
 from coding.spider import models as models_code
 
 
 def index(request):
-    return render_template('index.html', {}, request)
+    return render(request, 'index.html', {})
 
 
 def floor24(request):

@@ -1,13 +1,13 @@
 from django.http import HttpResponse
+from django.shortcuts import render
 import time
 
-from libs.functions import render_template
 from libs import wechat
 
 
 def mail_list(request):
     mail_list = wechat.get_mail_list_detail()
-    return render_template("coding/wechat/mail.html", { 'mail_list': mail_list }, request)
+    return render(request, "coding/wechat/mail.html", { 'mail_list': mail_list })
 
 
 def mail_parse(request):
