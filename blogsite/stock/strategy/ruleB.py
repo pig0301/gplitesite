@@ -37,13 +37,16 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
         
         results_to_create = []
         for _, row in df_ret.iterrows():
+            addition_info = { 'macd': float(row['macd']) }
+            
             results_to_create.append(pick_strategy_result(
                 strategy=strategy_obj,
                 pick_date=tx_date,
-                stock_code_id=row['code']
+                stock_code_id=row['code'],
+                addition_info=json.dumps(addition_info, ensure_ascii=False)
             ))
 
-            formatted_lines.append(f"{row['code']} {row['name']}【{row['type']}】")
+            formatted_lines.append(f"{row['code']} {row['name']}【{row['macd']}】")
         
         ret_summary = "\r\n".join(formatted_lines)
         with transaction.atomic():
@@ -88,12 +91,12 @@ def pick_stocks_with_macd(tx_date):
     indicator_rs= ths_stock_indicators.objects.filter(
         trade_dt=tx_date
     ).values(
-        'stock_code', 'ma20', 'ma30', 'ma49', 'ma60', 'ma120', 'ma250', 
-        'macd_diff', 'macd_dea', 'macd_bar'
+        'stock_code', 'ma20', 'ma30', 'ma49', 'ma60', 'ma120', 'ma250', 'macd_bar'
     )
     
     df_indicators = pd.DataFrame(list(indicator_rs))
-    df_indicators.rename(columns={ 'stock_code': 'code' }, inplace=True)
+    df_indicators.rename(columns={ 'stock_code': 'code', 'macd_bar':'macd' }, inplace=True)
+    df_indicators['macd'] = df_indicators['macd'].round(2)
     
     df_final = pd.merge(df_last, df_indicators, on='code', how='left')
 
