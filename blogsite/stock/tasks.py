@@ -1,7 +1,7 @@
 from django_rq import job
 from django.utils import timezone
 from django.db import transaction
-from iFinDPy import THS_RealtimeQuotes, THS_iwencai, THS_Date_Query, THS_iFinDLogin, THS_iFinDLogout
+from iFinDPy import THS_RealtimeQuotes, THS_iwencai, THS_Date_Query, THS_iFinDLogin, THS_iFinDLogout, THS_DS
 
 from stock.models import ths_stocks, ths_daily_quotes
 from libs import wechat, constants
@@ -41,6 +41,7 @@ def update_daily_quote(df):
     total_deleted = 0
     total_inserted = 0
 
+    batch_data_list = []
     for i in range(0, len(all_codes), THS_BATCH_SIZE):
         batch = all_codes[i : i + THS_BATCH_SIZE]
         code_str = ",".join(batch)
@@ -50,7 +51,6 @@ def update_daily_quote(df):
         if not isinstance(res, dict) or 'tables' not in res:
             continue
 
-        batch_data_list = []
         for stock_data in res['tables']:
             current_code = stock_data.get('thscode', 'Unknown')
             times = stock_data.get('time', [])
@@ -67,38 +67,96 @@ def update_daily_quote(df):
                 'close': tables.get('latest', []),
                 'volume': tables.get('volume', [])
             })
+            
             batch_data_list.append(temp_df)
 
-        if batch_data_list:
-            final_batch_df = pd.concat(batch_data_list)
+    if batch_data_list:
+        final_batch_df = pd.concat(batch_data_list)
 
-            final_batch_df['trade_dt'] = pd.to_datetime(final_batch_df['time']).dt.date
-            target_dates = final_batch_df['trade_dt'].unique()
-            current_batch_codes = final_batch_df['code'].unique().tolist()
+        final_batch_df['trade_dt'] = pd.to_datetime(final_batch_df['time']).dt.date
+        target_dates = final_batch_df['trade_dt'].unique()
+        current_batch_codes = final_batch_df['code'].unique().tolist()
 
-            with transaction.atomic():
-                deleted_count, _ = ths_daily_quotes.objects.filter(
-                    trade_dt__in=target_dates,
-                    stock_code__in=current_batch_codes
-                ).delete()
-                total_deleted += deleted_count
+        with transaction.atomic():
+            total_deleted, _ = ths_daily_quotes.objects.filter(
+                trade_dt__in=target_dates,
+                stock_code__in=current_batch_codes
+            ).delete()
 
-                quote_objs = [
-                    ths_daily_quotes(
-                        stock_code_id=row['code'],
-                        trade_dt=row['trade_dt'],
-                        open_price=row['open'],
-                        high_price=row['high'],
-                        low_price=row['low'],
-                        close_price=row['close'],
-                        total_volume=row['volume']
-                    ) for _, row in final_batch_df.iterrows()
-                ]
-                
-                created_objs = ths_daily_quotes.objects.bulk_create(quote_objs, batch_size=DB_BATCH_SIZE)
-                total_inserted += len(created_objs)
+            quote_objs = [
+                ths_daily_quotes(
+                    stock_code_id=row['code'],
+                    trade_dt=row['trade_dt'],
+                    open_price=row['open'],
+                    high_price=row['high'],
+                    low_price=row['low'],
+                    close_price=row['close'],
+                    total_volume=row['volume']
+                ) for _, row in final_batch_df.iterrows()
+            ]
+            
+            created_objs = ths_daily_quotes.objects.bulk_create(quote_objs, batch_size=DB_BATCH_SIZE)
+            total_inserted = len(created_objs)
 
     return [total_deleted, total_inserted]
+
+
+def update_stock_indicators(df):
+    all_codes = df['code'].tolist()
+    tx_dt = timezone.now().date().isoformat()
+    
+    total_deleted = 0
+    total_inserted = 0
+
+    indicator_params = [
+        {
+            'name': 'ths_ma_stock',
+            'params': [20, 30, 49, 60, 120, 250],
+            'formula': '$,100,100',
+            'outcome': 'ma$'
+        },
+        {
+            'name': 'ths_macd_stock',
+            'params': [100, 101, 102],
+            'param_names': { 100: 'diff', 101: 'dea', 102: 'bar' },
+            'formula': '26,12,9,$,100,100',
+            'outcome': 'macd_$'
+        },
+    ]
+
+    batch_indicator_list = []
+    for i in range(0, len(all_codes), THS_BATCH_SIZE):
+        batch = all_codes[i: i + THS_BATCH_SIZE]
+        code_str = ",".join(batch)
+
+        batch_indicator_df = None
+        for idt in indicator_params:
+            indicator_name = idt['name']
+
+            for p in idt['params']:
+                indicator_formula = idt['formula'].replace('$', str(p))
+                indicator_outcome = idt['outcome'].replace('$', idt['param_names'][p] if 'param_names' in idt else str(p))
+
+                res_ma = THS_DS(code_str, indicator_name, indicator_formula, '', tx_dt, tx_dt)
+                # res_ma = THS_BD(code_str, indicator_name, f'{tx_dt},{indicator_formula}')
+                
+                if res_ma.errorcode == 0:
+                    temp_df = res_ma.data[['thscode', indicator_name]].rename(
+                        columns={indicator_name: indicator_outcome}
+                    )
+
+                    if batch_indicator_df is None:
+                        batch_indicator_df = temp_df
+                    else:
+                        batch_indicator_df = pd.merge(batch_indicator_df, temp_df, on=['thscode'], how='outer')
+        
+        if batch_indicator_df is not None and not batch_indicator_df.empty:
+            batch_indicator_list.append(batch_indicator_df)
+    
+    
+
+
+    return batch_indicator_list
 
 
 def update_stock_info(df):
