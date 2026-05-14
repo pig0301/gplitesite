@@ -40,7 +40,7 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
         
         results_to_create = []
         for _, row in df_ret.iterrows():
-            addition_info = { 'macd': float(row['macd'].round(2)) }
+            addition_info = { 'macd': float(row['macd']) }
             
             results_to_create.append(pick_strategy_result(
                 strategy=strategy_obj,
@@ -49,7 +49,7 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
                 addition_info=json.dumps(addition_info, ensure_ascii=False)
             ))
 
-            formatted_lines.append(f"{row['code']} {row['name']}【{row['macd'].round(2)}】")
+            formatted_lines.append(f"{row['code']} {row['name']}【{row['macd']}】")
         
         ret_summary = "\r\n".join(formatted_lines)
         with transaction.atomic():
