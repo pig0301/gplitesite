@@ -62,7 +62,7 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
 
 
 def pick_stocks_with_macd(tx_date):
-    recent_dates = ths_daily_quotes.objects.filter(trade_dt__lte=tx_date).values_list('trade_dt', flat=True).distinct().order_by('-trade_dt')[:35]
+    recent_dates = ths_daily_quotes.objects.filter(trade_dt__lte=tx_date).values_list('trade_dt', flat=True).distinct().order_by('-trade_dt')[:15]
     min_date = list(recent_dates)[-1]
     
     quote_rs = ths_daily_quotes.objects.filter(
@@ -86,20 +86,8 @@ def pick_stocks_with_macd(tx_date):
     
     for _, group in df.groupby('code'):
         idx = group.index
-        df.loc[idx, 'ma5_t'] = talib.SMA(group['close'].values, timeperiod=5)
-        df.loc[idx, 'ma10_t'] = talib.SMA(group['close'].values, timeperiod=10)
-        df.loc[idx, 'ma20_t'] = talib.SMA(group['close'].values, timeperiod=20)
-        df.loc[idx, 'ma30_t'] = talib.SMA(group['close'].values, timeperiod=30)
-        
-        _, _, macd_hist = talib.MACD(
-            group['close'].values, 
-            fastperiod=12, 
-            slowperiod=26, 
-            signalperiod=9
-        )
-
-        df.loc[idx, 'macd_t'] = macd_hist * 2
-        
+        df.loc[idx, 'ma5'] = talib.SMA(group['close'].values, timeperiod=5)
+        df.loc[idx, 'ma10'] = talib.SMA(group['close'].values, timeperiod=10)
     
     df_last = df.groupby('code').tail(1)
     
@@ -118,7 +106,6 @@ def pick_stocks_with_macd(tx_date):
     df_indicators['macd'] = df_indicators['macd'].round(2)
     
     df_final = pd.merge(df_last, df_indicators, on='code', how='left')
-    df_final.to_csv('/data/share/log/ths.csv', index=False, encoding='utf-8-sig')
 
     return df_final
 
