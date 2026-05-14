@@ -166,7 +166,7 @@ def update_stock_indicators(df):
             ).delete()
 
             indicator_objs = [
-                ths_daily_quotes(
+                ths_stock_indicators(
                     stock_code_id=row['thscode'],
                     trade_dt=tx_dt,
                     ma20 = row['ma20'],
