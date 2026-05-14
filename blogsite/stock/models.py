@@ -35,6 +35,37 @@ class ths_daily_quotes(models.Model):
         ]
 
 
+class ths_stock_indicators(models.Model):
+    stock_code = models.ForeignKey(
+        ths_stocks, 
+        to_field='stock_code', 
+        on_delete=models.DO_NOTHING,
+        db_column='stock_code',
+        related_name='stock_indicators'
+    )
+
+    trade_dt = models.DateField()
+    ma20 = models.DecimalField(max_digits=12, decimal_places=4)
+    ma30 = models.DecimalField(max_digits=12, decimal_places=4)
+    ma49 = models.DecimalField(max_digits=12, decimal_places=4)
+    ma60 = models.DecimalField(max_digits=12, decimal_places=4)
+    ma120 = models.DecimalField(max_digits=12, decimal_places=4)
+    ma250 = models.DecimalField(max_digits=12, decimal_places=4)
+    macd_diff = models.DecimalField(max_digits=12, decimal_places=4)
+    macd_dea = models.DecimalField(max_digits=12, decimal_places=4)
+    macd_bar = models.DecimalField(max_digits=12, decimal_places=4)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['stock_code', 'trade_dt'], name='unique_stock_indicators')
+        ]
+
+        indexes = [
+            models.Index(fields=['stock_code', '-trade_dt']),
+            models.Index(fields=['trade_dt']),
+        ]
+
+
 class pick_strategy(models.Model):
     strategy_name = models.CharField(max_length=50)
     python_module = models.CharField(max_length=50)

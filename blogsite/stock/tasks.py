@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.db import transaction
 from iFinDPy import THS_RealtimeQuotes, THS_iwencai, THS_Date_Query, THS_iFinDLogin, THS_iFinDLogout, THS_DS
 
-from stock.models import ths_stocks, ths_daily_quotes
+from stock.models import ths_stocks, ths_daily_quotes, ths_stock_indicators
 from libs import wechat, constants
 
 import django_rq, os, json
@@ -24,11 +24,13 @@ def download_daily_quotes():
     
     ret_stock = update_stock_info(stock_df)
     ret_quote = update_daily_quote(stock_df)
+    ret_indicator = update_stock_indicators(stock_df)
     THS_iFinDLogout()
     
     stock_summary = f"共更新 {ret_stock[0]} 条记录，成功新增 {ret_stock[1]} 条记录"
     quote_summary = f"共删除 {ret_quote[0]} 条记录，成功新增 {ret_quote[1]} 条记录"
-    final_summary = f"①股票信息：{stock_summary}；\r\n②行情信息：{quote_summary}。"
+    indicator_summary = f"共删除 {ret_indicator[0]} 条记录，成功新增 {ret_indicator[1]} 条记录"
+    final_summary = f"①股票信息：{stock_summary}；\r\n②行情信息：{quote_summary}；\r\n③指标信息：{indicator_summary}。"
     
     wechat.send_text_message(1, final_summary)
 
@@ -153,10 +155,39 @@ def update_stock_indicators(df):
         if batch_indicator_df is not None and not batch_indicator_df.empty:
             batch_indicator_list.append(batch_indicator_df)
     
-    
+    if batch_indicator_list:
+        final_batch_df = pd.concat(batch_indicator_list)
 
+        final_batch_df['trade_dt'] = pd.to_datetime(final_batch_df['time']).dt.date
+        target_dates = final_batch_df['trade_dt'].unique()
+        current_batch_codes = final_batch_df['code'].unique().tolist()
 
-    return batch_indicator_list
+        with transaction.atomic():
+            total_deleted, _ = ths_stock_indicators.objects.filter(
+                trade_dt__in=target_dates,
+                stock_code__in=current_batch_codes
+            ).delete()
+
+            indicator_objs = [
+                ths_daily_quotes(
+                    stock_code_id=row['thscode'],
+                    trade_dt=tx_dt,
+                    ma20 = row['ma20'],
+                    ma30 = row['ma30'],
+                    ma49 = row['ma49'],
+                    ma60 = row['ma60'],
+                    ma120 = row['ma120'],
+                    ma250 = row['ma250'],
+                    macd_diff = row['macd_diff'],
+                    macd_dea = row['macd_dea'],
+                    macd_bar = row['macd_bar'],
+                ) for _, row in final_batch_df.iterrows()
+            ]
+            
+            created_objs = ths_stock_indicators.objects.bulk_create(indicator_objs, batch_size=DB_BATCH_SIZE)
+            total_inserted = len(created_objs)
+
+    return [total_deleted, total_inserted]
 
 
 def update_stock_info(df):
