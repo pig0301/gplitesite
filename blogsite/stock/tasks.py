@@ -157,7 +157,7 @@ def update_stock_indicators(df):
     
     if batch_indicator_list:
         final_batch_df = pd.concat(batch_indicator_list)
-        current_batch_codes = final_batch_df['code'].unique().tolist()
+        current_batch_codes = final_batch_df['thscode'].unique().tolist()
 
         with transaction.atomic():
             total_deleted, _ = ths_stock_indicators.objects.filter(
