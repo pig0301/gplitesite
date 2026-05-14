@@ -40,7 +40,7 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
         
         results_to_create = []
         for _, row in df_ret.iterrows():
-            addition_info = { 'macd': float(row['macd']) }
+            addition_info = { 'macd': float(row['macd'].round(2)) }
             
             results_to_create.append(pick_strategy_result(
                 strategy=strategy_obj,
@@ -49,7 +49,7 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
                 addition_info=json.dumps(addition_info, ensure_ascii=False)
             ))
 
-            formatted_lines.append(f"{row['code']} {row['name']}【{row['macd']}】")
+            formatted_lines.append(f"{row['code']} {row['name']}【{row['macd'].round(2)}】")
         
         ret_summary = "\r\n".join(formatted_lines)
         with transaction.atomic():
@@ -103,8 +103,6 @@ def pick_stocks_with_macd(tx_date):
     for col in ['ma20', 'ma30', 'ma49', 'ma60', 'ma120', 'ma250', 'macd']:
         df_indicators[col] = df_indicators[col].astype(float)
     
-    df_indicators['macd'] = df_indicators['macd'].round(2)
-    
     df_final = pd.merge(df_last, df_indicators, on='code', how='left')
 
     return df_final
@@ -113,6 +111,6 @@ def pick_stocks_with_macd(tx_date):
 def is_good_stock(row):
     isPrice_Rule1 = (row['ma5'] > row['ma10'] > row['ma30'] > row['ma49'] > row['ma60'] > row['ma120'] > row['ma250'])
     isPrice_Rule2 = (row['ma5'] > row['ma10'] * 1.05 and row['ma10'] > row['ma20'] * 1.05)
-    isPrice_Rule3 = (row['macd'] / row['close'] * 100 < MAX_MACD_RATE)
+    isPrice_Rule3 = ((row['macd'] * 100) / row['close']  < MAX_MACD_RATE)
 
     return isPrice_Rule1 and isPrice_Rule2 and isPrice_Rule3
