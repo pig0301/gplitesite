@@ -110,6 +110,6 @@ def pick_stocks_with_macd(tx_date):
 def is_good_stock(row):
     isPrice_Rule1 = (row['ma5'] > row['ma10'] > row['ma30'] > row['ma49'] > row['ma60'] > row['ma120'] > row['ma250'])
     isPrice_Rule2 = (row['ma5'] > row['ma10'] * 1.05 and row['ma10'] > row['ma20'] * 1.05)
-    isPrice_Rule3 = (row['macd'] < -0.2)
+    isPrice_Rule3 = (row['macd'] < 0)
 
     return isPrice_Rule1 and isPrice_Rule2 and isPrice_Rule3
