@@ -49,11 +49,13 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
         
         results_to_create = []
         for _, row in df_ret.iterrows():
-            stock_instance = ths_stocks.objects.get(stock_code=row['code'])
             addition_info = { 'type': row['type'], 'wr10': float(row['wr10']) }
             
             results_to_create.append(pick_strategy_result(
-                strategy=strategy_obj, pick_date=tx_date, stock_code=stock_instance, addition_info=json.dumps(addition_info, ensure_ascii=False)
+                strategy=strategy_obj,
+                pick_date=tx_date,
+                stock_code_id=row['code'],
+                addition_info=json.dumps(addition_info, ensure_ascii=False)
             ))
 
             formatted_lines.append(f"{row['code']} {row['name']}【{row['type']}】")
