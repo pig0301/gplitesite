@@ -96,6 +96,10 @@ def pick_stocks_with_macd(tx_date):
     
     df_indicators = pd.DataFrame(list(indicator_rs))
     df_indicators.rename(columns={ 'stock_code': 'code', 'macd_bar':'macd' }, inplace=True)
+    
+    for col in ['ma20', 'ma30', 'ma49', 'ma60', 'ma120', 'ma250', 'macd']:
+        df_indicators[col] = df_indicators[col].astype(float)
+    
     df_indicators['macd'] = df_indicators['macd'].round(2)
     
     df_final = pd.merge(df_last, df_indicators, on='code', how='left')
