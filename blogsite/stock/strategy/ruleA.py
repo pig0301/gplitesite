@@ -6,7 +6,7 @@ from django.db import transaction
 from django.db.models import F
 from libs import wechat, constants
 
-from stock.models import ths_stocks, ths_daily_quotes, pick_strategy, pick_strategy_result
+from stock.models import ths_daily_quotes, pick_strategy, pick_strategy_result
 from stock.tasks import is_trade_day
 
 
