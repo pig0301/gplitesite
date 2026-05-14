@@ -157,14 +157,11 @@ def update_stock_indicators(df):
     
     if batch_indicator_list:
         final_batch_df = pd.concat(batch_indicator_list)
-
-        final_batch_df['trade_dt'] = pd.to_datetime(final_batch_df['time']).dt.date
-        target_dates = final_batch_df['trade_dt'].unique()
         current_batch_codes = final_batch_df['code'].unique().tolist()
 
         with transaction.atomic():
             total_deleted, _ = ths_stock_indicators.objects.filter(
-                trade_dt__in=target_dates,
+                trade_dt=tx_dt,
                 stock_code__in=current_batch_codes
             ).delete()
 
