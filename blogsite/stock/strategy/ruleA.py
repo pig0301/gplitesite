@@ -10,6 +10,9 @@ from stock.models import ths_daily_quotes, pick_strategy, pick_strategy_result
 from stock.tasks import is_trade_day
 
 
+MAX_WR10 = 20
+
+
 @job('ths_worker', timeout=constants.JOB_TIMEOUT, result_ttl=constants.RESULT_TTL)
 def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
     if not ignore_trade_day and not is_trade_day():
@@ -146,6 +149,6 @@ def is_good_stock(row, is_abnormal=False):
 
     isPriceOK = (isPrice_Rule1 and isPrice_Rule2 and isPrice_Rule3)
     
-    isWr10 = (wr10 <= 20)
+    isWr10 = (wr10 <= MAX_WR10)
 
     return isFirstX and isLastX and isPriceOK and isWr10

@@ -10,6 +10,9 @@ from stock.models import ths_daily_quotes, pick_strategy, pick_strategy_result, 
 from stock.tasks import is_trade_day
 
 
+MAX_MACD = 0.2
+
+
 @job('ths_worker', timeout=constants.JOB_TIMEOUT, result_ttl=constants.RESULT_TTL)
 def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
     if not ignore_trade_day and not is_trade_day():
@@ -59,7 +62,7 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
 
 
 def pick_stocks_with_macd(tx_date):
-    recent_dates = ths_daily_quotes.objects.filter(trade_dt__lte=tx_date).values_list('trade_dt', flat=True).distinct().order_by('-trade_dt')[:15]
+    recent_dates = ths_daily_quotes.objects.filter(trade_dt__lte=tx_date).values_list('trade_dt', flat=True).distinct().order_by('-trade_dt')[:35]
     min_date = list(recent_dates)[-1]
     
     quote_rs = ths_daily_quotes.objects.filter(
@@ -83,8 +86,20 @@ def pick_stocks_with_macd(tx_date):
     
     for _, group in df.groupby('code'):
         idx = group.index
-        df.loc[idx, 'ma5'] = talib.SMA(group['close'].values, timeperiod=5)
-        df.loc[idx, 'ma10'] = talib.SMA(group['close'].values, timeperiod=10)
+        df.loc[idx, 'ma5_t'] = talib.SMA(group['close'].values, timeperiod=5)
+        df.loc[idx, 'ma10_t'] = talib.SMA(group['close'].values, timeperiod=10)
+        df.loc[idx, 'ma20_t'] = talib.SMA(group['close'].values, timeperiod=20)
+        df.loc[idx, 'ma30_t'] = talib.SMA(group['close'].values, timeperiod=30)
+        
+        _, _, macd_hist = talib.MACD(
+            group['close'].values, 
+            fastperiod=12, 
+            slowperiod=26, 
+            signalperiod=9
+        )
+
+        df.loc[idx, 'macd_t'] = macd_hist * 2
+        
     
     df_last = df.groupby('code').tail(1)
     
@@ -103,6 +118,7 @@ def pick_stocks_with_macd(tx_date):
     df_indicators['macd'] = df_indicators['macd'].round(2)
     
     df_final = pd.merge(df_last, df_indicators, on='code', how='left')
+    df_final.to_csv('/data/share/log/ths.csv', index=False, encoding='utf-8-sig')
 
     return df_final
 
@@ -110,6 +126,6 @@ def pick_stocks_with_macd(tx_date):
 def is_good_stock(row):
     isPrice_Rule1 = (row['ma5'] > row['ma10'] > row['ma30'] > row['ma49'] > row['ma60'] > row['ma120'] > row['ma250'])
     isPrice_Rule2 = (row['ma5'] > row['ma10'] * 1.05 and row['ma10'] > row['ma20'] * 1.05)
-    isPrice_Rule3 = (row['macd'] < 0.2)
+    isPrice_Rule3 = (row['macd'] < MAX_MACD)
 
     return isPrice_Rule1 and isPrice_Rule2 and isPrice_Rule3
