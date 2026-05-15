@@ -25,7 +25,7 @@ def test():
     from stock.strategy import ruleB
     import pandas as pd
     
-    date_series = pd.date_range(start='2026-05-14', end='2026-05-14', freq='D')
+    date_series = pd.date_range(start='2026-05-15', end='2026-05-15', freq='D')
     
     for dt in date_series:
         tx_date_str = dt.strftime('%Y-%m-%d')
