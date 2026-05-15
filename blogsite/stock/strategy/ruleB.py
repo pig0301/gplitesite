@@ -10,7 +10,7 @@ from stock.models import ths_daily_quotes, pick_strategy, pick_strategy_result, 
 from stock.tasks import is_trade_day
 
 
-MAX_MACD_RATE = 2
+MAX_MACD_RATE = -1
 
 
 @job('ths_worker', timeout=constants.JOB_TIMEOUT, result_ttl=constants.RESULT_TTL)
