@@ -1,7 +1,7 @@
 from django_rq import job
 from django.utils import timezone
 from django.db import transaction
-from iFinDPy import THS_RealtimeQuotes, THS_iwencai, THS_Date_Query, THS_iFinDLogin, THS_iFinDLogout, THS_DS
+from iFinDPy import THS_RealtimeQuotes, THS_iwencai, THS_Date_Query, THS_iFinDLogin, THS_iFinDLogout, THS_DS, THS_BD
 
 from stock.models import ths_stocks, ths_daily_quotes, ths_stock_indicators
 from libs import wechat, constants
