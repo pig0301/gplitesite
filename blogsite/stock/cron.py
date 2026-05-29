@@ -35,3 +35,10 @@ def test():
         ruleB.get_good_stocks.delay(2, tx_date_str, ignore_trade_day=True)
     
     print("所有任务已进入队列，请观察日志 /data/wwwlogs/gplitesite/rq_ths.log[cite: 1]")
+
+
+def test2():
+    from stock import tasks
+    
+    df = tasks.get_stocks_list()
+    tasks.update_stock_indicators(df)
