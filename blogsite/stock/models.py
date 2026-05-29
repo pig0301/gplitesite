@@ -53,7 +53,6 @@ class ths_stock_indicators(models.Model):
     ma250 = models.DecimalField(max_digits=12, decimal_places=4)
     macd_diff = models.DecimalField(max_digits=12, decimal_places=4)
     macd_dea = models.DecimalField(max_digits=12, decimal_places=4)
-    macd_bar = models.DecimalField(max_digits=12, decimal_places=4)
     
     class Meta:
         constraints = [

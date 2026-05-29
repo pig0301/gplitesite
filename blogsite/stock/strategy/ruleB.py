@@ -94,16 +94,16 @@ def pick_stocks_with_macd(tx_date):
     indicator_rs= ths_stock_indicators.objects.filter(
         trade_dt=tx_date
     ).values(
-        'stock_code', 'ma20', 'ma30', 'ma49', 'ma60', 'ma120', 'ma250', 'macd_bar'
+        'stock_code', 'ma20', 'ma30', 'ma49', 'ma60', 'ma120', 'ma250', 'macd_diff', 'macd_dea'
     )
     
     df_indicators = pd.DataFrame(list(indicator_rs))
-    df_indicators.rename(columns={ 'stock_code': 'code', 'macd_bar':'macd' }, inplace=True)
+    df_indicators.rename(columns={ 'stock_code': 'code'}, inplace=True)
     
-    for col in ['ma20', 'ma30', 'ma49', 'ma60', 'ma120', 'ma250', 'macd']:
+    for col in ['ma20', 'ma30', 'ma49', 'ma60', 'ma120', 'ma250', 'macd_diff', 'macd_dea']:
         df_indicators[col] = df_indicators[col].astype(float)
     
-    df_indicators['macd'] = df_indicators['macd'].round(2)
+    df_indicators['macd'] = ((df_indicators['macd_diff'] - df_indicators['macd_dea']) * 2).round(2)
     
     df_final = pd.merge(df_last, df_indicators, on='code', how='left')
 

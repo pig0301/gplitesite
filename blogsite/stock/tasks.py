@@ -119,8 +119,8 @@ def update_stock_indicators(df):
         },
         {
             'name': 'ths_macd_stock',
-            'params': [100, 101, 102],
-            'param_names': { 100: 'diff', 101: 'dea', 102: 'bar' },
+            'params': [100, 101],
+            'param_names': { 100: 'diff', 101: 'dea' },
             'formula': '26,12,9,$,100,100',
             'outcome': 'macd_$'
         },
@@ -177,7 +177,6 @@ def update_stock_indicators(df):
                     ma250 = row['ma250'],
                     macd_diff = row['macd_diff'],
                     macd_dea = row['macd_dea'],
-                    macd_bar = row['macd_bar'],
                 ) for _, row in final_batch_df.iterrows()
             ]
             
