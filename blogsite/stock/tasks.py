@@ -139,8 +139,10 @@ def update_stock_indicators(df):
                 indicator_formula = idt['formula'].replace('$', str(p))
                 indicator_outcome = idt['outcome'].replace('$', idt['param_names'][p] if 'param_names' in idt else str(p))
 
-                # res_ma = THS_DS(code_str, indicator_name, indicator_formula, '', tx_dt, tx_dt)
-                res_ma = THS_BD(code_str, indicator_name, f'{tx_dt},{indicator_formula}')
+                if tx_dt[-2:] <= '15':
+                    res_ma = THS_DS(code_str, indicator_name, indicator_formula, '', tx_dt, tx_dt)
+                else:
+                    res_ma = THS_BD(code_str, indicator_name, f'{tx_dt},{indicator_formula}')
                 
                 if res_ma.errorcode == 0:
                     temp_df = res_ma.data[['thscode', indicator_name]].rename(
