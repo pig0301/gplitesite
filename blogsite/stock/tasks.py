@@ -105,7 +105,8 @@ def update_daily_quote(df):
 
 def update_stock_indicators(df):
     all_codes = df['code'].tolist()
-    tx_dt = timezone.now().date().isoformat()
+    # tx_dt = timezone.now().date().isoformat()
+    tx_dt = '2026-05-27'
     
     total_deleted = 0
     total_inserted = 0
