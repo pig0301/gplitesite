@@ -83,13 +83,15 @@ def generate_daily_summary(tx_date, ignore_trade_day=False):
 
     if not has_data:
         doc.add_paragraph('当日无选股结果。')
+    
+    filename = f"{tx_date.replace('-', '')}_汇总.docx"
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    filepath = os.path.join(OUTPUT_DIR, f'{tx_date}.docx')
+    filepath = os.path.join(OUTPUT_DIR, filename)
     doc.save(filepath)
 
     with open(filepath, 'rb') as f:
-        media_id = wechat.upload_file(1, f.read(), 'file', f"{tx_date.replace('-', '')}_汇总.docx")
+        media_id = wechat.upload_file(1, f.read(), 'file', filename)
 
     if media_id:
         wechat.send_media_message(1, media_id, 'file')
