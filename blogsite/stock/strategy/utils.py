@@ -89,7 +89,7 @@ def generate_daily_summary(tx_date, ignore_trade_day=False):
     doc.save(filepath)
 
     with open(filepath, 'rb') as f:
-        media_id = wechat.upload_file(1, f.read(), 'file', f'{tx_date}.docx')
+        media_id = wechat.upload_file(1, f.read(), 'file', f"{tx_date.replace('-', '')}_汇总.docx")
 
     if media_id:
         wechat.send_media_message(1, media_id, 'file')
