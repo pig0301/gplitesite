@@ -26,14 +26,14 @@ def mail_parse(request):
         elif content_type.startswith('image/'):
             filename = part.get_filename()
             if filename:
-                media_id = wechat.upload_file(part.get_payload(decode=True), 'image', filename)
-                wechat.send_media_message(media_id, 'image')
+                media_id = wechat.upload_file(2, part.get_payload(decode=True), 'image', filename)
+                wechat.send_media_message(2, media_id, 'image')
                 time.sleep(0.5)
         elif content_disposition and content_disposition.startswith('attachment'):
             filename = wechat.decode_mime_words(part.get_filename())
             if filename:
-                media_id = wechat.upload_file(part.get_payload(decode=True), 'file', filename)
-                wechat.send_media_message(media_id, 'file')
+                media_id = wechat.upload_file(2, part.get_payload(decode=True), 'file', filename)
+                wechat.send_media_message(2, media_id, 'file')
                 time.sleep(0.5)
 
     return HttpResponse(text)

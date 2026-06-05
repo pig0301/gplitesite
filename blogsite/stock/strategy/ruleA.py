@@ -43,7 +43,7 @@ def get_good_stocks(strategy_id, tx_date, ignore_trade_day=False):
 
         selected.append(row)
 
-    df_ret = pd.DataFrame(selected)    
+    df_ret = pd.DataFrame(selected)
     ret_summary = f"{tx_date} | {strategy_obj.strategy_name} | 今日无信号。"
 
     if not df_ret.empty:

@@ -62,8 +62,8 @@ def get_mail_list_detail():
     
     return mail_list
 
-def upload_file(media_file, media_type, filename):
-    wechat = get_access_token(2)
+def upload_file(app_id, media_file, media_type, filename):
+    wechat = get_access_token(app_id)
     
     upload_url = f'{API_URL}/media/upload?access_token={wechat.access_token}'
     
@@ -99,8 +99,8 @@ def process_mail_text(mail_text):
     
     return textList
 
-def send_media_message(media_id, media_type):
-    wechat = get_access_token(2)
+def send_media_message(app_id, media_id, media_type):
+    wechat = get_access_token(app_id)
     
     url = f'{API_URL}/message/send?access_token={wechat.access_token}'
     data = {
