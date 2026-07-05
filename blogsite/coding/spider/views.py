@@ -66,11 +66,12 @@ def query_reset(request):
     
     if prod_strategy.exists():
         product = { 'prodSkuId': prod_sku[1], 'logstorId': prod_sku[2] }
+        (is_success, err_msg) = adjust_storage(emall_api, product, prod_strategy.first().adj_storage_cnt)
         
-        if adjust_storage(emall_api, product, prod_strategy.first().adj_storage_cnt):
+        if is_success:
             messages.info(request, "API调用成功，产品库存已实时调整！")
         else:
-            messages.warning(request, "API调用失败，请及时排查问题！")
+            messages.warning(request, f"API调用失败，请及时排查问题！【{err_msg}】")
 
     return HttpResponseRedirect("/coding/spider/storage/query/")
 
@@ -123,11 +124,11 @@ def adjust_storage(emall_api, product, final_storage):
     
     url = '{0}sign={1}'.format(url, base64.b64encode(sign).decode('utf-8')).replace('+', '%2B')
     response = requests.get(url, verify=False)
-    
-    response_xml = codecs.encode(response.text, 'latin-1').decode('utf-8')
-    pattern = re.match('^.*<ret_code>(\d+)</ret_code>.*$', response_xml)
-    
-    return int(pattern.group(1)) == 0
+
+#     response_xml = codecs.encode(response.text, 'latin-1').decode('utf-8')
+    pattern = re.match('^.*<ret_code>(\d*)</ret_code>.*<ret_msg>(.*?)</ret_msg>.*$', response.text)
+
+    return (pattern.group(1) == '0', pattern.group(2).strip())
 
 
 def get_icbc_product_details(prod_link):
