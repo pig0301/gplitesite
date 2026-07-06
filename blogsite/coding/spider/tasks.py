@@ -83,7 +83,8 @@ def auto_reset_product_storage(icbc_prods, dttm):
             if msg_level.emall_api == None or not dttm.minute in storage_strategy.adj_minutes:
                 storage_warn += "\n{0}仅剩{1}件。".format(product['name'], product['skuStorage'])
             else:
-                if views_code.adjust_storage(msg_level.emall_api, product, storage_strategy.adj_storage_cnt):
+                is_success, _ = views_code.adjust_storage(msg_level.emall_api, product, storage_strategy.adj_storage_cnt)
+                if is_success:
                     storage_warn += "\n{0}仅剩{1}件，已自动增加{2}件库存。".format(product['name'], product['skuStorage'], storage_strategy.adj_storage_cnt - product['skuStorage'])
                 else:
                     storage_warn += "\n{0}仅剩{1}件，自动增加库存失败！".format(product['name'], product['skuStorage'])

@@ -66,7 +66,7 @@ def query_reset(request):
     
     if prod_strategy.exists():
         product = { 'prodSkuId': prod_sku[1], 'logstorId': prod_sku[2] }
-        (is_success, err_msg) = adjust_storage(emall_api, product, prod_strategy.first().adj_storage_cnt)
+        is_success, err_msg = adjust_storage(emall_api, product, prod_strategy.first().adj_storage_cnt)
         
         if is_success:
             messages.info(request, "API调用成功，产品库存已实时调整！")
