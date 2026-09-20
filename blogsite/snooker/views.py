@@ -39,8 +39,8 @@ def analytics(request):
             avg_get=Avg('get_points'),
             avg_oppo=Avg('oppo_points'),
             highest_break=Max('max_break'),
-            break_20_plus=Count('id', filter=Q(max_break__gte=20, max_break__lt=30)),
-            break_30_plus=Count('id', filter=Q(max_break__gte=30, max_break__lt=50)),
+            break_30_plus=Count('id', filter=Q(max_break__gte=30, max_break__lt=40)),
+            break_40_plus=Count('id', filter=Q(max_break__gte=40, max_break__lt=50)),
             break_50_plus=Count('id', filter=Q(max_break__gte=50)),
         )
 
@@ -55,8 +55,8 @@ def analytics(request):
             'avg_get': round(overall['avg_get'] or 0, 1),
             'avg_oppo': round(overall['avg_oppo'] or 0, 1),
             'highest_break': overall['highest_break'] or 0,
-            'break_20_plus': overall['break_20_plus'] or 0,
             'break_30_plus': overall['break_30_plus'] or 0,
+            'break_40_plus': overall['break_40_plus'] or 0,
             'break_50_plus': overall['break_50_plus'] or 0,
         }
 
@@ -85,7 +85,7 @@ def analytics(request):
                 win_frames=Count('id', filter=Q(is_win='1')),
                 avg_get=Avg('get_points'),
                 highest_break=Max('max_break'),
-                break_20_plus=Count('id', filter=Q(max_break__gte=20)),
+                break_30_plus=Count('id', filter=Q(max_break__gte=30)),
             )
         )
         for item in cue_stats:

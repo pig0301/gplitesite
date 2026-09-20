@@ -57,7 +57,7 @@
 	            <div class="card text-white bg-info shadow-sm text-center mb-3 mb-md-0">
 	                <div class="card-body py-3">
 	                    <h6 class="card-title mb-1">高分单杆表现</h6>
-	                    <h3 class="mb-1">20+: ${ overall.break_20_plus } | 30+: ${ overall.break_30_plus }</h3>
+	                    <h3 class="mb-1">30+: ${ overall.break_30_plus } | 40+: ${ overall.break_40_plus }</h3>
 	                    <small>50+ 以上: ${ overall.break_50_plus } 次</small>
 	                </div>
 	            </div>
@@ -113,7 +113,7 @@
 	                                <th>材质</th>
 	                                <th>胜 / 总局数</th>
 	                                <th>胜率</th>
-	                                <th>单杆20+</th>
+	                                <th>单杆30+</th>
 	                            </tr>
 	                        </thead>
 	                        <tbody>
@@ -122,7 +122,7 @@
 	                                <td><small class="text-muted">${ item.cue__material }</small></td>
 	                                <td><strong>${ item.win_frames }</strong> / ${ item.total_frames }</td>
 	                                <td>${ item.win_rate }%</td>
-	                                <td>${ item.break_20_plus }</td>
+	                                <td>${ item.break_30_plus }</td>
 	                            </tr>
 	                            <tr v-if="cueStats.length === 0">
 	                                <td colspan="5" class="text-muted p-4">暂无数据</td>
@@ -186,8 +186,8 @@
 	                avg_get: 0,
 	                avg_oppo: 0,
 	                highest_break: 0,
-	                break_20_plus: 0,
 	                break_30_plus: 0,
+	                break_40_plus: 0,
 	                break_50_plus: 0
 	            },
 	            opponentStats: [],
