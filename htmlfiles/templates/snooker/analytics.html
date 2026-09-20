@@ -63,6 +63,15 @@
 	            </div>
 	        </div>
 	    </div>
+	    
+	    <div class="card shadow-sm mb-4">
+	    	<div class="card-header bg-white font-weight-bold py-2">
+		        <i class="fas fa-crosshairs"></i> 对手战术特性定位（四象限分析）
+		    </div>
+		    <div class="card-body" style="position: relative; height: 380px;">
+		        <canvas id="opponentScatterChart"></canvas>
+		    </div>
+		</div>
 
 	    <div class="row">
 	        <div class="col-lg-7 mb-4">
@@ -170,9 +179,62 @@
 {% endblock %}
 
 {% block js_content %}
+    <script src="{% static 'plugins/chartjs/chart.umd.min.js' %}"></script>
     <script src="{% static 'plugins/vue/vue.min.js' %}"></script>
     
     <script type="text/javascript">
+	    const quadrantPlugin = {
+	        id: 'quadrantPlugin',
+	        beforeDraw(chart) {
+	            const { ctx, chartArea: { left, top, right, bottom }, scales: { x, y } } = chart;
+	            if (!x || !y) return;
+
+	            const zeroX = x.getPixelForValue(0);
+	            const fiftyY = y.getPixelForValue(50);
+
+	            ctx.save();
+
+	            ctx.strokeStyle = 'rgba(220, 53, 69, 0.5)';
+	            ctx.lineWidth = 1.5;
+	            ctx.setLineDash([4, 4]);
+
+	            if (fiftyY >= top && fiftyY <= bottom) {
+	                ctx.beginPath();
+	                ctx.moveTo(left, fiftyY);
+	                ctx.lineTo(right, fiftyY);
+	                ctx.stroke();
+	            }
+
+	            if (zeroX >= left && zeroX <= right) {
+	                ctx.beginPath();
+	                ctx.moveTo(zeroX, top);
+	                ctx.lineTo(zeroX, bottom);
+	                ctx.stroke();
+	            }
+
+	            ctx.font = 'bold 12px sans-serif';
+	            ctx.fillStyle = 'rgba(108, 117, 125, 0.4)';
+
+	            ctx.textAlign = 'right';
+	            ctx.textBaseline = 'top';
+	            ctx.fillText('【优势压制】', right - 10, top + 10);
+
+	            ctx.textAlign = 'left';
+	            ctx.textBaseline = 'top';
+	            ctx.fillText('【硬仗获胜】', left + 10, top + 10);
+
+	            ctx.textAlign = 'left';
+	            ctx.textBaseline = 'bottom';
+	            ctx.fillText('【克星苦主】', left + 10, bottom - 10);
+
+	            ctx.textAlign = 'right';
+	            ctx.textBaseline = 'bottom';
+	            ctx.fillText('【高分输局】', right - 10, bottom - 10);
+
+	            ctx.restore();
+	        }
+	    };
+
 	    new Vue({
 	        el: "#vue_app_analytics",
 	        delimiters: ["${", "}"],
@@ -186,13 +248,15 @@
 	                avg_get: 0,
 	                avg_oppo: 0,
 	                highest_break: 0,
+	                break_20_plus: 0,
 	                break_30_plus: 0,
 	                break_40_plus: 0,
 	                break_50_plus: 0
 	            },
 	            opponentStats: [],
 	            cueStats: [],
-	            gymStats: []
+	            gymStats: [],
+	            scatterChartInstance: null
 	        },
 	        methods: {
 	            loadData() {
@@ -202,18 +266,96 @@
 	                })
 	                .then(res => res.json())
 	                .then(data => {
-	                    this.overall = data.overall;
-	                    this.opponentStats = data.opponent_stats;
-	                    this.cueStats = data.cue_stats;
-	                    this.gymStats = data.gym_stats;
+	                    this.overall = data.overall || {};
+	                    this.opponentStats = data.opponent_stats || [];
+	                    this.cueStats = data.cue_stats || [];
+	                    this.gymStats = data.gym_stats || [];
+
+	                    this.$nextTick(() => {
+	                        this.renderScatterChart();
+	                    });
 	                })
 	                .catch(err => console.error("数据加载失败:", err));
 	            },
+
+				renderScatterChart() {
+	                const ctx = document.getElementById('opponentScatterChart');
+	                if (!ctx) return;
+
+	                if (this.scatterChartInstance) {
+	                    this.scatterChartInstance.destroy();
+	                }
+
+	                const points = this.opponentStats
+	                    .filter(item => item.total_frames >= 5)
+	                    .map(item => ({
+	                        x: parseFloat(item.diff_points || 0),
+	                        y: parseFloat(item.win_rate || 0),
+	                        name: item.opponent__name,
+	                        total: item.total_frames,
+	                        win: item.win_frames
+	                    }));
+
+	                this.scatterChartInstance = new Chart(ctx, {
+	                    type: 'scatter',
+	                    data: {
+	                        datasets: [{
+	                            label: '对手战绩分布',
+	                            data: points,
+	                            clip: false,
+	                            backgroundColor: 'rgba(13, 110, 253, 0.75)',
+	                            borderColor: '#0d6efd',
+	                            pointRadius: 7,
+	                            pointHoverRadius: 10
+	                        }]
+	                    },
+	                    plugins: [quadrantPlugin],
+	                    options: {
+	                        responsive: true,
+	                        maintainAspectRatio: false,
+	                        layout: {
+	                            padding: {
+	                                top: 12,
+	                                right: 15,
+	                                bottom: 5,
+	                                left: 5
+	                            }
+	                        },
+	                        plugins: {
+	                            legend: { display: false },
+	                            tooltip: {
+	                                callbacks: {
+	                                    label(context) {
+	                                        const p = context.raw;
+	                                        const diffStr = p.x > 0 ? `+${p.x}` : `${p.x}`;
+	                                        return `${p.name}：胜率 ${p.y}% | 场均净胜 ${diffStr} 分 (${p.win}/${p.total} 局)`;
+	                                    }
+	                                }
+	                            }
+	                        },
+	                        scales: {
+	                            x: {
+	                                title: { display: true, text: '场均净胜得分 (得分 - 失分)' },
+	                                grid: { color: 'rgba(0, 0, 0, 0.05)' }
+	                            },
+	                            y: {
+	                                title: { display: true, text: '对战胜率 (%)' },
+	                                min: 0,
+	                                max: 100,
+	                                ticks: { stepSize: 20, callback: v => v + '%' },
+	                                grid: { color: 'rgba(0, 0, 0, 0.05)' }
+	                            }
+	                        }
+	                    }
+	                });
+	            },
+
 	            resetFilter() {
 	                this.startDate = '';
 	                this.endDate = '';
 	                this.loadData();
 	            },
+
 	            setShortcutRange(type) {
 	                const today = new Date();
 	                const formatDate = (d) => {
@@ -236,9 +378,6 @@
 	                    d.setFullYear(today.getFullYear() - 3);
 	                    this.startDate = formatDate(d);
 	                    this.endDate = formatDate(today);
-	                } else if (type === 'all') {
-	                    this.startDate = '';
-	                    this.endDate = '';
 	                }
 	                this.loadData();
 	            }
