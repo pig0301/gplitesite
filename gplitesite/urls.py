@@ -43,6 +43,7 @@ urlpatterns = [
     lgn(r'^coding/spider/storage/strategy/update/', coding_spider.strategy_update),
 
     url(r'^snooker/$', snooker.index),
+    url(r'^snooker/analytics/$', snooker.analytics),
     url(r'^snooker/campaign/$', snooker_campaign.index),
     url(r'^snooker/campaign/(\d+)/$', snooker_campaign.detail),
 
