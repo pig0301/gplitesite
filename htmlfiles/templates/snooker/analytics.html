@@ -67,7 +67,7 @@
 	    	<div class="card-header bg-white font-weight-bold py-2">
 		        <i class="fas fa-crosshairs"></i> 对手战术特性定位（四象限分析）
 		    </div>
-		    <div class="card-body" style="position: relative; height: 380px;">
+		    <div class="card-body" style="position: relative; height: 500px;">
 		        <canvas id="opponentScatterChart"></canvas>
 		    </div>
 		</div>
@@ -308,15 +308,54 @@
 	                    this.scatterChartInstance.destroy();
 	                }
 
-	                const points = this.opponentStats
-	                    .filter(item => item.total_frames >= 5)
-	                    .map(item => ({
-	                        x: parseFloat(item.diff_points || 0),
-	                        y: parseFloat(item.win_rate || 0),
-	                        name: item.opponent__name,
-	                        total: item.total_frames,
-	                        win: item.win_frames
-	                    }));
+	                const validStats = (this.opponentStats || []).filter(item => {
+	                    const total = Number(item.total_frames || 0);
+	                    return total >= 5;
+	                });
+
+	                const points = validStats.map(item => ({
+	                    x: parseFloat(item.diff_points || 0),
+	                    y: parseFloat(item.win_rate || 0),
+	                    name: item.opponent__name,
+	                    total: Number(item.total_frames),
+	                    win: Number(item.win_frames)
+	                }));
+
+	                let yMin = 0;
+	                let yMax = 100;
+	                let xMin = -1;
+	                let xMax = 10;
+
+	                if (points.length > 0) {
+	                    const winRates = points.map(p => p.y);
+	                    const minWinRate = Math.min(...winRates);
+	                    const maxWinRate = Math.max(...winRates);
+
+	                    let calcYMin = Math.floor((minWinRate - 5) / 5) * 5;
+	                    yMin = Math.max(0, Math.min(40, calcYMin));
+
+	                    if (maxWinRate >= 95) {
+	                        yMax = 105;
+	                    } else {
+	                        yMax = Math.min(100, Math.ceil((maxWinRate + 5) / 5) * 5);
+	                    }
+
+	                    const xVals = points.map(p => p.x);
+	                    const minX = Math.min(...xVals);
+	                    const maxX = Math.max(...xVals);
+
+	                    if (minX >= 0) {
+	                        xMin = -1;
+	                    } else {
+	                        xMin = Math.floor(minX - 2);
+	                    }
+
+	                    if (maxX <= 0) {
+	                        xMax = 1;
+	                    } else {
+	                        xMax = Math.ceil(maxX + 2);
+	                    }
+	                }
 
 	                this.scatterChartInstance = new Chart(ctx, {
 	                    type: 'scatter',
@@ -358,13 +397,18 @@
 	                        scales: {
 	                            x: {
 	                                title: { display: true, text: '场均净胜得分 (得分 - 失分)' },
+	                                min: xMin,
+	                                max: xMax,
 	                                grid: { color: 'rgba(0, 0, 0, 0.05)' }
 	                            },
 	                            y: {
 	                                title: { display: true, text: '对战胜率 (%)' },
-	                                min: 0,
-	                                max: 100,
-	                                ticks: { stepSize: 20, callback: v => v + '%' },
+	                                min: yMin,
+	                                max: yMax,
+	                                ticks: {
+	                                    stepSize: 5,
+	                                    callback: v => v <= 100 ? v + '%' : ''
+	                                },
 	                                grid: { color: 'rgba(0, 0, 0, 0.05)' }
 	                            }
 	                        }
